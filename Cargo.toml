@@ -1,0 +1,9 @@
+[package]
+name = "maniascript-parser"
+version = "0.1.0"
+authors = ["Vincent Parizet <vincent.parizet@hotmail.fr>"]
+
+[dependencies]
+strum = "0.11.0"
+strum_macros = "0.11.0"
+

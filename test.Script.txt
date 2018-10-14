@@ -1,0 +1,3 @@
+Void foo() {
+  declare x = 2;
+}
