@@ -1,48 +1,36 @@
-use token_kind::TokenKind;
-use trivia_kind::TriviaKind;
+use crate::token_kind::TokenKind;
+use crate::trivia_kind::TriviaKind;
 use ::std::str::FromStr;
 
 pub struct Lexer<'a> {
     source: &'a str,
     position: usize,
-    last_position: usize,
-    end_of_file_reached: bool,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct Token {
-    kind: TokenKind,
-    position: usize,
-    len: usize,
-    leading_trivia: Box<[TriviaKind]>,
-    trailing_trivia: Box<[TriviaKind]>,
+    pub kind: TokenKind,
+    pub position: usize,
+    pub len: usize,
+    pub leading_trivia: Box<[TriviaKind]>,
+    pub trailing_trivia: Box<[TriviaKind]>,
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(source: &str) -> Lexer {
+    pub fn new(source: &str) -> Lexer<'_> {
         Lexer {
             source,
             position: 0,
-            last_position: 0,
-            end_of_file_reached: false,
         }
     }
 
     fn char_next(&mut self) -> Option<char> {
         match self.source[self.position..].chars().next() {
             Some(c) => {
-                self.last_position = self.position;
                 self.position += c.len_utf8();
                 Some(c)
             }
-            None => {
-                if self.end_of_file_reached {
-                    None
-                } else {
-                    self.end_of_file_reached = true;
-                    Some('\x00')
-                }
-            }
+            _ => None
         }
     }
 
@@ -59,9 +47,8 @@ impl<'a> Lexer<'a> {
     }
 
     fn scan_word(&mut self) -> TokenKind {
-        self.char_next();
+        let start = self.position;
 
-        let start = self.last_position;
         if let Some('#') = self.char_peek() {
             self.char_next();
         }
@@ -119,108 +106,86 @@ impl<'a> Lexer<'a> {
         TokenKind::Unknown
     }
 
+    fn scan_string(&mut self) -> TokenKind {
+        self.char_next();
+        match (self.char_peek(), self.char_peek_n(2)) {
+            // multiline string
+            (Some('"'), Some('"')) => {
+                self.char_next();
+                self.char_next();
+
+                while let Some(_) = self.char_peek() {
+                    match (self.char_next(), self.char_peek(), self.char_peek_n(2)) {
+                        (Some('"'), Some('"'), Some('"')) => {
+                            self.char_next();
+                            self.char_next();
+                            break;
+                        }
+                        _ => {}
+                    }
+                }
+                TokenKind::BlockString
+            }
+            // line string
+            _ => {
+                while let Some(_) = self.char_peek() {
+                    match (self.char_next(), self.char_peek()) {
+                        (Some(c), Some('"')) if c != '\\' => {
+                            self.char_next();
+                            break;
+                        }
+                        (Some('"'), _) | (_, Some('\n')) => {
+                            break;
+                        }
+                        _ => {
+                            self.char_next();
+                        }
+                    }
+                }
+                TokenKind::LineString
+            }
+        }
+    }
+
     fn scan_trivias(&mut self, is_trailing: bool) -> Vec<TriviaKind> {
         let mut trivias = vec![];
-        let start = self.position;
-
 
         loop {
-            let trivia = match (self.char_peek().unwrap_or('\x00'), self.char_peek().unwrap_or('\x00')) {
-                ('\r', '\n') => {
-                    if is_trailing {
-                        break;
-                    }
+            let start = self.position;
+
+            let trivia = match (self.char_peek(), self.char_peek_n(2)) {
+                (Some('\r'), Some('\n')) if !is_trailing => {
                     self.char_next();
                     self.char_next();
-
-                    let mut count = 1;
-                    while let (Some('\r'), Some('\n')) = (self.char_peek(), self.char_peek_n(2)) {
-                        self.char_next();
-                        self.char_next();
-                        count += 1;
-                    }
-
-                    TriviaKind::CarriageReturnNewline(count)
+                    TriviaKind::CarriageReturnNewline(1)
                 }
-                ('\r', _) => {
-                    if is_trailing {
-                        break;
-                    }
+                (Some('\r'), _) if !is_trailing => {
                     self.char_next();
-
-                    let mut count = 1;
-                    while let Some('\r') = self.char_peek() {
-                        self.char_next();
-                        count += 1;
-                    }
-
-                    TriviaKind::CarriageReturn(count)
+                    TriviaKind::CarriageReturn(1)
                 }
-                ('\n', _) => {
-                    if is_trailing {
-                        break;
-                    }
-                    let mut count = 1;
-                    while let Some('\n') = self.char_peek() {
-                        self.char_next();
-                        count += 1;
-                    }
-
-                    TriviaKind::Newline(count)
-                }
-                ('\x09', _) => {
+                (Some('\n'), _) if !is_trailing => {
                     self.char_next();
-
-                    let mut count = 1;
-                    while let Some('\x09') = self.char_peek() {
-                        self.char_next();
-                        count += 1;
-                    }
-
-                    TriviaKind::Tab(count)
+                    TriviaKind::Newline(1)
                 }
-                ('\x0b', _) => {
-                    if is_trailing {
-                        break;
-                    }
+                (Some('\x09'), _) => {
                     self.char_next();
-
-                    let mut count = 1;
-                    while let Some('\x0b') = self.char_peek() {
-                        self.char_next();
-                        count += 1;
-                    }
-
-                    TriviaKind::VerticalTab(count)
+                    TriviaKind::Tab(1)
                 }
-                ('\x0c', _) => {
-                    if is_trailing {
-                        break;
-                    }
+                (Some('\x0b'), _) if !is_trailing => {
                     self.char_next();
-
-                    let mut count = 1;
-                    while let Some('\x0c') = self.char_peek() {
-                        self.char_next();
-                        count += 1;
-                    }
-
-                    TriviaKind::FormFeed(count)
+                    TriviaKind::VerticalTab(1)
                 }
-                (' ', _) => {
+                (Some('\x0c'), _) if !is_trailing => {
                     self.char_next();
-
-                    let mut count = 1;
-                    while let Some(' ') = self.char_peek() {
-                        self.char_next();
-                        count += 1;
-                    }
-
-                    TriviaKind::Space(count)
+                    TriviaKind::FormFeed(1)
                 }
-                ('/', '/') => {
+                (Some(' '), _) => {
                     self.char_next();
-
+                    TriviaKind::Space(1)
+                }
+                (Some('/'), Some('/')) => {
+                    self.char_next();
+                    self.char_next();
                     while let Some(c) = self.char_peek() {
                         if c == '\n' {
                             break;
@@ -230,18 +195,16 @@ impl<'a> Lexer<'a> {
                     let comment = &self.source[start..self.position];
                     TriviaKind::LineComment(String::from(comment))
                 }
-                ('/', '*') => {
+                (Some('/'), Some('*')) => {
                     self.char_next();
                     self.char_next();
-
                     while let (Some(c1), Some(c2)) = (self.char_peek(), self.char_peek_n(2)) {
                         self.char_next();
-                        self.char_next();
                         if c1 == '*' && c2 == '/' {
+                            self.char_next();
                             break;
                         }
                     }
-
                     let comment = &self.source[start..self.position];
                     TriviaKind::BlockComment(String::from(comment))
                 }
@@ -250,86 +213,36 @@ impl<'a> Lexer<'a> {
                 }
             };
 
-            trivias.push(trivia);
+            // count trivias
+            match (trivia, trivias.last_mut()) {
+                (TriviaKind::Space(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
+                (TriviaKind::Tab(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
+                (TriviaKind::Newline(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
+                (TriviaKind::VerticalTab(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
+                (TriviaKind::FormFeed(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
+                (TriviaKind::CarriageReturn(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
+                (TriviaKind::CarriageReturnNewline(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
+                (t, _) => trivias.push(t)
+            }
         }
         trivias
     }
 
     fn scan_token(&mut self) -> TokenKind {
-        let c: char = match self.char_peek() {
-            Some(c) => c,
-            None => return TokenKind::EOF
-        };
-
-        if is_punctuation_char(c) {
-            self.scan_operator()
-        } else if c.is_numeric() {
-            self.scan_number()
-        } else if c == '#' || is_ident_char(c) {
-            self.scan_word()
-        } else if c == '"' {
-            self.char_next();
-
-            match (self.char_peek(), self.char_peek_n(2)) {
-                // multiline string
-                (Some('"'), Some('"')) =>  {
-                    self.char_next();
-                    self.char_next();
-
-                    while let Some(next) = self.char_peek() {
-                        self.char_next();
-
-                        match (next, self.char_peek(), self.char_peek_n(2)) {
-                            ('"', Some('"'), Some('"')) => {
-                                self.char_next();
-                                self.char_next();
-                                break;
-                            }
-                            (_, _, None) => {
-                                break;
-                            }
-                            _ => {
-                                self.char_next();
-                            }
-                        }
-                    }
-                    TokenKind::BlockString
-                }
-                // empty string
-                (Some('"'), _) =>  {
-                    self.char_next();
-                    TokenKind::LineString
-                }
-                // else
-                _ => {
-                    while let Some(next) = self.char_peek() {
-                        self.char_next();
-
-                        match (next, self.char_peek()) {
-                            (c, Some('"')) if c != '\\' => {
-                                self.char_next();
-                                break;
-                            }
-                            (_, Some('\n')) => {
-                                break;
-                            }
-                            _ => {
-                                self.char_next();
-                            }
-                        }
-                        if next == '"' {
-                            break;
-                        }
-                    }
-                    TokenKind::LineString
-                }
+        match self.char_peek() {
+            Some(c) if is_punctuation_char(c) => self.scan_operator(),
+            Some(c) if c.is_numeric() => self.scan_number(),
+            Some(c) if c == '#' || is_ident_char(c) => self.scan_word(),
+            Some(c) if c == '"' => self.scan_string(),
+            Some(c) => {
+                let token = &self.source[self.position..self.position + c.len_utf8()];
+                self.position += c.len_utf8();
+                TokenKind::from_str_or_unknown(token)
+            },
+            None => {
+                self.position += 1;
+                TokenKind::EOF
             }
-
-
-        } else {
-            let token = &self.source[self.position..self.position + c.len_utf8()];
-            self.position += c.len_utf8();
-            TokenKind::from_str_or_unknown(token)
         }
     }
 }
@@ -338,15 +251,20 @@ impl<'a> Iterator for Lexer<'a> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Token> {
-        match self.char_peek() {
-            Some(_) => {},
-            None => return None
+        if self.position > self.source.len() {
+            return None;
         }
 
         let start = self.position;
         let leading_trivia = self.scan_trivias(false);
         let token_kind = self.scan_token();
-        let trailing_trivias = self.scan_trivias(true);
+
+        // Maybe the EOF is reached so the position > len
+        let trailing_trivias = if self.position < self.source.len() {
+            self.scan_trivias(true)
+        } else {
+            vec![]
+        };
 
         Some(Token {
             kind: token_kind,
@@ -363,8 +281,7 @@ fn is_ident_char(c: char) -> bool {
 }
 
 fn is_punctuation_char(c: char) -> bool {
-    c == '.' || c == ';' || c == ',' || c == ':' || c == '(' || c == ')' || c == '['
-        || c == ']' || c == '{' || c == '}' || c == '!' || c == '&' || c == '|' || c == '<'
-        || c == '>' || c == '=' || c == '-' || c == '+' || c == '-' || c == '*' || c == '/'
-        || c == '%' || c == '^'
+    c == ':' || c == '!' || c == '&' || c == '|' || c == '<' || c == '>' || c == '='
+        || c == '-' || c == '+' || c == '-' || c == '*' || c == '/'|| c == '%'
+        || c == '^'
 }

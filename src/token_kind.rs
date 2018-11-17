@@ -1,3 +1,5 @@
+use strum_macros::{EnumString};
+
 #[derive(Debug, PartialEq, Eq, Clone, Copy, EnumString)]
 pub enum TokenKind {
     #[strum(disabled="true")]
@@ -165,6 +167,16 @@ impl TokenKind {
         match TokenKind::from_str(word) {
             Result::Ok(token_kind) => token_kind,
             _ => TokenKind::Unknown
+        }
+    }
+
+    pub fn is_binary_op(&self) -> bool {
+        match self {
+            TokenKind::StrConcat | TokenKind::And | TokenKind::Or | TokenKind::EqualEqual | TokenKind::NotEqual
+            | TokenKind::Inf | TokenKind::InfEq | TokenKind::Sup | TokenKind::SupEq | TokenKind::Plus | TokenKind::Minus
+            | TokenKind::Mult | TokenKind::Div | TokenKind::Modulo | TokenKind::Dot | TokenKind::ColonColon
+            => true,
+            _ => false
         }
     }
 }
