@@ -1,157 +1,157 @@
-use strum_macros::{EnumString};
+use strum_macros::EnumString;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, EnumString)]
 pub enum TokenKind {
-    #[strum(disabled="true")]
+    #[strum(disabled = "true")]
     Unknown,
-    #[strum(disabled="true")]
+    #[strum(disabled = "true")]
     EOF,
-    #[strum(disabled="true")]
+    #[strum(disabled = "true")]
     Identifier,
-    #[strum(disabled="true")]
+    #[strum(disabled = "true")]
     Integer,
-    #[strum(disabled="true")]
+    #[strum(disabled = "true")]
     Real,
-    #[strum(disabled="true")]
+    #[strum(disabled = "true")]
     LineString,
-    #[strum(disabled="true")]
+    #[strum(disabled = "true")]
     BlockString,
-    #[strum(serialize="***")]
+    #[strum(serialize = "***")]
     LabelStar,
-    #[strum(serialize="---")]
+    #[strum(serialize = "---")]
     LabelMinus,
-    #[strum(serialize="+++")]
+    #[strum(serialize = "+++")]
     LabelPlus,
-    #[strum(serialize=".")]
+    #[strum(serialize = ".")]
     Dot,
-    #[strum(serialize=",")]
+    #[strum(serialize = ",")]
     Comma,
-    #[strum(serialize=";")]
+    #[strum(serialize = ";")]
     Semicolon,
-    #[strum(serialize="(")]
+    #[strum(serialize = "(")]
     OpenParen,
-    #[strum(serialize=")")]
+    #[strum(serialize = ")")]
     CloseParen,
-    #[strum(serialize="[")]
+    #[strum(serialize = "[")]
     OpenSquare,
-    #[strum(serialize="]")]
+    #[strum(serialize = "]")]
     CloseSquare,
-    #[strum(serialize="{")]
+    #[strum(serialize = "{")]
     OpenBrace,
-    #[strum(serialize="}")]
+    #[strum(serialize = "}")]
     CloseBrace,
-    #[strum(serialize="::")]
+    #[strum(serialize = "::")]
     ColonColon,
 
     // Operator
-    #[strum(serialize="!")]
+    #[strum(serialize = "!")]
     Not,
-    #[strum(serialize="-")]
+    #[strum(serialize = "-")]
     Minus,
-    #[strum(serialize="+")]
+    #[strum(serialize = "+")]
     Plus,
-    #[strum(serialize="*")]
+    #[strum(serialize = "*")]
     Mult,
-    #[strum(serialize="/")]
+    #[strum(serialize = "/")]
     Div,
-    #[strum(serialize="%")]
+    #[strum(serialize = "%")]
     Modulo,
-    #[strum(serialize="^")]
+    #[strum(serialize = "^")]
     StrConcat,
 
     //
-    #[strum(serialize="==")]
+    #[strum(serialize = "==")]
     EqualEqual,
-    #[strum(serialize="!=")]
+    #[strum(serialize = "!=")]
     NotEqual,
-    #[strum(serialize="<")]
+    #[strum(serialize = "<")]
     Inf,
-    #[strum(serialize="<=")]
+    #[strum(serialize = "<=")]
     InfEq,
-    #[strum(serialize=">")]
+    #[strum(serialize = ">")]
     Sup,
-    #[strum(serialize=">=")]
+    #[strum(serialize = ">=")]
     SupEq,
-    #[strum(serialize="&&")]
+    #[strum(serialize = "&&")]
     And,
-    #[strum(serialize="||")]
+    #[strum(serialize = "||")]
     Or,
 
     // Assignment
-    #[strum(serialize="=")]
+    #[strum(serialize = "=")]
     Equal,
-    #[strum(serialize="<=>")]
+    #[strum(serialize = "<=>")]
     Alias,
-    #[strum(serialize="+=")]
+    #[strum(serialize = "+=")]
     PlusEq,
-    #[strum(serialize="-=")]
+    #[strum(serialize = "-=")]
     MinusEq,
-    #[strum(serialize="*=")]
+    #[strum(serialize = "*=")]
     MultEq,
-    #[strum(serialize="/=")]
+    #[strum(serialize = "/=")]
     DivEq,
-    #[strum(serialize="^=")]
+    #[strum(serialize = "^=")]
     StrEq,
-    #[strum(serialize="&=")]
+    #[strum(serialize = "&=")]
     AndEq,
-    #[strum(serialize="|=")]
+    #[strum(serialize = "|=")]
     OrEq,
-    #[strum(serialize="=>")]
+    #[strum(serialize = "=>")]
     Arrow,
 
     // Keywords
-    #[strum(serialize="#Include")]
+    #[strum(serialize = "#Include")]
     Include,
-    #[strum(serialize="#Const")]
+    #[strum(serialize = "#Const")]
     Const,
-    #[strum(serialize="#Setting")]
+    #[strum(serialize = "#Setting")]
     Setting,
-    #[strum(serialize="#RequireContext")]
+    #[strum(serialize = "#RequireContext")]
     RequireContext,
-    #[strum(serialize="#Extends")]
+    #[strum(serialize = "#Extends")]
     Extends,
 
-    #[strum(serialize="break")]
+    #[strum(serialize = "break")]
     Break,
-    #[strum(serialize="yield")]
+    #[strum(serialize = "yield")]
     Yield,
-    #[strum(serialize="continue")]
+    #[strum(serialize = "continue")]
     Continue,
-    #[strum(serialize="return")]
+    #[strum(serialize = "return")]
     Return,
-    #[strum(serialize="declare")]
+    #[strum(serialize = "declare")]
     Declare,
-    #[strum(serialize="as")]
+    #[strum(serialize = "as")]
     As,
-    #[strum(serialize="for")]
+    #[strum(serialize = "for")]
     For,
-    #[strum(serialize="if")]
+    #[strum(serialize = "if")]
     If,
-    #[strum(serialize="else")]
+    #[strum(serialize = "else")]
     Else,
-    #[strum(serialize="switch")]
+    #[strum(serialize = "switch")]
     Switch,
-    #[strum(serialize="switchtype")]
+    #[strum(serialize = "switchtype")]
     SwitchType,
-    #[strum(serialize="case")]
+    #[strum(serialize = "case")]
     Case,
-    #[strum(serialize="default")]
+    #[strum(serialize = "default")]
     Default,
-    #[strum(serialize="while")]
+    #[strum(serialize = "while")]
     While,
-    #[strum(serialize="foreach")]
+    #[strum(serialize = "foreach")]
     Foreach,
-    #[strum(serialize="in")]
+    #[strum(serialize = "in")]
     In,
-    #[strum(serialize="is")]
+    #[strum(serialize = "is")]
     Is,
-    #[strum(serialize="netwrite")]
+    #[strum(serialize = "netwrite")]
     Netwrite,
-    #[strum(serialize="netread")]
+    #[strum(serialize = "netread")]
     Netread,
-    #[strum(serialize="persistent")]
+    #[strum(serialize = "persistent")]
     Persistent,
-    #[strum(serialize="metadata")]
+    #[strum(serialize = "metadata")]
     Metadata,
 
     // Constants
@@ -163,20 +163,46 @@ pub enum TokenKind {
 
 impl TokenKind {
     pub fn from_str_or_unknown(word: &str) -> TokenKind {
-        use ::std::str::FromStr;
+        use std::str::FromStr;
         match TokenKind::from_str(word) {
             Result::Ok(token_kind) => token_kind,
-            _ => TokenKind::Unknown
+            _ => TokenKind::Unknown,
         }
     }
 
     pub fn is_binary_op(&self) -> bool {
         match self {
-            TokenKind::StrConcat | TokenKind::And | TokenKind::Or | TokenKind::EqualEqual | TokenKind::NotEqual
-            | TokenKind::Inf | TokenKind::InfEq | TokenKind::Sup | TokenKind::SupEq | TokenKind::Plus | TokenKind::Minus
-            | TokenKind::Mult | TokenKind::Div | TokenKind::Modulo | TokenKind::Dot | TokenKind::ColonColon
-            => true,
-            _ => false
+            TokenKind::StrConcat
+            | TokenKind::And
+            | TokenKind::Or
+            | TokenKind::EqualEqual
+            | TokenKind::NotEqual
+            | TokenKind::Inf
+            | TokenKind::InfEq
+            | TokenKind::Sup
+            | TokenKind::SupEq
+            | TokenKind::Plus
+            | TokenKind::Minus
+            | TokenKind::Mult
+            | TokenKind::Div
+            | TokenKind::Modulo
+            | TokenKind::Dot
+            | TokenKind::ColonColon => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_litteral_value(&self) -> bool {
+        match self {
+            TokenKind::Integer
+            | TokenKind::Real
+            | TokenKind::LineString
+            | TokenKind::BlockString
+            | TokenKind::Null
+            | TokenKind::NullId
+            | TokenKind::False
+            | TokenKind::True => true,
+            _ => false,
         }
     }
 }

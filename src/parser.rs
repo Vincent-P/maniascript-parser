@@ -1,14 +1,12 @@
-use crate::token_kind::TokenKind;
-use crate::lexer::Token;
 use crate::lexer::Lexer;
+use crate::lexer::Token;
+use crate::token_kind::TokenKind;
 use std::iter::Peekable;
 
 #[derive(Debug)]
 pub enum ExpressionKind {
     Identifier,
-    Integer,
-    Real,
-    String,
+    Literal,
     Unary(Token, Box<ExpressionKind>),
     Binary(Box<ExpressionKind>, Token, Box<ExpressionKind>),
     Array(Vec<ExpressionKind>),
@@ -16,7 +14,7 @@ pub enum ExpressionKind {
     ArrayAccess(Box<ExpressionKind>, Box<ExpressionKind>),
     FunctionCall(Box<ExpressionKind>, Vec<ExpressionKind>),
     Cast(Box<ExpressionKind>, Token),
-    Is(Box<ExpressionKind>, Token)
+    Is(Box<ExpressionKind>, Token),
 }
 
 impl ExpressionKind {
@@ -62,18 +60,24 @@ impl Token {
             TokenKind::And => 200,
             TokenKind::Or => 300,
 
-            TokenKind::EqualEqual | TokenKind::NotEqual |
-            TokenKind::Inf | TokenKind::InfEq | TokenKind::Sup | TokenKind::SupEq => 400,
+            TokenKind::EqualEqual
+            | TokenKind::NotEqual
+            | TokenKind::Inf
+            | TokenKind::InfEq
+            | TokenKind::Sup
+            | TokenKind::SupEq => 400,
 
             TokenKind::Plus | TokenKind::Minus => 500,
-
             TokenKind::Mult | TokenKind::Div | TokenKind::Modulo => 600,
 
             TokenKind::Is | TokenKind::As => 650,
 
-            TokenKind::Dot | TokenKind::OpenParen | TokenKind::OpenSquare | TokenKind::ColonColon => 700,
+            TokenKind::Dot
+            | TokenKind::OpenParen
+            | TokenKind::OpenSquare
+            | TokenKind::ColonColon => 700,
 
-            _ => 0
+            _ => 0,
         }
     }
 
@@ -82,17 +86,15 @@ impl Token {
             TokenKind::OpenParen | TokenKind::OpenSquare => 0,
             TokenKind::Inf => 400,
             TokenKind::Minus | TokenKind::Not => 800,
-
-            _ => 0
+            _ => 0,
         }
     }
 
-    fn nud(&self, parser: &mut Parser) -> Result<ExpressionKind,String> {
+    fn nud(&self, parser: &mut Parser) -> Result<ExpressionKind, String> {
         match self.kind {
-            TokenKind::Integer => Ok(ExpressionKind::Integer),
-            TokenKind::Real => Ok(ExpressionKind::Real),
             TokenKind::Identifier => Ok(ExpressionKind::Identifier),
-            TokenKind::LineString | TokenKind::BlockString => Ok(ExpressionKind::String),
+
+            k if k.is_litteral_value() => Ok(ExpressionKind::Literal),
 
             TokenKind::Minus | TokenKind::Not => {
                 let rhs = parser.expression(self.rbp())?;
@@ -147,16 +149,23 @@ impl Token {
                 Ok(ExpressionKind::Array(values))
             }
 
-            _ => Err(format!("Expected an expression. {:?}", parser.tokens.peek()))
+            _ => Err(format!(
+                "Expected an expression. {:?}",
+                parser.tokens.peek()
+            )),
         }
     }
 
-    fn led(&self, parser: &mut Parser, lhs: ExpressionKind) -> Result<ExpressionKind,String> {
+    fn led(&self, parser: &mut Parser, lhs: ExpressionKind) -> Result<ExpressionKind, String> {
         match self.kind {
             k if k.is_binary_op() => {
                 println!("Found binary op: {:?}", self);
                 let rhs = parser.expression(self.lbp())?;
-                Ok(ExpressionKind::Binary(Box::new(lhs), self.clone(), Box::new(rhs)))
+                Ok(ExpressionKind::Binary(
+                    Box::new(lhs),
+                    self.clone(),
+                    Box::new(rhs),
+                ))
             }
 
             TokenKind::As => {
@@ -189,7 +198,7 @@ impl Token {
                 Ok(ExpressionKind::FunctionCall(Box::new(lhs), args))
             }
 
-            k => Err(format!("Expected an operator but got {:?}.", k))
+            k => Err(format!("Expected an operator but got {:?}.", k)),
         }
     }
 }
@@ -201,34 +210,35 @@ pub struct Parser<'a> {
 impl<'a> Parser<'a> {
     pub fn new(lexer: Lexer) -> Parser {
         let tokens = lexer.peekable();
-        Parser {
-            tokens
-        }
+        Parser { tokens }
     }
 
     fn expect(&mut self, token_kind: TokenKind) -> Result<Token, String> {
         match self.tokens.peek() {
             Some(ref t) if t.kind == token_kind => Ok(self.tokens.next().unwrap()),
-            Some(ref t) => Err(format!("Expected {:?} token but got {:?}.", token_kind, t.kind)),
-            _ => Err(format!("Expected {:?} token.", token_kind))
+            Some(ref t) => Err(format!(
+                "Expected {:?} token but got {:?}.",
+                token_kind, t.kind
+            )),
+            _ => Err(format!("Expected {:?} token.", token_kind)),
         }
     }
 
-    fn parse_nud(&mut self) -> Result<ExpressionKind,String> {
+    fn parse_nud(&mut self) -> Result<ExpressionKind, String> {
         match self.tokens.next() {
             Some(t) => t.nud(self),
-            _ => Err("Incomplete expression.".to_string())
+            _ => Err("Incomplete expression.".to_string()),
         }
     }
 
-    fn parse_led(&mut self, expr: ExpressionKind) -> Result<ExpressionKind,String> {
+    fn parse_led(&mut self, expr: ExpressionKind) -> Result<ExpressionKind, String> {
         match self.tokens.next() {
             Some(t) => t.led(self, expr),
-            _ => Err("Incomplete expression.".to_string())
+            _ => Err("Incomplete expression.".to_string()),
         }
     }
 
-    pub fn expression(&mut self, rbp: u32) -> Result<ExpressionKind,String> {
+    pub fn expression(&mut self, rbp: u32) -> Result<ExpressionKind, String> {
         let mut left = self.parse_nud()?;
 
         while let Some(t) = self.tokens.peek() {

@@ -1,9 +1,9 @@
 #![feature(duration_as_u128)]
 
 mod lexer;
+mod parser;
 mod token_kind;
 mod trivia_kind;
-mod parser;
 
 use crate::lexer::Lexer;
 use crate::parser::Parser;

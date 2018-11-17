@@ -1,6 +1,6 @@
 use crate::token_kind::TokenKind;
 use crate::trivia_kind::TriviaKind;
-use ::std::str::FromStr;
+use std::str::FromStr;
 
 pub struct Lexer<'a> {
     source: &'a str,
@@ -30,7 +30,7 @@ impl<'a> Lexer<'a> {
                 self.position += c.len_utf8();
                 Some(c)
             }
-            _ => None
+            _ => None,
         }
     }
 
@@ -64,7 +64,7 @@ impl<'a> Lexer<'a> {
 
         match TokenKind::from_str(token) {
             Result::Ok(t) => t,
-            _ => TokenKind::Identifier
+            _ => TokenKind::Identifier,
         }
     }
 
@@ -215,14 +215,16 @@ impl<'a> Lexer<'a> {
 
             // count trivias
             match (trivia, trivias.last_mut()) {
-                (TriviaKind::Space(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
-                (TriviaKind::Tab(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
-                (TriviaKind::Newline(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
-                (TriviaKind::VerticalTab(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
-                (TriviaKind::FormFeed(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
-                (TriviaKind::CarriageReturn(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
-                (TriviaKind::CarriageReturnNewline(_), Some(TriviaKind::Space(last_sp))) => { *last_sp += 1}
-                (t, _) => trivias.push(t)
+                (TriviaKind::Space(_), Some(TriviaKind::Space(last_sp))) => *last_sp += 1,
+                (TriviaKind::Tab(_), Some(TriviaKind::Space(last_sp))) => *last_sp += 1,
+                (TriviaKind::Newline(_), Some(TriviaKind::Space(last_sp))) => *last_sp += 1,
+                (TriviaKind::VerticalTab(_), Some(TriviaKind::Space(last_sp))) => *last_sp += 1,
+                (TriviaKind::FormFeed(_), Some(TriviaKind::Space(last_sp))) => *last_sp += 1,
+                (TriviaKind::CarriageReturn(_), Some(TriviaKind::Space(last_sp))) => *last_sp += 1,
+                (TriviaKind::CarriageReturnNewline(_), Some(TriviaKind::Space(last_sp))) => {
+                    *last_sp += 1
+                }
+                (t, _) => trivias.push(t),
             }
         }
         trivias
@@ -238,7 +240,7 @@ impl<'a> Lexer<'a> {
                 let token = &self.source[self.position..self.position + c.len_utf8()];
                 self.position += c.len_utf8();
                 TokenKind::from_str_or_unknown(token)
-            },
+            }
             None => {
                 self.position += 1;
                 TokenKind::EOF
@@ -281,7 +283,18 @@ fn is_ident_char(c: char) -> bool {
 }
 
 fn is_punctuation_char(c: char) -> bool {
-    c == ':' || c == '!' || c == '&' || c == '|' || c == '<' || c == '>' || c == '='
-        || c == '-' || c == '+' || c == '-' || c == '*' || c == '/'|| c == '%'
+    c == ':'
+        || c == '!'
+        || c == '&'
+        || c == '|'
+        || c == '<'
+        || c == '>'
+        || c == '='
+        || c == '-'
+        || c == '+'
+        || c == '-'
+        || c == '*'
+        || c == '/'
+        || c == '%'
         || c == '^'
 }
