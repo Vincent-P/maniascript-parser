@@ -1,5 +1,6 @@
 use token_kind::TokenKind;
 use trivia_kind::TriviaKind;
+use ::std::str::FromStr;
 
 pub struct Lexer<'a> {
     source: &'a str,
@@ -57,25 +58,65 @@ impl<'a> Lexer<'a> {
         chars.next()
     }
 
-    fn scan_word(&mut self) -> &str {
+    fn scan_word(&mut self) -> TokenKind {
+        self.char_next();
+
         let start = self.last_position;
+        if let Some('#') = self.char_peek() {
+            self.char_next();
+        }
+
         while let Some(c) = self.char_peek() {
             if !is_ident_char(c) {
                 break;
             }
             self.char_next();
         }
-        let word = &self.source[start..self.position];
-        word
+
+        let token = &self.source[start..self.position];
+
+        match TokenKind::from_str(token) {
+            Result::Ok(t) => t,
+            _ => TokenKind::Identifier
+        }
     }
 
-    fn scan_integer(&mut self) {
+    fn scan_number(&mut self) -> TokenKind {
+        let mut is_real = false;
         while let Some(c) = self.char_peek() {
-            if !c.is_numeric() {
+            if !c.is_numeric() && c != '.' {
                 break;
+            }
+            if c == '.' {
+                is_real = true;
             }
             self.char_next();
         }
+        if is_real {
+            TokenKind::Real
+        } else {
+            TokenKind::Integer
+        }
+    }
+
+    fn scan_operator(&mut self) -> TokenKind {
+        for i in 1..4 {
+            if self.position + (4 - i) > self.source.len() {
+                continue;
+            }
+
+            let end = self.position + 4 - i * '='.len_utf8();
+            let token = &self.source[self.position..end];
+
+            let res = TokenKind::from_str_or_unknown(token);
+            if res != TokenKind::Unknown {
+                self.position = end;
+                return res;
+            }
+        }
+
+        self.position += 1;
+        TokenKind::Unknown
     }
 
     fn scan_trivias(&mut self, is_trailing: bool) -> Vec<TriviaKind> {
@@ -215,226 +256,80 @@ impl<'a> Lexer<'a> {
     }
 
     fn scan_token(&mut self) -> TokenKind {
-        let first_char = self.char_next().unwrap();
-        match (
-            first_char,
-            self.char_peek().unwrap_or('\x00'),
-            self.char_peek_n(2).unwrap_or('\x00'),
-        ) {
-            /*
-             * OPERATORS
-             */
-            ('(', _, _) => TokenKind::OpenParen,
-            (')', _, _) => TokenKind::CloseParen,
-            ('[', _, _) => TokenKind::OpenSquare,
-            (']', _, _) => TokenKind::CloseSquare,
-            ('{', _, _) => TokenKind::OpenBrace,
-            ('}', _, _) => TokenKind::CloseBrace,
-            ('<', '=', '>') => {
-                self.char_next();
-                self.char_next();
-                TokenKind::Alias
-            }
-            ('<', '=', _) => {
-                self.char_next();
-                TokenKind::InfEq
-            }
-            ('<', _, _) => TokenKind::Inf,
-            ('>', '=', _) => {
-                self.char_next();
-                TokenKind::SupEq
-            }
-            ('>', _, _) => TokenKind::Sup,
-            ('+', '+', '+') => {
-                self.char_next();
-                self.char_next();
-                TokenKind::LabelPlus
-            }
-            ('+', '=', _) => {
-                self.char_next();
-                TokenKind::PlusEq
-            }
-            ('+', _, _) => TokenKind::Plus,
-            ('-', '-', '-') => {
-                self.char_next();
-                self.char_next();
-                TokenKind::LabelMinus
-            }
-            ('-', '=', _) => {
-                self.char_next();
-                TokenKind::MinusEq
-            }
-            ('-', _, _) => TokenKind::Minus,
-            ('*', '*', '*') => {
-                self.char_next();
-                self.char_next();
-                TokenKind::LabelStar
-            }
-            ('*', '=', _) => {
-                self.char_next();
-                TokenKind::MultEq
-            }
-            ('*', _, _) => TokenKind::Mult,
-            ('/', '=', _) => {
-                self.char_next();
-                TokenKind::DivEq
-            }
-            ('/', _, _) => TokenKind::Div,
+        let c: char = match self.char_peek() {
+            Some(c) => c,
+            None => return TokenKind::EOF
+        };
 
+        if is_punctuation_char(c) {
+            self.scan_operator()
+        } else if c.is_numeric() {
+            self.scan_number()
+        } else if c == '#' || is_ident_char(c) {
+            self.scan_word()
+        } else if c == '"' {
+            self.char_next();
 
-            ('!', '=', _) => {
-                self.char_next();
-                TokenKind::NotEqual
-            }
-            ('!', _, _) => TokenKind::Not,
-            ('%', _, _) => TokenKind::Modulo,
-            ('=', '=', _) => {
-                self.char_next();
-                TokenKind::EqualEqual
-            }
-            ('=', '>', _) => {
-                self.char_next();
-                TokenKind::Arrow
-            }
-            ('=', _, _) => TokenKind::Equal,
-            ('&', '=', _) => {
-                self.char_next();
-                TokenKind::AndEq
-            }
-            ('&', '&', _) => {
-                self.char_next();
-                TokenKind::And
-            }
-            ('|', '=', _) => {
-                self.char_next();
-                TokenKind::OrEq
-            }
-            ('|', '|', _) => {
-                self.char_next();
-                TokenKind::Or
-            }
-            ('^', '=', _) => {
-                self.char_next();
-                TokenKind::StrEq
-            }
-            ('^', _, _) => TokenKind::StrConcat,
-            (',', _, _) => TokenKind::Comma,
-            (';', _, _) => TokenKind::Semicolon,
-            (':', ':', _) => {
-                self.char_next();
-                TokenKind::ColonColon
-            }
-
-            /*
-             * STRINGS
-             */
-            ('"', '"', '"') => {
-                self.char_next();
-                self.char_next();
-
-                while let (Some(c1), Some(c2), Some(c3)) =
-                    (self.char_peek(), self.char_peek_n(2), self.char_peek_n(3))
-                {
+            match (self.char_peek(), self.char_peek_n(2)) {
+                // multiline string
+                (Some('"'), Some('"')) =>  {
                     self.char_next();
                     self.char_next();
-                    self.char_next();
-                    if c1 == '"' && c2 == '"' && c3 == '"' {
-                        break;
-                    }
-                }
 
-                TokenKind::BlockString
-            }
-            ('"', '"', _) => {
-                self.char_next();
-                TokenKind::LineString
-            }
-            ('"', _, _) => {
-                while let (Some(c1), Some(c2)) = (self.char_peek(), self.char_peek_n(2)) {
-                    if c1 != '\\' && c2 == '"' || c2 == '\n' {
-                        break;
-                    }
-                    self.char_next();
-                }
+                    while let Some(next) = self.char_peek() {
+                        self.char_next();
 
-                TokenKind::LineString
-            }
-            /*
-             * KEYWORDS, IDENTIFIERS AND NUMBERS
-             */
-            ('#', c, _) if is_ident_char(c) => {
-                let kind = match self.scan_word() {
-                    "#Include" => TokenKind::Include,
-                    "#Const" => TokenKind::Const,
-                    "#Setting" => TokenKind::Setting,
-                    "#RequireContext" => TokenKind::RequireContext,
-                    "#Extends" => TokenKind::Extends,
-                    _ => TokenKind::Unknown,
-                };
-
-                kind
-            }
-            (c, _, _) if c.is_numeric() => {
-                self.scan_integer();
-                if let Some('.') = self.char_peek() {
-                    self.char_next();
-
-                    if let Some(c) = self.char_peek() {
-                        if c.is_numeric() {
-                            self.scan_integer();
+                        match (next, self.char_peek(), self.char_peek_n(2)) {
+                            ('"', Some('"'), Some('"')) => {
+                                self.char_next();
+                                self.char_next();
+                                break;
+                            }
+                            (_, _, None) => {
+                                break;
+                            }
+                            _ => {
+                                self.char_next();
+                            }
                         }
                     }
-
-                    TokenKind::Real
-                } else {
-                    TokenKind::Integer
+                    TokenKind::BlockString
                 }
-            }
-            ('.', c, _) => {
-                if c.is_numeric() {
+                // empty string
+                (Some('"'), _) =>  {
                     self.char_next();
-                    self.scan_integer();
-                    TokenKind::Real
-                } else {
-                    TokenKind::Dot
+                    TokenKind::LineString
+                }
+                // else
+                _ => {
+                    while let Some(next) = self.char_peek() {
+                        self.char_next();
+
+                        match (next, self.char_peek()) {
+                            (c, Some('"')) if c != '\\' => {
+                                self.char_next();
+                                break;
+                            }
+                            (_, Some('\n')) => {
+                                break;
+                            }
+                            _ => {
+                                self.char_next();
+                            }
+                        }
+                        if next == '"' {
+                            break;
+                        }
+                    }
+                    TokenKind::LineString
                 }
             }
-            (c, _, _) if is_ident_char(c) => {
-                let kind = match self.scan_word() {
-                    "break" => TokenKind::Break,
-                    "yield" => TokenKind::Yield,
-                    "continue" => TokenKind::Continue,
-                    "return" => TokenKind::Return,
-                    "declare" => TokenKind::Declare,
-                    "as" => TokenKind::As,
-                    "for" => TokenKind::For,
-                    "if" => TokenKind::If,
-                    "else" => TokenKind::Else,
-                    "switch" => TokenKind::Switch,
-                    "switchtype" => TokenKind::SwitchType,
-                    "case" => TokenKind::Case,
-                    "default" => TokenKind::Default,
-                    "while" => TokenKind::While,
-                    "foreach" => TokenKind::Foreach,
-                    "in" => TokenKind::In,
-                    "is" => TokenKind::Is,
-                    "netwrite" => TokenKind::Netwrite,
-                    "netread" => TokenKind::Netread,
-                    "persistent" => TokenKind::Persistent,
-                    "metadata" => TokenKind::Metadata,
-                    "Null" => TokenKind::Null,
-                    "NullId" => TokenKind::NullId,
-                    "True" => TokenKind::True,
-                    "False" => TokenKind::False,
-                    _ => TokenKind::Identifier,
-                };
 
-                kind
-            }
-            ('\x00', _, _) => {
-                TokenKind::EOF
-            }
-            _ => TokenKind::Unknown,
+
+        } else {
+            let token = &self.source[self.position..self.position + c.len_utf8()];
+            self.position += c.len_utf8();
+            TokenKind::from_str_or_unknown(token)
         }
     }
 }
@@ -465,4 +360,11 @@ impl<'a> Iterator for Lexer<'a> {
 
 fn is_ident_char(c: char) -> bool {
     c.is_alphanumeric() || c == '_'
+}
+
+fn is_punctuation_char(c: char) -> bool {
+    c == '.' || c == ';' || c == ',' || c == ':' || c == '(' || c == ')' || c == '['
+        || c == ']' || c == '{' || c == '}' || c == '!' || c == '&' || c == '|' || c == '<'
+        || c == '>' || c == '=' || c == '-' || c == '+' || c == '-' || c == '*' || c == '/'
+        || c == '%' || c == '^'
 }

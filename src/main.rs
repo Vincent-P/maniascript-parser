@@ -23,7 +23,12 @@ fn main() {
     let now = Instant::now();
 
     let lexer = Lexer::new(&input);
-    let tokens: Vec<Token>= lexer.collect();
+    /*
+    for token in lexer {
+        println!("{:?}", token);
+    }
+    */
+    let tokens: Vec<Token> = lexer.collect();
 
     println!("Done in {}ms.", now.elapsed().as_millis());
 }
