@@ -226,7 +226,7 @@ impl TokenKind {
             | TokenKind::Netwrite
             | TokenKind::Persistent
             | TokenKind::Metadata => true,
-            _ => false
+            _ => false,
         }
     }
 

@@ -15,7 +15,7 @@ pub enum ExpressionKind {
     FunctionCall(Box<ExpressionKind>, Vec<ExpressionKind>),
     Cast(Box<ExpressionKind>, Token),
     Is(Box<ExpressionKind>, Token),
-    MapsTo(Box<ExpressionKind>, Box<ExpressionKind>)
+    MapsTo(Box<ExpressionKind>, Box<ExpressionKind>),
 }
 
 impl Token {
@@ -23,8 +23,7 @@ impl Token {
         match self.kind {
             TokenKind::Arrow => 5,
 
-            TokenKind::OpenParen
-            | TokenKind::OpenSquare => 51,
+            TokenKind::OpenParen | TokenKind::OpenSquare => 51,
 
             TokenKind::StrConcat => 100,
 
@@ -43,8 +42,7 @@ impl Token {
 
             TokenKind::Is | TokenKind::As => 650,
 
-            TokenKind::Dot
-            | TokenKind::ColonColon => 800,
+            TokenKind::Dot | TokenKind::ColonColon => 800,
 
             _ => 0,
         }
@@ -52,8 +50,7 @@ impl Token {
 
     fn rbp(&self) -> u32 {
         match self.kind {
-            TokenKind::OpenParen
-            | TokenKind::OpenSquare => 1,
+            TokenKind::OpenParen | TokenKind::OpenSquare => 1,
 
             TokenKind::Inf => 450,
             TokenKind::Minus | TokenKind::Not => 700,
@@ -120,8 +117,12 @@ impl Token {
                 Ok(ExpressionKind::Array(values))
             }
 
-            k => Err(format!("Expected an expression but got {:?}.
-            At : {}", k, &parser.source[self.position..])),
+            k => Err(format!(
+                "Expected an expression but got {:?}.
+            At : {}",
+                k,
+                &parser.source[self.position..]
+            )),
         }
     }
 
@@ -178,8 +179,12 @@ impl Token {
                 Ok(ExpressionKind::MapsTo(Box::new(lhs), Box::new(rhs)))
             }
 
-            k => Err(format!("Expected an operator but got {:?}.
-            At : {}", k, &parser.source[self.position..])),
+            k => Err(format!(
+                "Expected an operator but got {:?}.
+            At : {}",
+                k,
+                &parser.source[self.position..]
+            )),
         }
     }
 }
@@ -202,7 +207,9 @@ impl<'a> Parser<'a> {
             Some(ref t) => Err(format!(
                 "Expected {:?} token but got {:?}.
                 At : {}",
-                token_kind, t.kind, &self.source[t.position..]
+                token_kind,
+                t.kind,
+                &self.source[t.position..]
             )),
             _ => Err(format!("Expected {:?} token.", token_kind)),
         }
@@ -263,15 +270,23 @@ impl<'a> Parser<'a> {
         while let Some(next) = self.tokens.peek() {
             match next.kind {
                 TokenKind::EOF => break,
-                TokenKind::Declare => return Err("Globals need to be defined before functions.".to_string()),
+                TokenKind::Declare => {
+                    return Err("Globals need to be defined before functions.".to_string())
+                }
                 TokenKind::Identifier => {
                     _funcdecs.push(self.parse_funcdec()?);
                 }
                 TokenKind::LabelStar => {
                     _labeldecs.push(self.parse_labeldec()?);
                 }
-                k => return Err(format!("Unexpected token {:?}.
-                At: {}", k, &self.source[next.position..])),
+                k => {
+                    return Err(format!(
+                        "Unexpected token {:?}.
+                At: {}",
+                        k,
+                        &self.source[next.position..]
+                    ))
+                }
             }
         }
 
@@ -281,7 +296,7 @@ impl<'a> Parser<'a> {
     pub fn parse_hash(&mut self) -> Result<(), String> {
         let kind = match self.tokens.peek() {
             Some(t) if t.kind.is_hash() => t.kind,
-            _ => return Err("Expected a hash statement.".to_string())
+            _ => return Err("Expected a hash statement.".to_string()),
         };
         match kind {
             TokenKind::Include => {
@@ -320,7 +335,7 @@ impl<'a> Parser<'a> {
                 let _path = self.expect(TokenKind::LineString);
                 Ok(())
             }
-            _ => Err("Expected Include, Const, Setting, RequireContext or Extends.".to_string())
+            _ => Err("Expected Include, Const, Setting, RequireContext or Extends.".to_string()),
         }
     }
 
@@ -333,13 +348,12 @@ impl<'a> Parser<'a> {
                 TokenKind::Identifier => {
                     _type = Some(_name);
                     _name = self.expect(TokenKind::Identifier)?;
-                },
-                TokenKind::ColonColon
-                | TokenKind::OpenSquare => {
+                }
+                TokenKind::ColonColon | TokenKind::OpenSquare => {
                     _type = self.parse_type(Some(_name))?.into();
                     _name = self.expect(TokenKind::Identifier)?;
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
 
@@ -423,13 +437,12 @@ impl<'a> Parser<'a> {
                 TokenKind::Identifier => {
                     _type = Some(_name);
                     _name = self.tokens.next().unwrap();
-                },
-                TokenKind::ColonColon
-                | TokenKind::OpenSquare => {
+                }
+                TokenKind::ColonColon | TokenKind::OpenSquare => {
                     _type = self.parse_type(Some(_name))?.into();
                     _name = self.expect(TokenKind::Identifier)?;
-                },
-                _ => {},
+                }
+                _ => {}
             }
         }
 
@@ -489,7 +502,7 @@ impl<'a> Parser<'a> {
     pub fn parse_statement(&mut self) -> Result<(), String> {
         let kind = match self.tokens.peek() {
             Some(ref t) => t.kind,
-            _ => return Err("Expected a statement.".to_string())
+            _ => return Err("Expected a statement.".to_string()),
         };
 
         match kind {
@@ -516,7 +529,7 @@ impl<'a> Parser<'a> {
                 Ok(())
             }
 
-            TokenKind::Break=> {
+            TokenKind::Break => {
                 self.tokens.next();
                 self.expect(TokenKind::Semicolon)?;
                 Ok(())
@@ -622,7 +635,7 @@ impl<'a> Parser<'a> {
     pub fn parse_for(&mut self) -> Result<(), String> {
         self.expect(TokenKind::For)?;
         self.expect(TokenKind::OpenParen)?;
-        let _identifier =  self.expect(TokenKind::Identifier)?;
+        let _identifier = self.expect(TokenKind::Identifier)?;
         self.expect(TokenKind::Comma)?;
         let _start_expr = self.parse_expr()?;
         self.expect(TokenKind::Comma)?;
@@ -635,7 +648,7 @@ impl<'a> Parser<'a> {
     pub fn parse_foreach(&mut self) -> Result<(), String> {
         self.expect(TokenKind::Foreach)?;
         self.expect(TokenKind::OpenParen)?;
-        let _key =  self.expect(TokenKind::Identifier)?;
+        let _key = self.expect(TokenKind::Identifier)?;
         let mut _value: Option<Token> = None;
 
         if let Some(next) = self.tokens.peek() {
@@ -656,15 +669,14 @@ impl<'a> Parser<'a> {
     pub fn parse_while(&mut self) -> Result<(), String> {
         self.expect(TokenKind::While)?;
         self.expect(TokenKind::OpenParen)?;
-        let _condition =  self.parse_expr()?;
+        let _condition = self.parse_expr()?;
         self.expect(TokenKind::CloseParen)?;
         let _body = self.parse_statement()?;
         Ok(())
     }
 
     pub fn parse_type(&mut self, identifier: Option<Token>) -> Result<Token, String> {
-
-        let mut _type  = match identifier {
+        let mut _type = match identifier {
             Some(t) => t,
             None => self.expect(TokenKind::Identifier)?.into(),
         };
