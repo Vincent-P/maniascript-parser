@@ -28,6 +28,8 @@ pub enum TokenKind {
     Comma,
     #[strum(serialize = ";")]
     Semicolon,
+    #[strum(serialize = ":")]
+    Colon,
     #[strum(serialize = "(")]
     OpenParen,
     #[strum(serialize = ")")]
@@ -96,6 +98,7 @@ pub enum TokenKind {
     AndEq,
     #[strum(serialize = "|=")]
     OrEq,
+
     #[strum(serialize = "=>")]
     Arrow,
 
@@ -202,6 +205,42 @@ impl TokenKind {
             | TokenKind::NullId
             | TokenKind::False
             | TokenKind::True => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_hash(&self) -> bool {
+        match self {
+            TokenKind::Include
+            | TokenKind::Const
+            | TokenKind::Setting
+            | TokenKind::RequireContext
+            | TokenKind::Extends => true,
+            _ => false,
+        }
+    }
+
+    pub fn is_decl_metadata(&self) -> bool {
+        match self {
+            TokenKind::Netread
+            | TokenKind::Netwrite
+            | TokenKind::Persistent
+            | TokenKind::Metadata => true,
+            _ => false
+        }
+    }
+
+    pub fn is_assign_op(&self) -> bool {
+        match self {
+            TokenKind::Equal
+            | TokenKind::Alias
+            | TokenKind::PlusEq
+            | TokenKind::MinusEq
+            | TokenKind::MultEq
+            | TokenKind::DivEq
+            | TokenKind::StrEq
+            | TokenKind::AndEq
+            | TokenKind::OrEq => true,
             _ => false,
         }
     }

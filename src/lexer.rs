@@ -3,7 +3,7 @@ use crate::trivia_kind::TriviaKind;
 use std::str::FromStr;
 
 pub struct Lexer<'a> {
-    source: &'a str,
+    pub source: &'a str,
     position: usize,
 }
 
@@ -231,9 +231,15 @@ impl<'a> Lexer<'a> {
     }
 
     fn scan_token(&mut self) -> TokenKind {
+        let following = match self.char_peek_n(2) {
+            Some(c) => c,
+            _ => 'a',
+        };
+
         match self.char_peek() {
-            Some(c) if is_punctuation_char(c) => self.scan_operator(),
+            Some(c) if c == '.' && following.is_numeric() => self.scan_number(),
             Some(c) if c.is_numeric() => self.scan_number(),
+            Some(c) if is_punctuation_char(c) => self.scan_operator(),
             Some(c) if c == '#' || is_ident_char(c) => self.scan_word(),
             Some(c) if c == '"' => self.scan_string(),
             Some(c) => {
