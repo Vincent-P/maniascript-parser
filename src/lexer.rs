@@ -215,10 +215,7 @@ impl<'a> Lexer<'a> {
                                 self.last_line = self.position;
                                 self.lines += 1;
                             }
-                            ('\x0c', _)
-                            | ('\n', _)
-                            | ('\r', _)
-                            | ('\x0b', _) => {
+                            ('\x0c', _) | ('\n', _) | ('\r', _) | ('\x0b', _) => {
                                 self.last_line = self.position;
                                 self.lines += 1;
                             }

@@ -1,6 +1,8 @@
 use crate::lexer::Token;
 use crate::token_kind::TokenKind;
+use strum_macros::ToString;
 
+#[derive(Debug, ToString)]
 pub enum ExpressionKind {
     Identifier,
     Literal,
@@ -38,6 +40,7 @@ pub enum ExpressionKind {
     MapsTo,
 }
 
+#[derive(Debug, ToString)]
 pub enum NodeKind {
     Include,
     Const,
@@ -46,17 +49,31 @@ pub enum NodeKind {
     Extends,
     FuncDec,
     LabelDec,
+    LabelCall,
+    VarDec,
     If,
     Else,
     Switch,
+    SwitchType,
     Case,
+    CaseType,
+    Default,
     For,
     Foreach,
     While,
     Expr(ExpressionKind),
-    Token(Token)
+    Type,
+    #[strum(serialize = "Token")]
+    Token(Token),
+    File,
+    Block,
+    Continue,
+    Break,
+    Return,
+    Assignment,
 }
 
+#[derive(Debug)]
 pub struct Node {
     pub node_kind: NodeKind,
     pub span: (usize, usize),
@@ -68,7 +85,7 @@ impl Node {
         Node {
             node_kind,
             span: (0, 0),
-            children: vec![]
+            children: vec![],
         }
     }
 
@@ -80,7 +97,7 @@ impl Node {
         Node {
             node_kind,
             span,
-            children: vec![]
+            children: vec![],
         }
     }
 
@@ -93,6 +110,18 @@ impl Node {
             self.span = (start, end);
         }
         self.children.push(child)
+    }
+
+    pub fn format_dot(&self) -> String {
+        match &self.node_kind {
+            NodeKind::Expr(e) => {
+                e.to_string()
+            }
+            NodeKind::Token(t) => {
+                t.kind.format_dot()
+            }
+            k => k.to_string()
+        }
     }
 }
 
@@ -135,7 +164,10 @@ impl From<TokenKind> for ExpressionKind {
             TokenKind::Is => ExpressionKind::Is,
             TokenKind::Arrow => ExpressionKind::MapsTo,
             k if k.is_litteral_value() => ExpressionKind::Literal,
-            _ => panic!(format!("An ExpressionKind cannot be created from a {:?}", token_kind)),
+            _ => panic!(format!(
+                "An ExpressionKind cannot be created from a {:?}",
+                token_kind
+            )),
         }
     }
 }
