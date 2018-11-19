@@ -5,6 +5,8 @@ use std::str::FromStr;
 pub struct Lexer<'a> {
     pub source: &'a str,
     position: usize,
+    lines: usize,
+    last_line: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -12,6 +14,8 @@ pub struct Token {
     pub kind: TokenKind,
     pub position: usize,
     pub len: usize,
+    pub line: usize,
+    pub col: usize,
     pub leading_trivia: Box<[TriviaKind]>,
     pub trailing_trivia: Box<[TriviaKind]>,
 }
@@ -21,6 +25,8 @@ impl<'a> Lexer<'a> {
         Lexer {
             source,
             position: 0,
+            lines: 1,
+            last_line: 0,
         }
     }
 
@@ -198,11 +204,25 @@ impl<'a> Lexer<'a> {
                 (Some('/'), Some('*')) => {
                     self.char_next();
                     self.char_next();
-                    while let (Some(c1), Some(c2)) = (self.char_peek(), self.char_peek_n(2)) {
-                        self.char_next();
-                        if c1 == '*' && c2 == '/' {
-                            self.char_next();
-                            break;
+                    while let (Some(_), Some(c2)) = (self.char_peek(), self.char_peek_n(2)) {
+                        match (self.char_next().unwrap(), c2) {
+                            ('*', '/') => {
+                                self.char_next();
+                                break;
+                            }
+                            ('\r', '\n') => {
+                                self.char_next();
+                                self.last_line = self.position;
+                                self.lines += 1;
+                            }
+                            ('\x0c', _)
+                            | ('\n', _)
+                            | ('\r', _)
+                            | ('\x0b', _) => {
+                                self.last_line = self.position;
+                                self.lines += 1;
+                            }
+                            _ => {}
                         }
                     }
                     let comment = &self.source[start..self.position];
@@ -212,6 +232,11 @@ impl<'a> Lexer<'a> {
                     break;
                 }
             };
+
+            if trivia.is_line_break() {
+                self.lines += 1;
+                self.last_line = self.position;
+            }
 
             // count trivias
             match (trivia, trivias.last_mut()) {
@@ -263,8 +288,8 @@ impl<'a> Iterator for Lexer<'a> {
             return None;
         }
 
-        let start = self.position;
         let leading_trivia = self.scan_trivias(false);
+        let start = self.position;
         let token_kind = self.scan_token();
 
         // Maybe the EOF is reached so the position > len
@@ -278,6 +303,8 @@ impl<'a> Iterator for Lexer<'a> {
             kind: token_kind,
             position: start,
             len: self.position - start,
+            line: self.lines,
+            col: start - self.last_line,
             leading_trivia: leading_trivia.into_boxed_slice(),
             trailing_trivia: trailing_trivias.into_boxed_slice(),
         })

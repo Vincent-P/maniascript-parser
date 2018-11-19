@@ -4,6 +4,7 @@ mod lexer;
 mod parser;
 mod token_kind;
 mod trivia_kind;
+mod ast;
 
 use crate::lexer::Lexer;
 use crate::parser::Parser;

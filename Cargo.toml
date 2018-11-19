@@ -2,6 +2,7 @@
 name = "maniascript-parser"
 version = "0.1.0"
 authors = ["Vincent Parizet <vincent.parizet@hotmail.fr>"]
+edition = "2018"
 
 [dependencies]
 strum = "0.11.0"

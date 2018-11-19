@@ -10,3 +10,16 @@ pub enum TriviaKind {
     LineComment(String),
     BlockComment(String),
 }
+
+impl TriviaKind {
+    pub fn is_line_break(&self) -> bool {
+        match self {
+            TriviaKind::Newline(_)
+            | TriviaKind::FormFeed(_)
+            | TriviaKind::CarriageReturn(_)
+            | TriviaKind::CarriageReturnNewline(_)
+            | TriviaKind::VerticalTab(_) => true,
+            _ => false,
+        }
+    }
+}

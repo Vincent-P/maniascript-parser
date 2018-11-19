@@ -1,24 +1,15 @@
 use crate::lexer::Lexer;
 use crate::lexer::Token;
 use crate::token_kind::TokenKind;
+use crate::ast::{ExpressionKind, NodeKind};
 use std::iter::Peekable;
-
-#[derive(Debug)]
-pub enum ExpressionKind {
-    Identifier,
-    Literal,
-    Unary(Token, Box<ExpressionKind>),
-    Binary(Box<ExpressionKind>, Token, Box<ExpressionKind>),
-    Array(Vec<ExpressionKind>),
-    Vector(Vec<ExpressionKind>),
-    ArrayAccess(Box<ExpressionKind>, Box<ExpressionKind>),
-    FunctionCall(Box<ExpressionKind>, Vec<ExpressionKind>),
-    Cast(Box<ExpressionKind>, Token),
-    Is(Box<ExpressionKind>, Token),
-    MapsTo(Box<ExpressionKind>, Box<ExpressionKind>),
-}
+use crate::ast::Node;
 
 impl Token {
+    fn span(&self) -> (usize, usize) {
+        (self.position, self.position + self.len)
+    }
+
     fn lbp(&self) -> u32 {
         match self.kind {
             TokenKind::Arrow => 5,
@@ -58,132 +49,207 @@ impl Token {
         }
     }
 
-    fn nud(&self, parser: &mut Parser) -> Result<ExpressionKind, String> {
+    fn nud(&self, parser: &mut Parser) -> Result<Node, String> {
         match self.kind {
-            TokenKind::Identifier => Ok(ExpressionKind::Identifier),
+            TokenKind::Identifier => {
+                let expr = ExpressionKind::from(self.kind);
+                let mut node = Node::new_expr(expr);
 
-            k if k.is_litteral_value() => Ok(ExpressionKind::Literal),
+                let tok = Node::from(self);
+
+                node.add_child(tok);
+                Ok(node)
+            },
+
+            k if k.is_litteral_value() => {
+                let expr = ExpressionKind::from(self.kind);
+                let mut node = Node::new_expr(expr);
+
+                let tok = Node::from(self);
+
+                node.add_child(tok);
+                Ok(node)
+            },
 
             TokenKind::Minus | TokenKind::Not => {
                 let rhs = parser.expression(self.rbp())?;
-                Ok(ExpressionKind::Unary(self.clone(), Box::new(rhs)))
+
+                let expr = match self.kind {
+                    TokenKind::Minus => ExpressionKind::Negative,
+                    _ => ExpressionKind::Not
+                };
+
+                let mut node = Node::new_expr(expr);
+                node.add_child(rhs);
+
+                Ok(node)
             }
 
             TokenKind::OpenParen => {
-                let rhs = parser.expression(self.rbp())?;
-                parser.expect(TokenKind::CloseParen)?;
+                let mut rhs = parser.expression(self.rbp())?;
+                let end = parser.expect(TokenKind::CloseParen)?;
+                rhs.span = (self.position, end.position + end.len);
                 Ok(rhs)
             }
 
             TokenKind::Inf => {
-                let mut values = vec![];
-                if let Some(next_token) = parser.tokens.peek() {
-                    if next_token.kind == TokenKind::Sup {
-                        parser.tokens.next();
-                        return Ok(ExpressionKind::Vector(values));
-                    }
-                }
+                let expr = ExpressionKind::Vector;
+                let mut node = Node::new_expr(expr);
 
-                values.push(parser.expression(self.rbp())?);
+               node.add_child(parser.expression(self.rbp())?);
+
                 while let Some(next_token) = parser.tokens.peek() {
                     if next_token.kind != TokenKind::Comma {
                         break;
                     }
                     parser.tokens.next();
-                    values.push(parser.expression(self.rbp())?);
+                    node.add_child(parser.expression(self.rbp())?);
                 }
-                parser.expect(TokenKind::Sup)?;
-                Ok(ExpressionKind::Vector(values))
+
+                let (_, end) = parser.expect(TokenKind::Sup)?.span();
+                node.span = (self.position, end);
+                Ok(node)
             }
 
             TokenKind::OpenSquare => {
-                let mut values = vec![];
+                let expr = ExpressionKind::Array;
+                let mut node = Node::new_expr(expr);
+
                 if let Some(next_token) = parser.tokens.peek() {
                     if next_token.kind == TokenKind::CloseSquare {
-                        parser.tokens.next();
-                        return Ok(ExpressionKind::Array(values));
+                        let (_, end) = parser.tokens.next().unwrap().span();
+                        node.span = (self.position, end);
+                        return Ok(node);
                     }
                 }
 
-                values.push(parser.expression(self.rbp())?);
+               node.add_child(parser.expression(self.rbp())?);
+
                 while let Some(next_token) = parser.tokens.peek() {
                     if next_token.kind != TokenKind::Comma {
                         break;
                     }
                     parser.tokens.next();
-                    values.push(parser.expression(self.rbp())?);
+                    node.add_child(parser.expression(self.rbp())?);
                 }
-                parser.expect(TokenKind::CloseSquare)?;
-                Ok(ExpressionKind::Array(values))
+
+                let (_, end) = parser.expect(TokenKind::CloseSquare)?.span();
+                node.span = (self.position, end);
+                Ok(node)
             }
 
             k => Err(format!(
-                "Expected an expression but got {:?}.
-            At : {}",
-                k,
-                &parser.source[self.position..]
+                "{}:{} Expected an expression but got {:?}.",
+                self.line, self.col, k
             )),
         }
     }
 
-    fn led(&self, parser: &mut Parser, lhs: ExpressionKind) -> Result<ExpressionKind, String> {
+    fn led(&self, parser: &mut Parser, lhs: Node) -> Result<Node, String> {
         match self.kind {
             k if k.is_binary_op() => {
+                let expr = ExpressionKind::from(k);
+                let mut node = Node::new_expr(expr);
                 let rhs = parser.expression(self.lbp())?;
-                Ok(ExpressionKind::Binary(
-                    Box::new(lhs),
-                    self.clone(),
-                    Box::new(rhs),
-                ))
+
+                node.add_child(lhs);
+                node.add_child(rhs);
+
+                Ok(node)
             }
 
             TokenKind::As => {
+                let expr = ExpressionKind::from(self.kind);
+                let mut node = Node::new_expr(expr);
+
+                // TODO(vincent): properly parse type
                 let type_token = parser.expect(TokenKind::Identifier)?;
-                Ok(ExpressionKind::Cast(Box::new(lhs), type_token.clone()))
+                let type_node = Node::from(type_token);
+
+                node.add_child(lhs);
+                node.add_child(type_node);
+
+                Ok(node)
             }
 
             TokenKind::Is => {
+                let expr = ExpressionKind::from(self.kind);
+                let mut node = Node::new_expr(expr);
+
+                // TODO(vincent): properly parse type
                 let type_token = parser.expect(TokenKind::Identifier)?;
-                Ok(ExpressionKind::Is(Box::new(lhs), type_token.clone()))
+                let type_node = Node::from(type_token);
+
+                node.add_child(lhs);
+                node.add_child(type_node);
+
+                Ok(node)
             }
 
             TokenKind::OpenSquare => {
+                let expr = ExpressionKind::Array;
+                let mut node = Node::new_expr(expr);
+
                 let rhs = parser.expression(self.lbp())?;
-                parser.expect(TokenKind::CloseSquare)?;
-                Ok(ExpressionKind::ArrayAccess(Box::new(lhs), Box::new(rhs)))
+                let close_token = parser.expect(TokenKind::CloseSquare)?;
+
+                node.add_child(lhs);
+                node.add_child(rhs);
+
+                let (begin, _) = node.span;
+                let (_, end) = close_token.span();
+                node.span = (begin, end);
+
+                Ok(node)
             }
 
             TokenKind::OpenParen => {
-                let mut args = vec![];
+                let expr = ExpressionKind::ArrayAccess;
+                let mut node = Node::new_expr(expr);
+                node.add_child(lhs);
+
                 if let Some(next) = parser.tokens.peek() {
                     if next.kind == TokenKind::CloseParen {
-                        parser.tokens.next();
-                        return Ok(ExpressionKind::FunctionCall(Box::new(lhs), args));
+                        let close_token = parser.tokens.next().unwrap();
+                        let (begin, _) = node.span;
+                        let (_, end) = close_token.span();
+                        node.span = (begin, end);
+                        return Ok(node);
                     }
                 }
 
-                args.push(parser.expression(self.lbp())?);
+                node.add_child(parser.expression(self.lbp())?);
                 while let Some(next_token) = parser.tokens.peek() {
                     if next_token.kind != TokenKind::Comma {
                         break;
                     }
                     parser.tokens.next();
-                    args.push(parser.expression(self.lbp())?);
+                    node.add_child(parser.expression(self.lbp())?);
                 }
-                parser.expect(TokenKind::CloseParen)?;
-                Ok(ExpressionKind::FunctionCall(Box::new(lhs), args))
+
+                let close_token = parser.expect(TokenKind::CloseParen)?;
+                let (begin, _) = node.span;
+                let (_, end) = close_token.span();
+                node.span = (begin, end);
+
+                Ok(node)
             }
 
             TokenKind::Arrow => {
+
+                let expr = ExpressionKind::from(self.kind);
+                let mut node = Node::new_expr(expr);
+
                 let rhs = parser.expression(self.lbp())?;
-                Ok(ExpressionKind::MapsTo(Box::new(lhs), Box::new(rhs)))
+                node.add_child(lhs);
+                node.add_child(rhs);
+
+                Ok(node)
             }
 
             k => Err(format!(
-                "Expected an operator but got {:?}.
-            At : {}",
-                k,
-                &parser.source[self.position..]
+                "{}:{} Expected an operator but got {:?}.",
+                self.line, self.col, k
             )),
         }
     }
@@ -205,31 +271,30 @@ impl<'a> Parser<'a> {
         match self.tokens.peek() {
             Some(ref t) if t.kind == token_kind => Ok(self.tokens.next().unwrap()),
             Some(ref t) => Err(format!(
-                "Expected {:?} token but got {:?}.
-                At : {}",
+                "{}:{} Expected {:?} token but got {:?}.",
+                t.line, t.col,
                 token_kind,
                 t.kind,
-                &self.source[t.position..]
             )),
             _ => Err(format!("Expected {:?} token.", token_kind)),
         }
     }
 
-    fn parse_nud(&mut self) -> Result<ExpressionKind, String> {
+    fn parse_nud(&mut self) -> Result<Node, String> {
         match self.tokens.next() {
             Some(t) => t.nud(self),
             _ => Err("Incomplete expression.".to_string()),
         }
     }
 
-    fn parse_led(&mut self, expr: ExpressionKind) -> Result<ExpressionKind, String> {
+    fn parse_led(&mut self, expr: Node) -> Result<Node, String> {
         match self.tokens.next() {
             Some(t) => t.led(self, expr),
             _ => Err("Incomplete expression.".to_string()),
         }
     }
 
-    fn expression(&mut self, rbp: u32) -> Result<ExpressionKind, String> {
+    fn expression(&mut self, rbp: u32) -> Result<Node, String> {
         let mut left = self.parse_nud()?;
 
         while let Some(t) = self.tokens.peek() {
@@ -243,7 +308,7 @@ impl<'a> Parser<'a> {
         Ok(left)
     }
 
-    pub fn parse_expr(&mut self) -> Result<ExpressionKind, String> {
+    pub fn parse_expr(&mut self) -> Result<Node, String> {
         self.expression(1)
     }
 
@@ -281,10 +346,9 @@ impl<'a> Parser<'a> {
                 }
                 k => {
                     return Err(format!(
-                        "Unexpected token {:?}.
-                At: {}",
-                        k,
-                        &self.source[next.position..]
+                        "{}:{} Unexpected token {:?}.",
+                        next.line, next.col,
+                        k
                     ))
                 }
             }
@@ -428,9 +492,9 @@ impl<'a> Parser<'a> {
         let mut _type: Option<Token> = None;
         let mut _name = self.expect(TokenKind::Identifier)?;
         let mut _name_alias: Option<Token> = None;
-        let mut _for: Option<ExpressionKind> = None;
+        let mut _for: Option<Node> = None;
         let mut _assign_tok: Option<Token> = None;
-        let mut _value: Option<ExpressionKind> = None;
+        let mut _value: Option<Node> = None;
 
         if let Some(next) = self.tokens.peek() {
             match next.kind {

@@ -270,7 +270,8 @@ declare Ident[] AvailableLandmarksIds;
 declare CSmMapLandmark[][Text] AvailableLandmarksOfType;
 
 foreach (MapLandmark in MapLandmarks_ObjectAnchor) {
-	if (!AvailableLandmarksOfType.existskey(MapLandmark.Tag)) AvailableLandmarksOfType[MapLandmark.Tag] = CSmMapLandmark[];
+	if (!AvailableLandmarksOfType.existskey(MapLandmark.Tag))
+	    AvailableLandmarksOfType[MapLandmark.Tag] = [];
 	AvailableLandmarksOfType[MapLandmark.Tag].add(MapLandmark);
 	if (MapLandmark.Tag != "Armor") AvailableLandmarksIds.add(MapLandmark.Id);
 }
@@ -1121,7 +1122,7 @@ CSmObject SpawnObject(Vec3 _Position, Text _ObjectTag, Ident _AnchorId) {
 	
 	// ---------------------------------- //
 	// Save central Goal distance in the object
-	declare Real CenterGoalDistance for Object;
+    declare Real CenterGoalDistance for Object;
 	CenterGoalDistance = GT_Distance2D(Object.Position, G_CenterGoalPosition);
 	
 	return Object;
