@@ -1,6 +1,6 @@
-use strum_macros::{EnumString, ToString};
+use strum_macros::{Display, EnumString};
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy, EnumString, ToString)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, EnumString, Display)]
 pub enum TokenKind {
     Unknown,
     #[strum(disabled = "true")]
@@ -169,19 +169,6 @@ impl TokenKind {
         match TokenKind::from_str(word) {
             Result::Ok(token_kind) => token_kind,
             _ => TokenKind::Unknown,
-        }
-    }
-
-    pub fn format_dot(&self) -> String {
-        match &self {
-            TokenKind::Unknown => "Unknown".to_string(),
-            TokenKind::EOF => "EOF".to_string(),
-            TokenKind::Identifier => "Identifier".to_string(),
-            TokenKind::Integer => "Integer".to_string(),
-            TokenKind::Real => "Real".to_string(),
-            TokenKind::LineString => "LineString".to_string(),
-            TokenKind::BlockString => "BlockString".to_string(),
-            _ => format!("t_{}", &self.to_string())
         }
     }
 

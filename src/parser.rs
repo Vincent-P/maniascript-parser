@@ -1,54 +1,16 @@
 use crate::ast::Node;
 use crate::ast::{ExpressionKind, NodeKind};
 use crate::lexer::Lexer;
-use crate::lexer::Token;
+use crate::token::Token;
 use crate::token_kind::TokenKind;
 use std::iter::Peekable;
 
+pub struct Parser<'a> {
+    tokens: Peekable<Lexer<'a>>,
+    pub source: &'a str,
+}
+
 impl Token {
-    fn span(&self) -> (usize, usize) {
-        (self.position, self.position + self.len)
-    }
-
-    fn lbp(&self) -> u32 {
-        match self.kind {
-            TokenKind::Arrow => 5,
-
-            TokenKind::OpenParen | TokenKind::OpenSquare => 51,
-
-            TokenKind::StrConcat => 100,
-
-            TokenKind::And => 200,
-            TokenKind::Or => 300,
-
-            TokenKind::EqualEqual
-            | TokenKind::NotEqual
-            | TokenKind::Inf
-            | TokenKind::InfEq
-            | TokenKind::Sup
-            | TokenKind::SupEq => 400,
-
-            TokenKind::Plus | TokenKind::Minus => 500,
-            TokenKind::Mult | TokenKind::Div | TokenKind::Modulo => 600,
-
-            TokenKind::Is | TokenKind::As => 650,
-
-            TokenKind::Dot | TokenKind::ColonColon => 800,
-
-            _ => 0,
-        }
-    }
-
-    fn rbp(&self) -> u32 {
-        match self.kind {
-            TokenKind::OpenParen | TokenKind::OpenSquare => 1,
-
-            TokenKind::Inf => 450,
-            TokenKind::Minus | TokenKind::Not => 700,
-            _ => 0,
-        }
-    }
-
     fn nud(&self, parser: &mut Parser) -> Result<Node, String> {
         match self.kind {
             TokenKind::Identifier => {
@@ -112,7 +74,7 @@ impl Token {
             }
 
             TokenKind::OpenSquare => {
-                let expr = ExpressionKind::ArrayAccess;
+                let expr = ExpressionKind::Array;
                 let mut node = Node::new_expr(expr);
 
                 if let Some(next_token) = parser.tokens.peek() {
@@ -183,7 +145,7 @@ impl Token {
             }
 
             TokenKind::OpenSquare => {
-                let expr = ExpressionKind::Array;
+                let expr = ExpressionKind::ArrayAccess;
                 let mut node = Node::new_expr(expr);
 
                 let rhs = parser.expression(self.lbp())?;
@@ -248,11 +210,6 @@ impl Token {
             )),
         }
     }
-}
-
-pub struct Parser<'a> {
-    tokens: Peekable<Lexer<'a>>,
-    pub source: &'a str,
 }
 
 impl<'a> Parser<'a> {

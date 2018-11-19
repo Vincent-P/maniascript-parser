@@ -1,5 +1,6 @@
-use crate::lexer::Token;
+use crate::token::Token;
 use crate::token_kind::TokenKind;
+use std::string::ToString;
 use strum_macros::ToString;
 
 #[derive(Debug, ToString)]
@@ -112,15 +113,17 @@ impl Node {
         self.children.push(child)
     }
 
-    pub fn format_dot(&self) -> String {
+    pub fn format_dot(&self, source_file: &str) -> String {
         match &self.node_kind {
-            NodeKind::Expr(e) => {
-                e.to_string()
-            }
+            NodeKind::Expr(e) => e.to_string(),
             NodeKind::Token(t) => {
-                t.kind.format_dot()
+                if t.kind == TokenKind::BlockString {
+                    return "Multiline String".to_string();
+                }
+                let (begin, end) = self.span;
+                source_file[begin..end].to_string()
             }
-            k => k.to_string()
+            k => k.to_string(),
         }
     }
 }

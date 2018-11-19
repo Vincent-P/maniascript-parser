@@ -1,3 +1,4 @@
+use crate::token::Token;
 use crate::token_kind::TokenKind;
 use crate::trivia_kind::TriviaKind;
 use std::str::FromStr;
@@ -7,17 +8,6 @@ pub struct Lexer<'a> {
     position: usize,
     lines: usize,
     last_line: usize,
-}
-
-#[derive(Debug, Clone)]
-pub struct Token {
-    pub kind: TokenKind,
-    pub position: usize,
-    pub len: usize,
-    pub line: usize,
-    pub col: usize,
-    pub leading_trivia: Box<[TriviaKind]>,
-    pub trailing_trivia: Box<[TriviaKind]>,
 }
 
 impl<'a> Lexer<'a> {

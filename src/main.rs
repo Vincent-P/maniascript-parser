@@ -4,6 +4,7 @@ mod ast;
 mod ast_printer;
 mod lexer;
 mod parser;
+mod token;
 mod token_kind;
 mod trivia_kind;
 
@@ -16,7 +17,7 @@ use std::time::Instant;
 fn main() {
     use std::io::Read;
 
-    let mut file = File::open("test.Script.txt").expect("Unable to open the file");
+    let mut file = File::open("HungerGames.Script.txt").expect("Unable to open the file");
     let mut input = String::new();
     file.read_to_string(&mut input)
         .expect("Unable to read the file");
@@ -28,7 +29,7 @@ fn main() {
     match parser.parse_file() {
         Ok(tree) => {
             println!("()");
-            match print(&tree) {
+            match print(&tree, &input) {
                 Err(e) => println!("{:#?}", e),
                 _ => {}
             }
