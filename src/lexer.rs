@@ -111,12 +111,22 @@ impl<'a> Lexer<'a> {
                 self.char_next();
 
                 while let Some(_) = self.char_peek() {
-                    match (self.char_next(), self.char_peek(), self.char_peek_n(2)) {
-                        (Some('"'), Some('"'), Some('"')) => {
+                    match (self.char_next().unwrap(), self.char_peek(), self.char_peek_n(2)) {
+                        ('"', Some('"'), Some('"')) => {
                             self.char_next();
                             self.char_next();
                             break;
                         }
+                        ('\r', Some('\n'), _) => {
+                            self.char_next();
+                            self.last_line = self.position;
+                            self.lines += 1;
+                        }
+                        ('\x0c', _, _) | ('\n', _, _) | ('\r', _, _) | ('\x0b', _, _) => {
+                            self.last_line = self.position;
+                            self.lines += 1;
+                        }
+
                         _ => {}
                     }
                 }

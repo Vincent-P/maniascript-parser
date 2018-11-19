@@ -17,7 +17,7 @@ use std::time::Instant;
 fn main() {
     use std::io::Read;
 
-    let mut file = File::open("HungerGames.Script.txt").expect("Unable to open the file");
+    let mut file = File::open("ObstacleLib.Script.txt").expect("Unable to open the file");
     let mut input = String::new();
     file.read_to_string(&mut input)
         .expect("Unable to read the file");
