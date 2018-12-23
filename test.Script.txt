@@ -1,48 +1,7 @@
-#Const C_ModeSupportedObjects ["Weapon", "Charge", "Mini", "Replie", "Armor", "Fuel"]
-#Const C_ScoresTablePosition [False => <0., 40., 20.>, True => <0., 47., 20.>]
+  Void Private_Test    (   )
+{
+log("Test"   )
+;
 
-***Match_LogVersions***
-***
-Log::RegisterScript(ScriptName, Version);
-Log::RegisterScript(Map::GetScriptName(), Map::GetScriptVersion());
-declare CSmMapLandmark[][Text] AvailableLandmarksOfType;
 
-foreach (MapLandmark in MapLandmarks_ObjectAnchor) {
-	if (!AvailableLandmarksOfType.existskey(MapLandmark.Tag))
-	    AvailableLandmarksOfType[MapLandmark.Tag] = [];
-	AvailableLandmarksOfType[MapLandmark.Tag].add(MapLandmark);
-	if (MapLandmark.Tag != "Armor") AvailableLandmarksIds.add(MapLandmark.Id);
-}
-
-while (!ServerShutdownRequested
-       && !MatchEndRequested
-       && (Players.count < C_RequiredPlayersNb || CupAdmin::IsCupPaused()))
-    MB_Yield();
-
-// Manage only Weapons, Charges and Minis
-declare SupportedTags = ["Weapon", "Charge", "Mini"];
-if (!SupportedTags.exists(Tag)) return False;
-
-// ---------------------------------- //
-// Pick conditions
-declare CSmMode::EWeapon[] PossibleWeapons;
-declare CanPickUpObject = True;
-
-if (_Player == Null || _SkillType == "") return;
-
-declare Integer[Text] PlayerSkillPoints for _Player;
-if (!PlayerSkillPoints.existskey(_SkillType)) PlayerSkillPoints[_SkillType] = 0;
-PlayerSkillPoints[_SkillType] += ML::Max(0, _SkillPoints);
-
-UpdatePlayerSkills(_Player);
-***
-
-Void AddPlayerSkill(CSmPlayer _Player, Text _SkillType, Integer _SkillPoints) {
-	if (_Player == Null || _SkillType == "") return;
-
-	declare Integer[Text] PlayerSkillPoints for _Player;
-	if (!PlayerSkillPoints.existskey(_SkillType)) PlayerSkillPoints[_SkillType] = 0;
-	PlayerSkillPoints[_SkillType] += ML::Max(0, _SkillPoints);
-
-	UpdatePlayerSkills(_Player);
-}
+            }

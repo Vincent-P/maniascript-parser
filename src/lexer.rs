@@ -301,7 +301,7 @@ impl<'a> Iterator for Lexer<'a> {
             position: start,
             len: self.position - start,
             line: self.lines,
-            col: start - self.last_line,
+            col: self.position - self.last_line,
             leading_trivia: leading_trivia.into_boxed_slice(),
             trailing_trivia: trailing_trivias.into_boxed_slice(),
         })

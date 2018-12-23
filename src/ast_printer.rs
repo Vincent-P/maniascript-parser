@@ -1,4 +1,5 @@
 use crate::ast::Node;
+use crate::ast::NodeKind;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
@@ -21,6 +22,12 @@ fn ast_print(
     for child in &tree.children {
         let link = format!("    {} -> {};\n", parent_level, *level);
         file.write(link.as_bytes())?;
+
+        match child.node_kind {
+            NodeKind::Token(ref t) => println!("{:?}", t),
+            _ => {}
+        }
+
         ast_print(&child, file, level, source_file)?;
     }
 

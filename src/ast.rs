@@ -64,7 +64,6 @@ pub enum NodeKind {
     While,
     Expr(ExpressionKind),
     Type,
-    #[strum(serialize = "Token")]
     Token(Token),
     File,
     Block,
