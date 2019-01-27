@@ -1,213 +1,188 @@
-use crate::ast::Node;
-use crate::ast::{ExpressionKind, NodeKind};
+use crate::ast::{Tree, Node, NodeId};
+use crate::ast::node_kind::{ExpressionKind, NodeKind};
 use crate::lexer::Lexer;
-use crate::token::Token;
-use crate::token_kind::TokenKind;
+use crate::lexer::token::Token;
+use crate::lexer::token_kind::TokenKind;
+
 use std::iter::Peekable;
 
 pub struct Parser<'a> {
     tokens: Peekable<Lexer<'a>>,
     pub source: &'a str,
+    pub tree: Tree
 }
 
 impl Token {
-    fn nud(&self, parser: &mut Parser) -> Result<Node, String> {
+    fn nud(&self, parser: &mut Parser) -> Result<NodeId, String> {
         match self.kind {
             TokenKind::Identifier => {
-                let expr = ExpressionKind::from(self.kind);
-                let mut node = Node::new_expr(expr);
-
-                let tok = Node::from(self);
-
-                node.add_child(tok);
-                Ok(node)
+                let node = Node::new(ExpressionKind::Identifier.into());
+                let node_id = parser.tree.add_node(node);
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             k if k.is_litteral_value() => {
-                let expr = ExpressionKind::from(self.kind);
-                let mut node = Node::new_expr(expr);
-
-                let tok = Node::from(self);
-
-                node.add_child(tok);
-                Ok(node)
+                let node = Node::new(ExpressionKind::Literal.into());
+                let node_id = parser.tree.add_node(node);
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::Minus | TokenKind::Not => {
-                let rhs = parser.expression(self.rbp())?;
-
-                let expr = match self.kind {
+                let node = Node::new(match self.kind {
                     TokenKind::Minus => ExpressionKind::Negative,
                     _ => ExpressionKind::Not,
-                };
-
-                let mut node = Node::new_expr(expr);
-                node.add_child(rhs);
-
-                Ok(node)
+                }.into());
+                let node_id = parser.tree.add_node(node);
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
+                { let tmp = parser.expression(self.rbp())?; parser.tree.add_child_id(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::OpenParen => {
-                let mut rhs = parser.expression(self.rbp())?;
-                let end = parser.expect(TokenKind::CloseParen)?;
-                rhs.span = (self.position, end.position + end.len);
-                Ok(rhs)
+                let node = Node::new(NodeKind::Parenthesised);
+                let node_id = parser.tree.add_node(node);
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
+                { let tmp = parser.expression(self.rbp())?; parser.tree.add_child_id(node_id, tmp) };
+                { let tmp = Node::from(parser.expect(TokenKind::CloseParen)?); parser.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::Inf => {
-                let expr = ExpressionKind::Vector;
-                let mut node = Node::new_expr(expr);
-
-                node.add_child(parser.expression(self.rbp())?);
+                let node = Node::new(ExpressionKind::Vector.into());
+                let node_id = parser.tree.add_node(node);
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
+                { let tmp = parser.expression(self.rbp())?; parser.tree.add_child_id(node_id, tmp) };
 
                 while let Some(next_token) = parser.tokens.peek() {
                     if next_token.kind != TokenKind::Comma {
                         break;
                     }
-                    parser.tokens.next();
-                    node.add_child(parser.expression(self.rbp())?);
+                    { let tmp = Node::from(parser.tokens.next().unwrap()); parser.tree.add_child(node_id, tmp) };
+                    { let tmp = parser.expression(self.rbp())?; parser.tree.add_child_id(node_id, tmp) };
                 }
 
-                let (_, end) = parser.expect(TokenKind::Sup)?.span();
-                node.span = (self.position, end);
-                Ok(node)
+                { let tmp = Node::from(parser.expect(TokenKind::Sup)?); parser.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::OpenSquare => {
-                let expr = ExpressionKind::Array;
-                let mut node = Node::new_expr(expr);
+                let node = Node::new(ExpressionKind::Array.into());
+                let node_id = parser.tree.add_node(node);
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
 
                 if let Some(next_token) = parser.tokens.peek() {
                     if next_token.kind == TokenKind::CloseSquare {
-                        let (_, end) = parser.tokens.next().unwrap().span();
-                        node.span = (self.position, end);
-                        return Ok(node);
+                        { let tmp = Node::from(parser.tokens.next().unwrap()); parser.tree.add_child(node_id, tmp) };
+                        return Ok(node_id);
                     }
                 }
 
-                node.add_child(parser.expression(self.rbp())?);
+                { let tmp = parser.expression(self.rbp())?; parser.tree.add_child_id(node_id, tmp) };
 
                 while let Some(next_token) = parser.tokens.peek() {
                     if next_token.kind != TokenKind::Comma {
                         break;
                     }
-                    parser.tokens.next();
-                    node.add_child(parser.expression(self.rbp())?);
+                    { let tmp = Node::from(parser.tokens.next().unwrap()); parser.tree.add_child(node_id, tmp) };
+                    { let tmp = parser.expression(self.rbp())?; parser.tree.add_child_id(node_id, tmp) };
                 }
 
-                let (_, end) = parser.expect(TokenKind::CloseSquare)?.span();
-                node.span = (self.position, end);
-                Ok(node)
+                { let tmp = Node::from(parser.expect(TokenKind::Sup)?); parser.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             k => Err(format!(
                 "{}:{} Expected an expression but got {:?}.",
                 self.line, self.col, k
-            )),
+            ))
         }
     }
 
-    fn led(&self, parser: &mut Parser, lhs: Node) -> Result<Node, String> {
+    fn led(&self, parser: &mut Parser, lhs: NodeId) -> Result<NodeId, String> {
         match self.kind {
             k if k.is_binary_op() => {
-                let expr = ExpressionKind::from(k);
-                let mut node = Node::new_expr(expr);
-                let rhs = parser.expression(self.lbp())?;
-
-                node.add_child(lhs);
-                node.add_child(rhs);
-
-                Ok(node)
+                let node = Node::new(ExpressionKind::BinaryOp.into());
+                let node_id = parser.tree.add_node(node);
+                { let tmp = lhs; parser.tree.add_child_id(node_id, tmp) };
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
+                // TODO(vincent): parse type
+                { let tmp = parser.expression(self.lbp())?; parser.tree.add_child_id(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::As => {
-                let expr = ExpressionKind::from(self.kind);
-                let mut node = Node::new_expr(expr);
-
-                let type_node = parser.parse_type()?;
-
-                node.add_child(lhs);
-                node.add_child(type_node);
-
-                Ok(node)
+                let node = Node::new(ExpressionKind::Cast.into());
+                let node_id = parser.tree.add_node(node);
+                { let tmp = lhs; parser.tree.add_child_id(node_id, tmp) };
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
+                // TODO(vincent): parse type
+                { let tmp = parser.expression(self.lbp())?; parser.tree.add_child_id(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::Is => {
-                let expr = ExpressionKind::from(self.kind);
-                let mut node = Node::new_expr(expr);
-
-                let type_node = parser.parse_type()?;
-
-                node.add_child(lhs);
-                node.add_child(type_node);
-
-                Ok(node)
+                let node = Node::new(ExpressionKind::Is.into());
+                let node_id = parser.tree.add_node(node);
+                { let tmp = lhs; parser.tree.add_child_id(node_id, tmp) };
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
+                // TODO(vincent): parse type
+                { let tmp = parser.expression(self.lbp())?; parser.tree.add_child_id(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::OpenSquare => {
-                let expr = ExpressionKind::ArrayAccess;
-                let mut node = Node::new_expr(expr);
+                let node = Node::new(ExpressionKind::ArrayAccess.into());
+                let node_id = parser.tree.add_node(node);
 
-                let rhs = parser.expression(self.lbp())?;
-                let close_token = parser.expect(TokenKind::CloseSquare)?;
+                { let tmp = lhs; parser.tree.add_child_id(node_id, tmp) };
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
+                { let tmp = parser.expression(self.lbp())?; parser.tree.add_child_id(node_id, tmp) };
+                { let tmp = Node::from(parser.expect(TokenKind::CloseSquare)?); parser.tree.add_child(node_id, tmp) };
 
-                node.add_child(lhs);
-                node.add_child(rhs);
-
-                let (begin, _) = node.span;
-                let (_, end) = close_token.span();
-                node.span = (begin, end);
-
-                Ok(node)
+                Ok(node_id)
             }
 
             TokenKind::OpenParen => {
-                let expr = ExpressionKind::FunctionCall;
-                let mut node = Node::new_expr(expr);
-                node.add_child(lhs);
+                let node = Node::new(ExpressionKind::FunctionCall.into());
+                let node_id = parser.tree.add_node(node);
+                { let tmp = lhs; parser.tree.add_child_id(node_id, tmp) };
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
 
                 if let Some(next) = parser.tokens.peek() {
                     if next.kind == TokenKind::CloseParen {
-                        let close_token = parser.tokens.next().unwrap();
-                        let (begin, _) = node.span;
-                        let (_, end) = close_token.span();
-                        node.span = (begin, end);
-                        return Ok(node);
+                        { let tmp = Node::from(parser.tokens.next().unwrap()); parser.tree.add_child(node_id, tmp) };
+                        return Ok(node_id);
                     }
                 }
 
-                node.add_child(parser.expression(self.lbp())?);
+                { let tmp = parser.expression(self.lbp())?; parser.tree.add_child_id(node_id, tmp) };
                 while let Some(next_token) = parser.tokens.peek() {
                     if next_token.kind != TokenKind::Comma {
                         break;
                     }
-                    parser.tokens.next();
-                    node.add_child(parser.expression(self.lbp())?);
+                    { let tmp = Node::from(parser.tokens.next().unwrap()); parser.tree.add_child(node_id, tmp) };
+                    { let tmp = parser.expression(self.lbp())?; parser.tree.add_child_id(node_id, tmp) };
                 }
 
-                let close_token = parser.expect(TokenKind::CloseParen)?;
-                let (begin, _) = node.span;
-                let (_, end) = close_token.span();
-                node.span = (begin, end);
-
-                Ok(node)
+                { let tmp = Node::from(parser.expect(TokenKind::CloseParen)?); parser.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::Arrow => {
-                let expr = ExpressionKind::from(self.kind);
-                let mut node = Node::new_expr(expr);
-
-                let rhs = parser.expression(self.lbp())?;
-                node.add_child(lhs);
-                node.add_child(rhs);
-
-                Ok(node)
+                let node = Node::new(ExpressionKind::MapsTo.into());
+                let node_id = parser.tree.add_node(node);
+                { let tmp = lhs; parser.tree.add_child_id(node_id, tmp) };
+                { let tmp = Node::from(self); parser.tree.add_child(node_id, tmp) };
+                { let tmp = parser.expression(self.lbp())?; parser.tree.add_child_id(node_id, tmp) };
+                Ok(node_id)
             }
 
             k => Err(format!(
                 "{}:{} Expected an operator but got {:?}.",
                 self.line, self.col, k
-            )),
+            ))
         }
     }
 }
@@ -216,7 +191,8 @@ impl<'a> Parser<'a> {
     pub fn new(lexer: Lexer) -> Parser {
         let source = lexer.source;
         let tokens = lexer.peekable();
-        Parser { tokens, source }
+        let tree = Tree::new();
+        Parser { tokens, source, tree }
     }
 
     fn expect(&mut self, token_kind: TokenKind) -> Result<Token, String> {
@@ -230,21 +206,21 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_nud(&mut self) -> Result<Node, String> {
+    fn parse_nud(&mut self) -> Result<NodeId, String> {
         match self.tokens.next() {
             Some(t) => t.nud(self),
             _ => Err("Incomplete expression.".to_string()),
         }
     }
 
-    fn parse_led(&mut self, expr: Node) -> Result<Node, String> {
+    fn parse_led(&mut self, expr: NodeId) -> Result<NodeId, String> {
         match self.tokens.next() {
             Some(t) => t.led(self, expr),
-            _ => Err("Incomplete expression.".to_string()),
+            _ => Err("Incomplete expression.".to_string())
         }
     }
 
-    fn expression(&mut self, rbp: u32) -> Result<Node, String> {
+    fn expression(&mut self, rbp: u32) -> Result<NodeId, String> {
         let mut left = self.parse_nud()?;
 
         while let Some(t) = self.tokens.peek() {
@@ -258,275 +234,262 @@ impl<'a> Parser<'a> {
         Ok(left)
     }
 
-    pub fn parse_expr(&mut self) -> Result<Node, String> {
+    pub fn parse_expr(&mut self) -> Result<NodeId, String> {
         self.expression(1)
     }
 
-    pub fn parse_file(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::File);
+    pub fn parse_file(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::File);
+        let node_id = self.tree.add_node(node);
 
         while let Some(next) = self.tokens.peek() {
             if !next.kind.is_hash() {
                 break;
             }
-            node.add_child(self.parse_hash()?);
+            { let tmp = self.parse_hash()?; self.tree.add_child_id(node_id, tmp) };
         }
 
         while let Some(next) = self.tokens.peek() {
             if next.kind != TokenKind::Declare {
                 break;
             }
-            node.add_child(self.parse_vardec()?);
+            { let tmp = self.parse_vardec()?; self.tree.add_child_id(node_id, tmp) };
         }
 
         while let Some(next) = self.tokens.peek() {
             match next.kind {
                 TokenKind::EOF => break,
                 TokenKind::Declare => {
-                    return Err("Globals need to be defined before functions.".to_string())
+                    return Err("Globals need to be defined before functions.".to_string());
                 }
                 TokenKind::Identifier => {
-                    node.add_child(self.parse_funcdec()?);
+                    { let tmp = self.parse_funcdec()?; self.tree.add_child_id(node_id, tmp) };
                 }
                 TokenKind::LabelStar => {
-                    node.add_child(self.parse_labeldec()?);
+                    { let tmp = self.parse_labeldec()?; self.tree.add_child_id(node_id, tmp) };
                 }
                 k => {
                     return Err(format!(
                         "{}:{} Unexpected token {:?}.",
                         next.line, next.col, k
-                    ))
+                    ));
                 }
             }
         }
 
-        Ok(node)
+        Ok(node_id)
     }
 
-    pub fn parse_hash(&mut self) -> Result<Node, String> {
-        let kind = match self.tokens.peek() {
-            Some(t) if t.kind.is_hash() => t.kind,
-            _ => return Err("Expected a hash statement.".to_string()),
-        };
-
-        match kind {
+    pub fn parse_hash(&mut self) -> Result<NodeId, String> {
+        match self.tokens.peek().unwrap().kind {
             TokenKind::Include => {
-                let mut node = Node::new(NodeKind::Include);
-                self.tokens.next();
-                node.add_child(Node::from(self.expect(TokenKind::LineString)?));
-                self.expect(TokenKind::As)?;
-                node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
-                Ok(node)
+                let node = Node::new(NodeKind::Include);
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::LineString)?); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::As)?); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
             TokenKind::Const => {
-                let mut node = Node::new(NodeKind::Const);
-                self.tokens.next();
-                node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
-                node.add_child(self.parse_expr()?);
-                Ok(node)
+                let node = Node::new(NodeKind::Const);
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
+                { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+                Ok(node_id)
             }
             TokenKind::Setting => {
-                let mut node = Node::new(NodeKind::Setting);
-                self.tokens.next();
-                node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
-                node.add_child(self.parse_expr()?);
+                let node = Node::new(NodeKind::Setting);
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
+                { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
 
                 if let Some(next) = self.tokens.peek() {
                     if next.kind == TokenKind::As {
-                        self.tokens.next();
-                        node.add_child(self.parse_expr()?);
+                        { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
                     }
                 }
 
-                Ok(node)
+                Ok(node_id)
             }
             TokenKind::RequireContext => {
-                let mut node = Node::new(NodeKind::RequireContext);
-                self.tokens.next();
-                node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
-                Ok(node)
+                let node = Node::new(NodeKind::RequireContext);
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
             TokenKind::Extends => {
-                let mut node = Node::new(NodeKind::Extends);
-                self.tokens.next();
-                node.add_child(Node::from(self.expect(TokenKind::LineString)?));
-                Ok(node)
+                let node = Node::new(NodeKind::Extends);
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::LineString)?); self.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
-            _ => Err("Expected Include, Const, Setting, RequireContext or Extends.".to_string()),
+            _ => Err("Expected Include, Const, Setting, RequireContext or Extends.".to_string())
         }
     }
 
-    pub fn parse_funcdec(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::FuncDec);
+    pub fn parse_funcdec(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::FuncDec);
+        let node_id = self.tree.add_node(node);
 
-        let mut _type = self.parse_type()?;
-        let _name = match self.tokens.peek() {
-            // There is an identifier after the type
-            Some(t) if t.kind == TokenKind::Identifier => {
-                node.add_child(_type);
-                Node::from(self.tokens.next().unwrap())
-            }
-            // There is no type so the previous identifier is in fact the name
-            _ => {
-                let _new_name = _type.children.pop().unwrap();
-                _new_name
-            }
-        };
-        node.add_child(Node::from(_name));
+        //TODO(vincent): parse type
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
 
-        self.expect(TokenKind::OpenParen)?;
+        match self.tokens.peek() {
+            Some(name) if name.kind == TokenKind::Identifier => {
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+            },
+            _ => {}
+        }
+
+        { let tmp = Node::from(self.expect(TokenKind::OpenParen)?); self.tree.add_child(node_id, tmp) };
 
         while let Some(next) = self.tokens.peek() {
             if next.kind != TokenKind::Identifier {
                 break;
             }
-            let _arg_type = self.parse_type()?;
-            let _arg_name = Node::from(self.expect(TokenKind::Identifier)?);
-            node.add_child(_arg_type);
-            node.add_child(_arg_name);
+            { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+            { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
 
             match self.tokens.peek() {
-                Some(t) if t.kind == TokenKind::Comma => self.tokens.next(),
-                _ => break
+                Some(t) if t.kind == TokenKind::Comma => { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) },
+                _ => break,
             };
         }
 
-        self.expect(TokenKind::CloseParen)?;
-        node.add_child(self.parse_block()?);
-        Ok(node)
+        { let tmp = Node::from(self.expect(TokenKind::CloseParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_block()?; self.tree.add_child_id(node_id, tmp) };
+        Ok(node_id)
     }
 
-    pub fn parse_labeldec(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::LabelDec);
+    pub fn parse_labeldec(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::LabelDec);
+        let node_id = self.tree.add_node(node);
 
-        self.expect(TokenKind::LabelStar)?;
-        node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
-        self.expect(TokenKind::LabelStar)?;
+        { let tmp = Node::from(self.expect(TokenKind::LabelStar)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::LabelStar)?); self.tree.add_child(node_id, tmp) };
 
-        self.expect(TokenKind::LabelStar)?;
+        { let tmp = Node::from(self.expect(TokenKind::LabelStar)?); self.tree.add_child(node_id, tmp) };
 
-        node.add_child(self.parse_statement()?);
+        { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) };
         while let Some(next) = self.tokens.peek() {
             if next.kind == TokenKind::LabelStar {
                 break;
             }
-            node.add_child(self.parse_statement()?);
+            { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) };
         }
 
-        self.expect(TokenKind::LabelStar)?;
-        Ok(node)
+        { let tmp = Node::from(self.expect(TokenKind::LabelStar)?); self.tree.add_child(node_id, tmp) };
+        Ok(node_id)
     }
 
-    pub fn parse_block(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::Block);
-        self.expect(TokenKind::OpenBrace)?;
+    pub fn parse_block(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::Block);
+        let node_id = self.tree.add_node(node);
+        { let tmp = Node::from(self.expect(TokenKind::OpenBrace)?); self.tree.add_child(node_id, tmp) };
 
         while let Some(next) = self.tokens.peek() {
             if next.kind == TokenKind::CloseBrace {
                 break;
             }
-            node.add_child(self.parse_statement()?);
+            { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) };
         }
 
-        self.expect(TokenKind::CloseBrace)?;
-        Ok(node)
+        { let tmp = Node::from(self.expect(TokenKind::CloseBrace)?); self.tree.add_child(node_id, tmp) };
+        Ok(node_id)
     }
 
-    pub fn parse_vardec(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::VarDec);
+    // TODO(vincent): make different nodes based on the assignment
+    pub fn parse_vardec(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::VarDec);
+        let node_id = self.tree.add_node(node);
 
-        self.expect(TokenKind::Declare)?;
+        { let tmp = Node::from(self.expect(TokenKind::Declare)?); self.tree.add_child(node_id, tmp) };
 
         while let Some(next) = self.tokens.peek() {
             if !next.kind.is_decl_metadata() {
                 break;
             }
-            node.add_child(Node::from(self.tokens.next().unwrap()));
+            { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
         }
 
-        let mut _type = self.parse_type()?;
-        let _name = match self.tokens.peek() {
-            // There is an identifier after the type
-            Some(t) if t.kind == TokenKind::Identifier => {
-                node.add_child(_type);
-                Node::from(self.tokens.next().unwrap())
-            }
-            // There is no type so the previous identifier is in fact the name
-            _ => {
-                let _new_name = _type.children.pop().unwrap();
-                _new_name
-            }
-        };
-        node.add_child(Node::from(_name));
+        //TODO(vincent): parse type
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+
+        match self.tokens.peek() {
+            Some(name) if name.kind == TokenKind::Identifier => {
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+            },
+            _ => {}
+        }
 
         if let Some(next) = self.tokens.peek() {
             if next.kind == TokenKind::As {
-                self.tokens.next();
-                node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
             }
         }
 
         if let Some(next) = self.tokens.peek() {
             if next.kind == TokenKind::For {
-                self.tokens.next();
-                node.add_child(self.parse_expr()?);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
             }
         }
 
         if let Some(next) = self.tokens.peek() {
             if next.kind.is_assign_op() {
-                let mut assign = Node::new(NodeKind::Assignment);
-                assign.add_child(Node::from(self.tokens.next().unwrap()));
-                assign.add_child(self.parse_expr()?);
-                node.add_child(assign);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
             }
         }
 
-        self.expect(TokenKind::Semicolon)?;
+        { let tmp = Node::from(self.expect(TokenKind::Semicolon)?); self.tree.add_child(node_id, tmp) };
 
-        Ok(node)
+        Ok(node_id)
     }
 
-    pub fn parse_else(&mut self) -> Result<Node, String> {
-        self.expect(TokenKind::Else)?;
+    pub fn parse_else(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::Else);
+        let node_id = self.tree.add_node(node);
+
+        { let tmp = Node::from(self.expect(TokenKind::Else)?); self.tree.add_child(node_id, tmp) };
 
         match self.tokens.peek() {
-            Some(t) if t.kind == TokenKind::If => {
-                Ok(self.parse_if()?)
-            }
-            _ => {
-                let mut node = Node::new(NodeKind::Else);
-                node.add_child(self.parse_statement()?);
-                Ok(node)
-            }
-        }
+            Some(t) if t.kind == TokenKind::If => { let tmp = self.parse_if()?; self.tree.add_child_id(node_id, tmp) },
+            _ => { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) }
+        };
+
+        Ok(node_id)
     }
 
-    pub fn parse_if(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::If);
+    pub fn parse_if(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::If);
+        let node_id = self.tree.add_node(node);
 
-        self.expect(TokenKind::If)?;
-        self.expect(TokenKind::OpenParen)?;
-        node.add_child(self.parse_expr()?);
-        self.expect(TokenKind::CloseParen)?;
-        node.add_child(self.parse_statement()?);
+        { let tmp = Node::from(self.expect(TokenKind::If)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::OpenParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::CloseParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) };
 
         if let Some(next) = self.tokens.peek() {
             if next.kind == TokenKind::Else {
-                node.add_child(self.parse_else()?);
+                { let tmp = self.parse_else()?; self.tree.add_child_id(node_id, tmp) };
             }
         }
 
-        Ok(node)
+        Ok(node_id)
     }
 
-    pub fn parse_statement(&mut self) -> Result<Node, String> {
-        let kind = match self.tokens.peek() {
-            Some(ref t) => t.kind,
-            _ => return Err("Expected a statement.".to_string()),
-        };
-
-        match kind {
+    pub fn parse_statement(&mut self) -> Result<NodeId, String> {
+        match self.tokens.peek().unwrap().kind {
             TokenKind::OpenBrace => self.parse_block(),
             TokenKind::Declare => self.parse_vardec(),
             TokenKind::If => self.parse_if(),
@@ -537,215 +500,204 @@ impl<'a> Parser<'a> {
             TokenKind::While => self.parse_while(),
 
             TokenKind::LabelPlus => {
-                let mut node = Node::new(NodeKind::LabelCall);
-                self.tokens.next();
-                node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
-                self.expect(TokenKind::LabelPlus)?;
-                Ok(node)
+                let node = Node::new(NodeKind::LabelCall);
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::LabelPlus)?); self.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::LabelMinus => {
-                let mut node = Node::new(NodeKind::LabelCall);
-                self.tokens.next();
-                node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
-                self.expect(TokenKind::LabelMinus)?;
-                Ok(node)
+                let node = Node::new(NodeKind::LabelCall);
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::LabelMinus)?); self.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::Break => {
-                self.tokens.next();
                 let node = Node::new(NodeKind::Break);
-                self.expect(TokenKind::Semicolon)?;
-                Ok(node)
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Semicolon)?); self.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::Continue => {
-                self.tokens.next();
                 let node = Node::new(NodeKind::Continue);
-                self.expect(TokenKind::Semicolon)?;
-                Ok(node)
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Semicolon)?); self.tree.add_child(node_id, tmp) };
+                Ok(node_id)
+            }
+
+            TokenKind::Yield => {
+                let node = Node::new(NodeKind::Yield);
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Semicolon)?); self.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             TokenKind::Return => {
-                let mut node = Node::new(NodeKind::Return);
+                let node = Node::new(NodeKind::Return);
+                let node_id = self.tree.add_node(node);
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
 
-                self.tokens.next();
                 if let Some(next) = self.tokens.peek() {
-                    if next.kind == TokenKind::Semicolon {
-                        self.tokens.next();
-                        return Ok(node);
+                    if next.kind != TokenKind::Semicolon {
+                        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
                     }
                 }
 
-                node.add_child(self.parse_expr()?);
-                self.expect(TokenKind::Semicolon)?;
-                Ok(node)
+                { let tmp = Node::from(self.expect(TokenKind::Semicolon)?); self.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
 
             _ => {
-                let mut node = self.parse_expr()?;
+                let expr_id = self.parse_expr()?;
+
                 if let Some(next) = self.tokens.peek() {
                     if next.kind.is_assign_op() {
-                        let mut parent_node = Node::new(NodeKind::Assignment);
-                        parent_node.add_child(node);
-                        node = parent_node;
-
-                        node.add_child(Node::from(self.tokens.next().unwrap()));
-                        node.add_child(self.parse_expr()?);
+                        let node = Node::new(NodeKind::Assignment);
+                        let node_id = self.tree.add_node(node);
+                        { let tmp = expr_id; self.tree.add_child_id(node_id, tmp) };
+                        { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+                        { let tmp = Node::from(self.expect(TokenKind::Semicolon)?); self.tree.add_child(node_id, tmp) };
+                        return Ok(node_id);
                     }
                 }
-                self.expect(TokenKind::Semicolon)?;
-                Ok(node)
+
+                let node = Node::new(NodeKind::ExprStatement);
+                let node_id = self.tree.add_node(node);
+                { let tmp = expr_id; self.tree.add_child_id(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Semicolon)?); self.tree.add_child(node_id, tmp) };
+                Ok(node_id)
             }
         }
     }
 
-    pub fn parse_switch(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::Switch);
+    pub fn parse_switch(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::Switch);
+        let node_id = self.tree.add_node(node);
 
-        self.expect(TokenKind::Switch)?;
-        self.expect(TokenKind::OpenParen)?;
-        node.add_child(self.parse_expr()?);
-        self.expect(TokenKind::CloseParen)?;
-        self.expect(TokenKind::OpenBrace)?;
+        { let tmp = Node::from(self.expect(TokenKind::Switch)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::OpenParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::CloseParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::OpenBrace)?); self.tree.add_child(node_id, tmp) };
 
         while let Some(next) = self.tokens.peek() {
             match next.kind {
-                TokenKind::Default => node.add_child(self.parse_default()?),
-                TokenKind::Case => node.add_child(self.parse_case()?),
+                TokenKind::Default => { let tmp = self.parse_default()?; self.tree.add_child_id(node_id, tmp) },
+                TokenKind::Case => { let tmp = self.parse_case()?; self.tree.add_child_id(node_id, tmp) },
                 _ => break,
             };
         }
 
-        self.expect(TokenKind::CloseBrace)?;
+        { let tmp = Node::from(self.expect(TokenKind::CloseBrace)?); self.tree.add_child(node_id, tmp) };
 
-        Ok(node)
+        Ok(node_id)
     }
-    pub fn parse_switchtype(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::SwitchType);
-        self.expect(TokenKind::SwitchType)?;
-        self.expect(TokenKind::OpenParen)?;
-        node.add_child(self.parse_expr()?);
-        self.expect(TokenKind::CloseParen)?;
-        self.expect(TokenKind::OpenBrace)?;
+    pub fn parse_switchtype(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::SwitchType);
+        let node_id = self.tree.add_node(node);
+
+        { let tmp = Node::from(self.expect(TokenKind::SwitchType)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::OpenParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::CloseParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::OpenBrace)?); self.tree.add_child(node_id, tmp) };
 
         while let Some(next) = self.tokens.peek() {
             match next.kind {
-                TokenKind::Default => node.add_child(self.parse_default()?),
-                TokenKind::Case => node.add_child(self.parse_case_type()?),
+                TokenKind::Default => { let tmp = self.parse_default()?; self.tree.add_child_id(node_id, tmp) },
+                TokenKind::Case => { let tmp = self.parse_case_type()?; self.tree.add_child_id(node_id, tmp) },
                 _ => break,
             };
         }
 
-        self.expect(TokenKind::CloseBrace)?;
+        { let tmp = Node::from(self.expect(TokenKind::CloseBrace)?); self.tree.add_child(node_id, tmp) };
 
-        Ok(node)
+        Ok(node_id)
     }
 
-    pub fn parse_case(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::Case);
-        self.expect(TokenKind::Case)?;
-        node.add_child(self.parse_expr()?);
-        self.expect(TokenKind::Colon)?;
-        node.add_child(self.parse_statement()?);
-        Ok(node)
+    pub fn parse_case(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::Case);
+        let node_id = self.tree.add_node(node);
+        { let tmp = Node::from(self.expect(TokenKind::Case)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::Colon)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) };
+        Ok(node_id)
     }
 
-    pub fn parse_case_type(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::CaseType);
-        self.expect(TokenKind::Case)?;
-        node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
-        self.expect(TokenKind::Colon)?;
-        node.add_child(self.parse_statement()?);
-        Ok(node)
+    pub fn parse_case_type(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::CaseType);
+        let node_id = self.tree.add_node(node);
+        { let tmp = Node::from(self.expect(TokenKind::Case)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::Colon)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) };
+        Ok(node_id)
     }
 
-    pub fn parse_default(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::Default);
-        self.expect(TokenKind::Default)?;
-        self.expect(TokenKind::Colon)?;
-        node.add_child(self.parse_statement()?);
-        Ok(node)
+    pub fn parse_default(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::Default);
+        let node_id = self.tree.add_node(node);
+        { let tmp = Node::from(self.expect(TokenKind::Default)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::Colon)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) };
+        Ok(node_id)
     }
 
-    pub fn parse_for(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::For);
-        self.expect(TokenKind::For)?;
-        self.expect(TokenKind::OpenParen)?;
-        node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
-        self.expect(TokenKind::Comma)?;
-        node.add_child(self.parse_expr()?);
-        self.expect(TokenKind::Comma)?;
-        node.add_child(self.parse_expr()?);
-        self.expect(TokenKind::CloseParen)?;
-        node.add_child(self.parse_statement()?);
-        Ok(node)
+    pub fn parse_for(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::For);
+        let node_id = self.tree.add_node(node);
+        { let tmp = Node::from(self.expect(TokenKind::For)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::OpenParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::Comma)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::Comma)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::CloseParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) };
+        Ok(node_id)
     }
 
-    pub fn parse_foreach(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::Foreach);
-        self.expect(TokenKind::Foreach)?;
-        self.expect(TokenKind::OpenParen)?;
-        node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
+    pub fn parse_foreach(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::Foreach);
+        let node_id = self.tree.add_node(node);
+        { let tmp = Node::from(self.expect(TokenKind::Foreach)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::OpenParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
 
         if let Some(next) = self.tokens.peek() {
             if next.kind == TokenKind::Arrow {
-                self.tokens.next();
-                node.add_child(Node::from(self.expect(TokenKind::Identifier)?));
+                { let tmp = Node::from(self.tokens.next().unwrap()); self.tree.add_child(node_id, tmp) };
+                { let tmp = Node::from(self.expect(TokenKind::Identifier)?); self.tree.add_child(node_id, tmp) };
             }
         }
 
-        self.expect(TokenKind::In)?;
-        node.add_child(self.parse_expr()?);
-        self.expect(TokenKind::CloseParen)?;
-
-        node.add_child(self.parse_statement()?);
-        Ok(node)
+        { let tmp = Node::from(self.expect(TokenKind::In)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::CloseParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) };
+        Ok(node_id)
     }
 
-    pub fn parse_while(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::While);
-        self.expect(TokenKind::While)?;
-        self.expect(TokenKind::OpenParen)?;
-        node.add_child(self.parse_expr()?);
-        self.expect(TokenKind::CloseParen)?;
-        node.add_child(self.parse_statement()?);
-        Ok(node)
-    }
-
-    pub fn parse_type(&mut self) -> Result<Node, String> {
-        let mut node = Node::new(NodeKind::Type);
-
-        let inner_type = Node::from(self.expect(TokenKind::Identifier)?);
-        node.add_child(inner_type);
-
-        while let Some(next) = self.tokens.peek() {
-            match next.kind {
-                TokenKind::OpenSquare => {
-                    self.tokens.next();
-                    let array = Node::new_expr(ExpressionKind::Array);
-
-                    if let Some(following) = self.tokens.peek() {
-                        if following.kind == TokenKind::Identifier {
-                            node.add_child(Node::from(self.tokens.next().unwrap()));
-                        }
-                    }
-
-                    self.expect(TokenKind::CloseSquare)?;
-                    node.add_child(array);
-                }
-                TokenKind::ColonColon => {
-                    let mut namespace = Node::new_expr(ExpressionKind::Namespace);
-
-                    self.tokens.next();
-                    namespace.add_child(Node::from(self.expect(TokenKind::Identifier)?));
-
-                    node.add_child(namespace);
-                }
-                _ => break,
-            }
-        }
-
-        Ok(node)
+    pub fn parse_while(&mut self) -> Result<NodeId, String> {
+        let node = Node::new(NodeKind::While);
+        let node_id = self.tree.add_node(node);
+        { let tmp = Node::from(self.expect(TokenKind::While)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::OpenParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_expr()?; self.tree.add_child_id(node_id, tmp) };
+        { let tmp = Node::from(self.expect(TokenKind::CloseParen)?); self.tree.add_child(node_id, tmp) };
+        { let tmp = self.parse_statement()?; self.tree.add_child_id(node_id, tmp) };
+        Ok(node_id)
     }
 }

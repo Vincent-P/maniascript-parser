@@ -1,175 +1,98 @@
-use crate::token::Token;
-use crate::token_kind::TokenKind;
-use std::string::ToString;
-use strum_macros::ToString;
+pub mod node_kind;
+pub mod printer;
 
-#[derive(Debug, ToString)]
-pub enum ExpressionKind {
-    Identifier,
-    Literal,
-    Vector,
-    Array,
+use generational_arena::{Index, Arena};
+use crate::lexer::token::Token;
+use node_kind::NodeKind;
 
-    Not,
-    Negative,
+pub type NodeId = Index;
+pub type Nodes = Arena<Node>;
 
-    And,
-    Or,
-    IsEqual,
-    IsNotEqual,
-
-    Inf,
-    Sup,
-    InfEq,
-    SupEq,
-
-    StrConcat,
-
-    Plus,
-    Minus,
-    Mult,
-    Div,
-    Modulo,
-
-    Member,
-    Namespace,
-
-    ArrayAccess,
-    FunctionCall,
-    Cast,
-    Is,
-    MapsTo,
+#[derive(Debug)]
+pub struct Tree {
+    nodes: Nodes
 }
 
-#[derive(Debug, ToString)]
-pub enum NodeKind {
-    Include,
-    Const,
-    Setting,
-    RequireContext,
-    Extends,
-    FuncDec,
-    LabelDec,
-    LabelCall,
-    VarDec,
-    If,
-    Else,
-    Switch,
-    SwitchType,
-    Case,
-    CaseType,
-    Default,
-    For,
-    Foreach,
-    While,
-    Expr(ExpressionKind),
-    Type,
-    Token(Token),
-    File,
-    Block,
-    Continue,
-    Break,
-    Return,
-    Assignment,
+impl Tree {
+    pub fn new() -> Tree {
+        Tree {
+            nodes: Arena::new()
+        }
+    }
+
+    pub fn add_node(&mut self, node: Node) -> NodeId {
+        self.nodes.insert(node)
+    }
+
+    pub fn get_node(&self, node: NodeId) -> Option<&Node> {
+        self.nodes.get(node)
+    }
+
+    pub fn get_mut_node(&mut self, node: NodeId) -> Option<&mut Node> {
+        self.nodes.get_mut(node)
+    }
+
+    pub fn remove_node(&mut self, node: NodeId) -> Option<Node> {
+        self.nodes.remove(node)
+    }
+
+    pub fn add_child_id(&mut self, parent_id: NodeId, child_id: NodeId) -> NodeId {
+        if let Some(_) = self.nodes[child_id].parent {
+            panic!("Cannot change the parent an already linked node.");
+        }
+
+        if self.nodes[parent_id].children.len() == 0 {
+            self.nodes[parent_id].span = self.nodes[child_id].span;
+        } else {
+            // .1 is the second element of the span
+            self.nodes[parent_id].span.1 = self.nodes[child_id].span.1;
+        }
+
+        self.nodes[parent_id].children.push(child_id);
+        self.nodes[child_id].parent = Some(parent_id);
+
+        child_id
+    }
+
+    pub fn add_child(&mut self, parent_id: NodeId, child: Node) -> NodeId {
+        let tmp = self.add_node(child);
+        self.add_child_id(parent_id, tmp)
+    }
 }
 
 #[derive(Debug)]
 pub struct Node {
-    pub node_kind: NodeKind,
+    pub kind: NodeKind,
     pub span: (usize, usize),
-    pub children: Vec<Node>,
+
+    pub parent: Option<NodeId>,
+    pub children: Vec<NodeId>,
 }
 
 impl Node {
-    pub fn new(node_kind: NodeKind) -> Node {
+    pub fn new(kind: NodeKind) -> Node {
         Node {
-            node_kind,
+            kind,
             span: (0, 0),
+            parent: None,
             children: vec![],
         }
     }
+}
 
-    pub fn new_expr(expr_kind: ExpressionKind) -> Node {
-        Node::new(NodeKind::Expr(expr_kind))
-    }
-
-    fn with_span(node_kind: NodeKind, span: (usize, usize)) -> Node {
+impl From<&Token> for Node {
+    fn from(token: &Token) -> Node {
         Node {
-            node_kind,
-            span,
-            children: vec![],
-        }
-    }
-
-    pub fn add_child(&mut self, child: Node) {
-        if self.children.is_empty() {
-            self.span = child.span;
-        } else {
-            let (start, _) = self.span;
-            let (_, end) = child.span;
-            self.span = (start, end);
-        }
-        self.children.push(child)
-    }
-
-    pub fn format_dot(&self, source_file: &str) -> String {
-        match &self.node_kind {
-            NodeKind::Expr(e) => e.to_string(),
-            NodeKind::Token(t) => {
-                if t.kind == TokenKind::BlockString {
-                    return "Multiline String".to_string();
-                }
-                let (begin, end) = self.span;
-                source_file[begin..end].to_string()
-            }
-            k => k.to_string(),
+            kind: NodeKind::Token(token.clone()),
+            parent: None,
+            span: token.span(),
+            children: vec![]
         }
     }
 }
 
 impl From<Token> for Node {
     fn from(token: Token) -> Node {
-        let span = (token.position, token.position + token.len);
-        let kind = NodeKind::Token(token);
-        Node::with_span(kind, span)
-    }
-}
-
-impl From<&Token> for Node {
-    fn from(token: &Token) -> Node {
-        let kind = NodeKind::Token(token.clone());
-        Node::with_span(kind, (token.position, token.position + token.len))
-    }
-}
-
-impl From<TokenKind> for ExpressionKind {
-    fn from(token_kind: TokenKind) -> ExpressionKind {
-        match token_kind {
-            TokenKind::StrConcat => ExpressionKind::StrConcat,
-            TokenKind::And => ExpressionKind::And,
-            TokenKind::Or => ExpressionKind::Or,
-            TokenKind::EqualEqual => ExpressionKind::IsEqual,
-            TokenKind::NotEqual => ExpressionKind::IsNotEqual,
-            TokenKind::Inf => ExpressionKind::Inf,
-            TokenKind::InfEq => ExpressionKind::InfEq,
-            TokenKind::Sup => ExpressionKind::Sup,
-            TokenKind::SupEq => ExpressionKind::SupEq,
-            TokenKind::Plus => ExpressionKind::Plus,
-            TokenKind::Minus => ExpressionKind::Minus,
-            TokenKind::Mult => ExpressionKind::Mult,
-            TokenKind::Div => ExpressionKind::Div,
-            TokenKind::Modulo => ExpressionKind::Modulo,
-            TokenKind::Dot => ExpressionKind::Member,
-            TokenKind::ColonColon => ExpressionKind::Namespace,
-            TokenKind::Identifier => ExpressionKind::Identifier,
-            TokenKind::As => ExpressionKind::Cast,
-            TokenKind::Is => ExpressionKind::Is,
-            TokenKind::Arrow => ExpressionKind::MapsTo,
-            k if k.is_litteral_value() => ExpressionKind::Literal,
-            _ => panic!(format!(
-                "An ExpressionKind cannot be created from a {:?}",
-                token_kind
-            )),
-        }
+        Node::from(&token)
     }
 }

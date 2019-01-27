@@ -1,6 +1,10 @@
-use crate::token::Token;
-use crate::token_kind::TokenKind;
-use crate::trivia_kind::TriviaKind;
+pub mod token;
+pub mod token_kind;
+pub mod trivia_kind;
+
+use token::Token;
+use token_kind::TokenKind;
+use trivia_kind::TriviaKind;
 use std::str::FromStr;
 
 pub struct Lexer<'a> {
@@ -111,7 +115,11 @@ impl<'a> Lexer<'a> {
                 self.char_next();
 
                 while let Some(_) = self.char_peek() {
-                    match (self.char_next().unwrap(), self.char_peek(), self.char_peek_n(2)) {
+                    match (
+                        self.char_next().unwrap(),
+                        self.char_peek(),
+                        self.char_peek_n(2),
+                    ) {
                         ('"', Some('"'), Some('"')) => {
                             self.char_next();
                             self.char_next();
