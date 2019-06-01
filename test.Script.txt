@@ -1,7 +1,8 @@
+#Const C_ModeSupportedObjects ["Weapon", "Charge", "Mini", "Replie", "Armor", "Fuel"]
+
   Void Private_Test    (   )
 {
-log("Test"   )
-;
-
+    UI.SendNotice("",
+            CUIConfig::ENoticeLevel::PlayerInfo );
 
             }

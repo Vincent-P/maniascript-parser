@@ -1,10 +1,9 @@
-use crate::ast::{Tree, NodeId};
 use crate::ast::node_kind::NodeKind;
-
+use crate::ast::{NodeId, Tree};
 
 use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 use std::fs::File;
+use std::hash::{Hash, Hasher};
 use std::io::prelude::*;
 use std::path::Path;
 
@@ -18,12 +17,16 @@ fn print_dot_file(tree: &Tree, root: NodeId, source: &str, file: &mut File) -> s
     let node = tree.get_node(root).unwrap();
     let hashed_root = calculate_hash(&root);
 
-    match node.kind {
+    match &node.kind {
         NodeKind::Token(_) => {
             file.write_all(b"    ")?;
             file.write_all(hashed_root.to_string().as_bytes())?;
             file.write_all(b"[label=\"")?;
-            file.write_all(source[node.span.0..node.span.1].replace("\"", "\\\"").as_bytes())?;
+            file.write_all(
+                source[node.span.0..node.span.1]
+                    .replace("\"", "\\\"")
+                    .as_bytes(),
+            )?;
             file.write_all(b"\"];\n")?;
         }
         _ => {
@@ -32,8 +35,7 @@ fn print_dot_file(tree: &Tree, root: NodeId, source: &str, file: &mut File) -> s
         }
     };
 
-
-    for child in &node.children {
+    for child in &tree.children[root] {
         let link = format!("    {} -> {};\n", hashed_root, calculate_hash(&child));
         file.write_all(link.as_bytes())?;
 
@@ -56,15 +58,28 @@ pub fn print_dot(tree: &Tree, root: NodeId, source: &str) -> std::io::Result<()>
     Ok(())
 }
 
-pub fn print_ast_file(tree: &Tree, root: NodeId, source: &str, file: &mut File) -> std::io::Result<()> {
+pub fn print_ast_file(
+    tree: &Tree,
+    root: NodeId,
+    source: &str,
+    file: &mut File,
+) -> std::io::Result<()> {
     let node = tree.get_node(root).unwrap();
 
     if let NodeKind::Token(token) = &node.kind {
+        for trivia in token.leading_trivia.iter() {
+            file.write_all(trivia.to_print().as_bytes())?;
+        }
+
         let span = token.span();
-        file.write_all(source[span.0..span.1].replace("\"", "\\\"").as_bytes())?;
+        file.write_all(source[span.0..span.1].as_bytes())?;
+
+        for trivia in token.trailing_trivia.iter() {
+            file.write_all(trivia.to_print().as_bytes())?;
+        }
     }
 
-    for child in &node.children {
+    for child in &tree.children[root] {
         print_ast_file(tree, *child, source, file)?;
     }
 

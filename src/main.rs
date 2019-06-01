@@ -1,10 +1,11 @@
 mod ast;
+mod formatter;
 mod lexer;
 mod parser;
 
+use crate::ast::printer::print;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
-use crate::ast::printer::print;
 
 use std::env;
 use std::fs::File;
@@ -24,10 +25,14 @@ fn main() -> Result<(), Box<std::error::Error>> {
 
     let now = Instant::now();
 
+    // parse the file
     let lexer = Lexer::new(&input);
-    let mut parser = Parser::new(lexer);
-    let root = parser.parse_file()?;
-    print(&parser.tree, root, &input)?;
+
+    let tree = Parser::new(lexer).parse()?;
+
+//    tree.format();
+
+    print(&tree, 0, &input)?;
 
     println!("Done in {}ms.", now.elapsed().as_millis());
 

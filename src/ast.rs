@@ -1,98 +1,137 @@
 pub mod node_kind;
 pub mod printer;
 
-use generational_arena::{Index, Arena};
-use crate::lexer::token::Token;
-use node_kind::NodeKind;
-
-pub type NodeId = Index;
-pub type Nodes = Arena<Node>;
+use crate::lexer::token::*;
+pub use node_kind::*;
 
 #[derive(Debug)]
 pub struct Tree {
-    nodes: Nodes
+    pub parents: Vec<NodeId>,
+    pub children: Vec<Vec<NodeId>>,
+    pub nodes: Vec<Node>,
+    current_parent: usize,
+    building_nodes: Vec<usize>,
 }
 
 impl Tree {
     pub fn new() -> Tree {
         Tree {
-            nodes: Arena::new()
+            parents: vec![],
+            children: vec![],
+            nodes: vec![],
+            current_parent: 0,
+            // a stack of the nodes that are not finished
+            building_nodes: vec![]
         }
     }
 
+    fn set_parent(&mut self, p: usize) {
+        self.building_nodes.push(self.current_parent);
+        self.current_parent = p;
+    }
+
+    fn revert_parent(&mut self) {
+        self.current_parent = match self.building_nodes.pop() {
+            Some(old_parent) => old_parent,
+            None => 0
+        };
+    }
+
     pub fn add_node(&mut self, node: Node) -> NodeId {
-        self.nodes.insert(node)
+        let node_id = self.nodes.len();
+
+        self.nodes.push(node);
+        self.children.push(vec![]);
+        self.parents.push(0);
+
+        if self.current_parent != node_id {
+            self.add_child_id(self.current_parent, node_id);
+        }
+
+        node_id
+    }
+
+    pub fn new_node(&mut self) -> NodeId {
+        self.add_node(Default::default())
+    }
+
+    pub fn start_node(&mut self) -> NodeId {
+        let node_id = self.new_node();
+        self.set_parent(node_id);
+        node_id
+    }
+
+    pub fn end_node(&mut self, node_kind: NodeKind) -> NodeId{
+        let node_id = self.current_parent;
+        self.nodes[node_id].kind = node_kind;
+        println!("Ending node #{} {:?}", node_id, &self.nodes[node_id].kind);
+        self.revert_parent();
+        node_id
     }
 
     pub fn get_node(&self, node: NodeId) -> Option<&Node> {
         self.nodes.get(node)
     }
 
-    pub fn get_mut_node(&mut self, node: NodeId) -> Option<&mut Node> {
-        self.nodes.get_mut(node)
-    }
-
-    pub fn remove_node(&mut self, node: NodeId) -> Option<Node> {
-        self.nodes.remove(node)
-    }
-
+    // Link two nodes
     pub fn add_child_id(&mut self, parent_id: NodeId, child_id: NodeId) -> NodeId {
-        if let Some(_) = self.nodes[child_id].parent {
-            panic!("Cannot change the parent an already linked node.");
+        if parent_id == child_id {
+            panic!("Cannot link a node to itself");
         }
 
-        if self.nodes[parent_id].children.len() == 0 {
+        let old_parent = self.parents[child_id];
+
+        if self.children[old_parent].contains(&child_id) {
+            self.children[old_parent].retain(|&x| x != child_id);
+        }
+
+        let child_to_parent = self.parents[child_id] == parent_id;
+        let parent_to_child = self.children[parent_id].contains(&child_id);
+
+        match (child_to_parent, parent_to_child) {
+            (false, true) => {
+                self.parents[child_id] = parent_id;
+            }
+
+            (true, false) => {
+                self.children[parent_id].push(child_id);
+            }
+
+            (false, false) => {
+                self.parents[child_id] = parent_id;
+                self.children[parent_id].push(child_id);
+            }
+
+            _ => {
+                panic!(
+                    "You tried to link the sames nodes two times in a row, {:?} and {:?}.",
+                    self.nodes[parent_id], self.nodes[child_id]
+                );
+            }
+        }
+
+        if self.children[parent_id].is_empty() {
             self.nodes[parent_id].span = self.nodes[child_id].span;
         } else {
             // .1 is the second element of the span
             self.nodes[parent_id].span.1 = self.nodes[child_id].span.1;
         }
 
-        self.nodes[parent_id].children.push(child_id);
-        self.nodes[child_id].parent = Some(parent_id);
-
         child_id
     }
-
-    pub fn add_child(&mut self, parent_id: NodeId, child: Node) -> NodeId {
-        let tmp = self.add_node(child);
-        self.add_child_id(parent_id, tmp)
-    }
 }
 
-#[derive(Debug)]
-pub struct Node {
-    pub kind: NodeKind,
-    pub span: (usize, usize),
-
-    pub parent: Option<NodeId>,
-    pub children: Vec<NodeId>,
-}
-
-impl Node {
-    pub fn new(kind: NodeKind) -> Node {
+impl From<Token> for Node {
+    fn from(token: Token) -> Node {
         Node {
-            kind,
-            span: (0, 0),
-            parent: None,
-            children: vec![],
+            span: token.span(),
+            kind: NodeKind::Token(token),
         }
     }
 }
 
 impl From<&Token> for Node {
     fn from(token: &Token) -> Node {
-        Node {
-            kind: NodeKind::Token(token.clone()),
-            parent: None,
-            span: token.span(),
-            children: vec![]
-        }
-    }
-}
-
-impl From<Token> for Node {
-    fn from(token: Token) -> Node {
-        Node::from(&token)
+        Node::from(token.clone())
     }
 }

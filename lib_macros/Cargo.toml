@@ -1,10 +1,12 @@
 [package]
-name = "maniascript-parser"
+name = "lib_macros"
 version = "0.1.0"
 authors = ["Vincent Parizet <vincent.parizet@hotmail.fr>"]
 edition = "2018"
 
+[lib]
+proc-macro = true
+
 [dependencies]
-strum = "0.11.0"
-strum_macros = "0.11.0"
-lib_macros = { path = "./lib_macros" }
+syn = { version = "0.15", features = ["extra-traits"] }
+quote = "0.6.3"

@@ -22,4 +22,18 @@ impl TriviaKind {
             _ => false,
         }
     }
+
+    pub fn to_print(&self) -> String {
+        match self {
+            TriviaKind::Space(c) => String::from(" ").repeat(*c),
+            TriviaKind::Tab(c) => String::from("\x09").repeat(*c),
+            TriviaKind::Newline(c) => String::from("\n").repeat(*c),
+            TriviaKind::VerticalTab(c) => String::from("\0xb").repeat(*c),
+            TriviaKind::FormFeed(c) => String::from("\x0c").repeat(*c),
+            TriviaKind::CarriageReturn(c) => String::from("\r").repeat(*c),
+            TriviaKind::CarriageReturnNewline(c) => String::from("\r\n").repeat(*c),
+            TriviaKind::LineComment(s) => s.clone(),
+            TriviaKind::BlockComment(s) => s.clone(),
+        }
+    }
 }

@@ -189,6 +189,9 @@ impl TokenKind {
             | TokenKind::Div
             | TokenKind::Modulo
             | TokenKind::Dot
+            | TokenKind::As
+            | TokenKind::Is
+            | TokenKind::Arrow
             | TokenKind::ColonColon => true,
             _ => false,
         }
@@ -215,16 +218,6 @@ impl TokenKind {
             | TokenKind::Setting
             | TokenKind::RequireContext
             | TokenKind::Extends => true,
-            _ => false,
-        }
-    }
-
-    pub fn is_decl_metadata(self) -> bool {
-        match self {
-            TokenKind::Netread
-            | TokenKind::Netwrite
-            | TokenKind::Persistent
-            | TokenKind::Metadata => true,
             _ => false,
         }
     }

@@ -2,10 +2,10 @@ pub mod token;
 pub mod token_kind;
 pub mod trivia_kind;
 
+use std::str::FromStr;
 use token::Token;
 use token_kind::TokenKind;
 use trivia_kind::TriviaKind;
-use std::str::FromStr;
 
 pub struct Lexer<'a> {
     pub source: &'a str,
@@ -295,7 +295,9 @@ impl<'a> Iterator for Lexer<'a> {
 
         let leading_trivia = self.scan_trivias(false);
         let start = self.position;
+        let col = start - self.last_line;
         let token_kind = self.scan_token();
+        let end = self.position;
 
         // Maybe the EOF is reached so the position > len
         let trailing_trivias = if self.position < self.source.len() {
@@ -304,15 +306,21 @@ impl<'a> Iterator for Lexer<'a> {
             vec![]
         };
 
-        Some(Token {
+        let mut t = Token {
             kind: token_kind,
             position: start,
-            len: self.position - start,
+            len: end - start,
             line: self.lines,
-            col: self.position - self.last_line,
+            col,
             leading_trivia: leading_trivia.into_boxed_slice(),
             trailing_trivia: trailing_trivias.into_boxed_slice(),
-        })
+        };
+
+        if let TokenKind::EOF = t.kind {
+            t.len = 0;
+        }
+
+        Some(t)
     }
 }
 
