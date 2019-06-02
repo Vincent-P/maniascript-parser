@@ -1,0 +1,3 @@
+
+Formatting is on progress, maybe a big match is enough.
+There is a problem in the Expression formatting, it is because the parser produces invalid Expression nodes, nodes are attached to the wrong parent. For example, a binary op node only contains an operator and a right handside.

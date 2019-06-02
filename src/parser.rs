@@ -80,7 +80,6 @@ impl Token {
                     return Ok(parser.tree.end_node(NodeKind::Array(array)));
                 }
 
-
                 let mut expr_id = parser.expression(self.rbp())?;
 
                 while parser.next_token_is(TokenKind::Comma) {
@@ -106,7 +105,6 @@ impl Token {
     // Led is called when there is a token in the middle of an expression
     fn led(&self, parser: &mut Parser, lhs: NodeId) -> Result<NodeId, String> {
         match self.kind {
-
             k if k.is_binary_op() => {
                 let mut binop = BinaryOp::new(parser.tree.start_node());
                 binop.set_lhs(lhs)?;
@@ -325,7 +323,9 @@ impl<'a> Parser<'a> {
                 let mut require_context = RequireContext::new(self.tree.start_node());
                 require_context.set_require_context(self.next_token_node())?;
                 require_context.set_name(self.expect_node(TokenKind::Identifier)?)?;
-                Ok(self.tree.end_node(NodeKind::RequireContext(require_context)))
+                Ok(self
+                    .tree
+                    .end_node(NodeKind::RequireContext(require_context)))
             }
             TokenKind::Extends => {
                 let mut extends = Extends::new(self.tree.new_node());
@@ -578,10 +578,7 @@ impl<'a> Parser<'a> {
                 self.tree.end_node(NodeKind::LabelCall(label))
             }
 
-            TokenKind::Break |
-            TokenKind::Continue |
-            TokenKind::Yield |
-            TokenKind::Return => {
+            TokenKind::Break | TokenKind::Continue | TokenKind::Yield | TokenKind::Return => {
                 self.tree.start_node();
                 self.next_token_node();
                 self.tree.end_node(match &tkind {
@@ -589,8 +586,9 @@ impl<'a> Parser<'a> {
                     TokenKind::Continue => NodeKind::Continue,
                     TokenKind::Yield => NodeKind::Yield,
                     TokenKind::Return => NodeKind::Return,
-                    _ => unreachable!()})
-                }
+                    _ => unreachable!(),
+                })
+            }
 
             // expr = value; OR  expr;
             _ => {

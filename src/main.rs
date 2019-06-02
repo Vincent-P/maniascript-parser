@@ -28,9 +28,9 @@ fn main() -> Result<(), Box<std::error::Error>> {
     // parse the file
     let lexer = Lexer::new(&input);
 
-    let tree = Parser::new(lexer).parse()?;
+    let mut tree = Parser::new(lexer).parse()?;
 
-//    tree.format();
+    tree.format();
 
     print(&tree, 0, &input)?;
 

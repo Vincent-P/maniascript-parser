@@ -21,7 +21,7 @@ impl Tree {
             nodes: vec![],
             current_parent: 0,
             // a stack of the nodes that are not finished
-            building_nodes: vec![]
+            building_nodes: vec![],
         }
     }
 
@@ -33,7 +33,7 @@ impl Tree {
     fn revert_parent(&mut self) {
         self.current_parent = match self.building_nodes.pop() {
             Some(old_parent) => old_parent,
-            None => 0
+            None => 0,
         };
     }
 
@@ -61,10 +61,9 @@ impl Tree {
         node_id
     }
 
-    pub fn end_node(&mut self, node_kind: NodeKind) -> NodeId{
+    pub fn end_node(&mut self, node_kind: NodeKind) -> NodeId {
         let node_id = self.current_parent;
         self.nodes[node_id].kind = node_kind;
-        println!("Ending node #{} {:?}", node_id, &self.nodes[node_id].kind);
         self.revert_parent();
         node_id
     }

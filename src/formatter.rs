@@ -1,7 +1,5 @@
-/*
 use crate::ast::node_kind::*;
 use crate::ast::*;
-use crate::lexer::token_kind::*;
 use crate::lexer::trivia_kind::*;
 
 #[derive(Debug, Copy, Clone)]
@@ -26,17 +24,10 @@ fn is_not_tab(trivia: &TriviaKind) -> bool {
     true
 }
 
-fn is_not_newline(trivia: &TriviaKind) -> bool {
-    !trivia.is_line_break()
-}
-
-fn format_node(node: &mut Node, mut ctx: FormatContext) {
+fn format_node(node: &mut Node, ctx: FormatContext) {
     if let NodeKind::Token(t) = &node.kind {
         let mut leadings = vec![];
         let mut trailings = t.trailing_trivia.to_vec();
-
-        println!("{:?}", ctx);
-        println!("{:?}", node);
 
         // Remove tabs
         trailings.retain(is_not_tab);
@@ -55,11 +46,19 @@ fn format_node(node: &mut Node, mut ctx: FormatContext) {
             ctx.space_before
         };
 
+        let mut has_inserted_newline = false;
         for trivia in t.leading_trivia.iter() {
             match trivia {
                 TriviaKind::LineComment(_) | TriviaKind::BlockComment(_) => {
                     if ctx.lines_before > 0 {
-                        leadings.push(TriviaKind::Newline(1));
+                        let newlines = if has_inserted_newline {
+                            1
+                        } else {
+                            has_inserted_newline = true;
+                            ctx.lines_before
+                        };
+
+                        leadings.push(TriviaKind::Newline(newlines));
                         if spaces > 0 {
                             leadings.push(TriviaKind::Space(spaces));
                         }
@@ -71,15 +70,16 @@ fn format_node(node: &mut Node, mut ctx: FormatContext) {
         }
 
         if ctx.lines_before > 0 {
-            leadings.push(TriviaKind::Newline(ctx.lines_before));
+            let newlines = if has_inserted_newline {
+                1
+            } else {
+                ctx.lines_before
+            };
+            leadings.push(TriviaKind::Newline(newlines));
 
             if spaces > 0 {
                 leadings.push(TriviaKind::Space(spaces));
             }
-        }
-
-        if let TokenKind::Comma = t.kind {
-            ctx.space_after = 1;
         }
 
         trailings.retain(is_not_space);
@@ -87,82 +87,180 @@ fn format_node(node: &mut Node, mut ctx: FormatContext) {
             trailings.push(TriviaKind::Space(ctx.space_after));
         }
 
-        // Remove spaces
-        match t.kind {
-            TokenKind::Semicolon | TokenKind::ColonColon | TokenKind::Dot => {
-                leadings.retain(is_not_space);
-                trailings.retain(is_not_space);
-            }
-            _ => {}
-        }
-
         let mut new_token = t.clone();
         new_token.leading_trivia = leadings.into_boxed_slice();
         new_token.trailing_trivia = trailings.into_boxed_slice();
         node.kind = NodeKind::Token(new_token);
-
-        println!("{:?}", node);
-        println!();
     }
 }
 
-fn format_rec(
-    parents: &[NodeId],
-    children: &[Vec<NodeId>],
-    nodes: &mut Vec<Node>,
-    i: usize,
-    mut ctx: FormatContext,
-) {
-    let node = &mut nodes[i];
+fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, i: usize, mut ctx: FormatContext) {
+    let node_kind = nodes[i].kind.clone();
 
     // Update the formatting context based on the nodes
-    let mut multiline = false;
-    match &node.kind {
-        NodeKind::File => {
-            multiline = true;
-            ctx.lines_before = 2;
-        }
-        NodeKind::Block => {
-            multiline = true;
-            ctx.indent += 4;
-            ctx.lines_before = 1;
-            ctx.space_before = 0;
-            ctx.space_after = 1;
-        }
-        NodeKind::FuncDec => {
-            // Start a new line
-            ctx.lines_before = 2;
-            format_rec(parents, children, nodes, children[i][0], ctx);
-
-            // Stay on the same line, dont put a space between 'name ('
+    match node_kind {
+        NodeKind::File(f) => {
             ctx.lines_before = 0;
-            ctx.space_after = 0;
-            format_rec(parents, children, nodes, children[i][1], ctx);
-
-            // print the rest
-            for j in 2..children[i].len() {
-                format_rec(parents, children, nodes, children[i][j], ctx);
+            for hash in &f.hashes {
+                format_rec(children, nodes, *hash, ctx);
+                ctx.lines_before = 1;
             }
 
-            return;
+            for global in &f.globals {
+                format_rec(children, nodes, *global, ctx);
+            }
+            for label in &f.labels {
+                format_rec(children, nodes, *label, ctx);
+            }
+            for function in &f.functions {
+                format_rec(children, nodes, *function, ctx);
+            }
+            if let Some(eof) = f.get_eof() {
+                format_rec(children, nodes, *eof, ctx);
+            }
         }
-        NodeKind::ExprStatement => {
-            ctx.lines_before = 1;
-            ctx.space_before = 0;
+
+        NodeKind::Const(c) => {
+            ctx.space_after = 1;
+
+            if let Some(child) = c.get_const_() {
+                format_rec(children, nodes, *child, ctx);
+            }
+
+            if let Some(child) = c.get_name() {
+                format_rec(children, nodes, *child, ctx);
+            }
+
             ctx.space_after = 0;
+
+            if let Some(child) = c.get_value() {
+                format_rec(children, nodes, *child, ctx);
+            }
         }
-        _ => {}
-    }
 
-    format_node(node, ctx);
-    let mut first = false;
-    for child_id in &children[i] {
-        format_rec(parents, children, nodes, *child_id, ctx);
+        NodeKind::FuncDec(f) => {
+            ctx.lines_before = 3;
+            ctx.space_after = 1;
 
-        if first || !multiline && ctx.lines_before > 0 {
+            if let Some(child) = f.get_type_() {
+                format_rec(children, nodes, *child, ctx);
+                ctx.lines_before = 0;
+            }
+
+            ctx.space_after = 0;
+
+            if let Some(child) = f.get_name() {
+                format_rec(children, nodes, *child, ctx);
+                ctx.lines_before = 0;
+            }
+
+            if let Some(child) = f.get_lparen() {
+                format_rec(children, nodes, *child, ctx);
+            }
+
+            for child in &f.args {
+                format_rec(children, nodes, *child, ctx);
+            }
+
+            if let Some(child) = f.get_rparen() {
+                format_rec(children, nodes, *child, ctx);
+            }
+
+            if let Some(child) = f.get_body() {
+                format_rec(children, nodes, *child, ctx);
+            }
+        }
+
+        NodeKind::Block(b) => {
+            ctx.lines_before = 1;
+
+            if let Some(child) = b.get_lbrace() {
+                format_rec(children, nodes, *child, ctx);
+            }
+
+            ctx.indent += 4;
+
+            for child in &b.statements {
+                format_rec(children, nodes, *child, ctx);
+            }
+
+            ctx.indent -= 4;
+
+            if let Some(child) = b.get_rbrace() {
+                format_rec(children, nodes, *child, ctx);
+            }
+        }
+
+        NodeKind::Statement(s) => {
+            if let Some(child) = s.get_statement() {
+                format_rec(children, nodes, *child, ctx);
+            }
+
             ctx.lines_before = 0;
+
+            if let Some(child) = s.get_semicolon() {
+                format_rec(children, nodes, *child, ctx);
+            }
         }
-        first = false;
+
+        NodeKind::Expr => {
+            for child_id in &children[i] {
+                format_rec(children, nodes, *child_id, ctx);
+                ctx.lines_before = 0;
+            }
+        }
+
+        NodeKind::Array(a) => {
+            if let Some(child) = a.get_lsquare() {
+                format_rec(children, nodes, *child, ctx);
+            }
+
+            for (value, comma) in &a.values {
+                format_rec(children, nodes, *value, ctx);
+
+                if let Some(child) = comma {
+                    ctx.space_after = 1;
+                    format_rec(children, nodes, *child, ctx);
+                    ctx.space_after = 0;
+                }
+            }
+
+            if let Some(child) = a.get_rsquare() {
+                format_rec(children, nodes, *child, ctx);
+            }
+        }
+
+        NodeKind::FunctionCall(f) => {
+            if let Some(child) = f.get_lhs() {
+                format_rec(children, nodes, *child, ctx);
+            }
+            if let Some(child) = f.get_lparen() {
+                format_rec(children, nodes, *child, ctx);
+            }
+
+            for (value, comma) in &f.args {
+                format_rec(children, nodes, *value, ctx);
+
+                if let Some(child) = comma {
+                    ctx.space_after = 1;
+                    format_rec(children, nodes, *child, ctx);
+                    ctx.space_after = 0;
+                }
+            }
+
+            if let Some(child) = f.get_rparen() {
+                format_rec(children, nodes, *child, ctx);
+            }
+        }
+
+        // Recursive calls to children
+        _ => {
+            format_node(&mut nodes[i], ctx);
+
+            for child_id in &children[i] {
+                format_rec(children, nodes, *child_id, ctx);
+            }
+        }
     }
 }
 
@@ -172,9 +270,8 @@ impl Tree {
             indent: 0,
             lines_before: 1,
             space_before: 0,
-            space_after: 1,
+            space_after: 0,
         };
-        format_rec(&self.parents, &self.children, &mut self.nodes, 0, ctx);
+        format_rec(&self.children, &mut self.nodes, 0, ctx);
     }
 }
-*/

@@ -1,7 +1,7 @@
-use lib_macros::AstNode;
 use crate::lexer::token::Token;
+use lib_macros::AstNode;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum NodeKind {
     // Root
     File(File),
@@ -59,7 +59,7 @@ pub enum NodeKind {
 
     // A single token (leafs)
     Token(Token),
-    Dummy
+    Dummy,
 }
 
 pub type NodeId = usize;
@@ -84,14 +84,14 @@ impl Default for Node {
     }
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct File {
     syntax: NodeId,
-    hashes: Vec<NodeId>,
-    globals: Vec<NodeId>,
-    labels: Vec<NodeId>,
-    functions: Vec<NodeId>,
-    eof: NodeRef
+    pub hashes: Vec<NodeId>,
+    pub globals: Vec<NodeId>,
+    pub labels: Vec<NodeId>,
+    pub functions: Vec<NodeId>,
+    eof: NodeRef,
 }
 
 impl File {
@@ -109,7 +109,7 @@ impl File {
     }
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Include {
     syntax: NodeId,
     include: NodeRef,
@@ -118,7 +118,7 @@ pub struct Include {
     name: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Const {
     syntax: NodeId,
     const_: NodeRef,
@@ -126,7 +126,7 @@ pub struct Const {
     value: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Setting {
     syntax: NodeId,
     setting: NodeRef,
@@ -136,21 +136,21 @@ pub struct Setting {
     description: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct RequireContext {
     syntax: NodeId,
     require_context: NodeRef,
     name: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Extends {
     syntax: NodeId,
     extends: NodeRef,
     path: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct VarDec {
     syntax: NodeId,
     declare: NodeRef,
@@ -168,21 +168,21 @@ pub struct VarDec {
     value: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct FormalArg {
     syntax: NodeId,
     type_: NodeRef,
     name: NodeRef,
-    comma: NodeRef
+    comma: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct FuncDec {
     syntax: NodeId,
     type_: NodeRef,
     name: NodeRef,
     lparen: NodeRef,
-    args: Vec<NodeId>,
+    pub args: Vec<NodeId>,
     rparen: NodeRef,
     body: NodeRef,
 }
@@ -193,7 +193,7 @@ impl FuncDec {
     }
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct LabelImpl {
     syntax: NodeId,
     stars1: NodeRef,
@@ -210,7 +210,7 @@ impl LabelImpl {
     }
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct If {
     syntax: NodeId,
     if_: NodeRef,
@@ -221,7 +221,7 @@ pub struct If {
     else_: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Else {
     syntax: NodeId,
     else_: NodeRef,
@@ -229,7 +229,7 @@ pub struct Else {
     body: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Switch {
     syntax: NodeId,
     switch: NodeRef,
@@ -249,7 +249,7 @@ impl Switch {
     }
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Case {
     syntax: NodeId,
     case: NodeRef,
@@ -258,7 +258,7 @@ pub struct Case {
     statement: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct DefaultCase {
     syntax: NodeId,
     default: NodeRef,
@@ -266,7 +266,7 @@ pub struct DefaultCase {
     statement: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct For {
     syntax: NodeId,
     for_: NodeRef,
@@ -280,7 +280,7 @@ pub struct For {
     body: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Foreach {
     syntax: NodeId,
     foreach: NodeRef,
@@ -294,7 +294,7 @@ pub struct Foreach {
     body: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct While {
     syntax: NodeId,
     while_: NodeRef,
@@ -304,11 +304,11 @@ pub struct While {
     body: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Block {
     syntax: NodeId,
     lbrace: NodeRef,
-    statements: Vec<NodeId>,
+    pub statements: Vec<NodeId>,
     rbrace: NodeRef,
 }
 
@@ -318,7 +318,7 @@ impl Block {
     }
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Parenthesised {
     syntax: NodeId,
     lparen: NodeRef,
@@ -326,14 +326,14 @@ pub struct Parenthesised {
     rparen: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Statement {
     syntax: NodeId,
     statement: NodeRef,
     semicolon: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Type {
     syntax: NodeId,
     basename: NodeRef,
@@ -350,7 +350,7 @@ impl Type {
     }
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct LabelCall {
     syntax: NodeId,
     start: NodeRef,
@@ -358,7 +358,7 @@ pub struct LabelCall {
     end: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Assignment {
     syntax: NodeId,
     lvalue: NodeRef,
@@ -366,7 +366,7 @@ pub struct Assignment {
     rvalue: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Vector {
     syntax: NodeId,
     langle: NodeRef,
@@ -380,11 +380,11 @@ impl Vector {
     }
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct Array {
     syntax: NodeId,
     lsquare: NodeRef,
-    values: Vec<(NodeId, NodeRef)>,
+    pub values: Vec<(NodeId, NodeRef)>,
     rsquare: NodeRef,
 }
 
@@ -394,14 +394,14 @@ impl Array {
     }
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct UnOp {
     syntax: NodeId,
     operator: NodeRef,
     operand: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct BinaryOp {
     syntax: NodeId,
     lhs: NodeRef,
@@ -409,7 +409,7 @@ pub struct BinaryOp {
     rhs: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct ArrayAccess {
     syntax: NodeId,
     lhs: NodeRef,
@@ -418,12 +418,12 @@ pub struct ArrayAccess {
     rsquare: NodeRef,
 }
 
-#[derive(AstNode, Default, Debug)]
+#[derive(AstNode, Default, Debug, Clone)]
 pub struct FunctionCall {
     syntax: NodeId,
     lhs: NodeRef,
     lparen: NodeRef,
-    args: Vec<(NodeId, NodeRef)>,
+    pub args: Vec<(NodeId, NodeRef)>,
     rparen: NodeRef,
 }
 
