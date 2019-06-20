@@ -132,8 +132,6 @@ pub struct Setting {
     setting: NodeRef,
     name: NodeRef,
     value: NodeRef,
-    as_: NodeRef,
-    description: NodeRef,
 }
 
 #[derive(AstNode, Default, Debug, Clone)]

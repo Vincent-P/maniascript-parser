@@ -87,7 +87,7 @@ fn format_node(node: &mut Node, ctx: FormatContext) {
                 ctx.lines_before
             };
             if leading_lines < newlines {
-                leadings.push(TriviaKind::Newline(newlines));
+                leadings.push(TriviaKind::Newline(newlines-leading_lines));
             }
 
             if spaces > 0 {
@@ -95,9 +95,34 @@ fn format_node(node: &mut Node, ctx: FormatContext) {
             }
         }
 
-        trailings.retain(is_not_space);
-        if ctx.space_after > 0 {
+        let mut last_comment = 0;
+        for i in 0..trailings.len() {
+            match trailings[i] {
+                TriviaKind::LineComment(_) | TriviaKind::BlockComment(_) => {
+                    last_comment = i;
+                }
+                _ => {}
+            }
+        }
+
+        for i in last_comment+1..trailings.len() {
+            trailings.pop();
+        }
+
+        let trailing_spaces = if let Some(TriviaKind::Space(s)) = trailings.last() {
+            *s
+        } else {
+            0
+        };
+
+        if ctx.space_after > 0 && trailing_spaces < ctx.space_after {
             trailings.push(TriviaKind::Space(ctx.space_after));
+        }
+        else if trailing_spaces > ctx.space_after {
+            trailings.pop();
+            if ctx.space_after != 0 {
+                trailings.push(TriviaKind::Space(ctx.space_after));
+            }
         }
 
         let mut new_token = t.clone();
@@ -113,6 +138,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
     // Update the formatting context based on the nodes
     match node_kind {
         NodeKind::File(f) => {
+            ctx.lines_before = 0;
 
             for hash in &f.hashes {
                 format_rec(children, nodes, *hash, ctx);
@@ -194,16 +220,8 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
             if let Some(child) = i.get_name() {
                 format_rec(children, nodes, *child, ctx);
             }
-            if let Some(child) = i.get_value() {
-                format_rec(children, nodes, *child, ctx);
-            }
-            if let Some(child) = i.get_as_() {
-                format_rec(children, nodes, *child, ctx);
-            }
-
             ctx.space_after = 0;
-
-            if let Some(child) = i.get_description() {
+            if let Some(child) = i.get_value() {
                 format_rec(children, nodes, *child, ctx);
             }
         }
@@ -262,15 +280,16 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
 
         NodeKind::FormalArg(f) => {
             let old_ctx = ctx.clone();
-            ctx.space_after = 0;
 
             if let Some(child) = f.get_type_() {
                 format_rec(children, nodes, *child, ctx);
             }
 
+            ctx.space_after = 0;
             if let Some(child) = f.get_name() {
                 format_rec(children, nodes, *child, ctx);
             }
+            ctx.space_after = old_ctx.space_after;
 
             if let Some(child) = f.get_comma() {
                 ctx.space_after = old_ctx.space_after;
@@ -322,6 +341,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
             if let Some(child) = l.get_stars1() {
                 format_rec(children, nodes, *child, ctx);
             }
+            ctx.lines_before = 0;
             if let Some(child) = l.get_name() {
                 format_rec(children, nodes, *child, ctx);
             }
@@ -578,6 +598,35 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
             }
         }
 
+        NodeKind::While(i) => {
+            let old_lines = ctx.lines_before;
+
+            ctx.space_after = 1;
+            if let Some(child) = i.get_while_() {
+                format_rec(children, nodes, *child, ctx);
+            }
+            ctx.lines_before = 0;
+            ctx.space_after = 0;
+
+            if let Some(child) = i.get_lparen() {
+                format_rec(children, nodes, *child, ctx);
+            }
+            if let Some(child) = i.get_condition() {
+                format_rec(children, nodes, *child, ctx);
+            }
+            if let Some(child) = i.get_rparen() {
+                format_rec(children, nodes, *child, ctx);
+            }
+
+            ctx.lines_before = old_lines;
+
+            if let Some(child) = i.get_body() {
+                ctx.indent += 1;
+                format_rec(children, nodes, *child, ctx);
+                ctx.indent -= 1;
+            }
+        }
+
 
         NodeKind::Block(b) => {
             ctx.lines_before = 1;
@@ -739,6 +788,21 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
             }
 
             if let Some(child) = a.get_rsquare() {
+                format_rec(children, nodes, *child, ctx);
+            }
+        }
+
+        NodeKind::UnOp(o) => {
+            let old_ctx = ctx.clone();
+            ctx.space_after = 0;
+
+            if let Some(child) = o.get_operator() {
+                format_rec(children, nodes, *child, ctx);
+            }
+
+            ctx.space_after = old_ctx.space_after;
+
+            if let Some(child) = o.get_operand() {
                 format_rec(children, nodes, *child, ctx);
             }
         }

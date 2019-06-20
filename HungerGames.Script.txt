@@ -1,13 +1,8 @@
-// -------------------------------------- //
-//  HUNGER GAMES 3.3.0 by domino54        //
-//  script version: 2018-02-17            //
-// -------------------------------------- //
-
-#Extends "Modes/ShootMania/ModeGalaxyTitles.Script.txt"
+// -------------------------------------- ////  HUNGER GAMES 3.3.0 by domino54        ////  script version: 2018-02-17            //// -------------------------------------- //#Extends "Modes/ShootMania/ModeGalaxyTitles.Script.txt"
 
 #Const CompatibleMapTypes "HungerGamesV2Arena"
-#Const Version		"2018-02-17"
-#Const ScriptName	"Modes/ShootMania/HungerGames.Script.txt"
+#Const Version "2018-02-17"
+#Const ScriptName "Modes/ShootMania/HungerGames.Script.txt"
 
 #Include "Libs/Nadeo/ShootMania/Map.Script.txt" as Map
 #Include "Libs/domino54/MultiClans.Script.txt" as Clans
@@ -15,66 +10,61 @@
 // ---------------------------------- //
 // Settings
 // ---------------------------------- //
-#Setting S_OffZoneActivationTime	360		as _("OffZone activation time (0 = don't activate)")
-#Setting S_OffZoneShrinkDuration	180		as _("OffZone shrink duration (min. 60)")
-#Setting S_ObjectsSpawnRatio		-1.		as _("Objects spawning ratio (-1 = auto)")
-#Setting S_NewcomersJoinTime		240		as _("Time for new players to join the game after it starts")
-#Setting S_ObjectsDroppingRatio		.5		as _("Objects drop ratio from eliminated players")
-#Setting S_RandomizeObjectsSpawns	True	as _("Randomize objects locations on the map (except Armor)")
-#Setting S_ArmorRespawnTime			180		as _("Armor and Replie respawn duration (0 = don't respawn)")
-#Setting S_ToadsFirstSpawnDelay		30		as _("Delay before Toads are spawned")
-#Setting S_AllowPlayersRespawn		True	as _("Allow players to respawn on Checkpoints")
-#Setting S_MatchmakingFormat		8		as _("Number of players in matchmaking mode")
+#Setting S_OffZoneActivationTime 360 as _("OffZone activation time (0 = don't activate)")
+#Setting S_OffZoneShrinkDuration 180 as _("OffZone shrink duration (min. 60)")
+#Setting S_ObjectsSpawnRatio -1. as _("Objects spawning ratio (-1 = auto)")
+#Setting S_NewcomersJoinTime 240 as _("Time for new players to join the game after it starts")
+#Setting S_ObjectsDroppingRatio .5 as _("Objects drop ratio from eliminated players")
+#Setting S_RandomizeObjectsSpawns True as _("Randomize objects locations on the map (except Armor)")
+#Setting S_ArmorRespawnTime 180 as _("Armor and Replie respawn duration (0 = don't respawn)")
+#Setting S_ToadsFirstSpawnDelay 30 as _("Delay before Toads are spawned")
+#Setting S_AllowPlayersRespawn True as _("Allow players to respawn on Checkpoints")
+#Setting S_MatchmakingFormat 8 as _("Number of players in matchmaking mode")
 
 /// Overwrite existing settings
-#Setting S_AutoManageAFK		False
-#Setting S_PlayerArmorPoints	5
-#Setting S_MaximumNbWeapons		3
-#Setting S_MaximumNbReplies		5
-#Setting S_ObjectsRespawnTime	300
-#Setting S_ToadsRespawnTime		240
-#Setting S_ToadsSpawnRatio		1.
+#Setting S_AutoManageAFK False
+#Setting S_PlayerArmorPoints 5
+#Setting S_MaximumNbWeapons 3
+#Setting S_MaximumNbReplies 5
+#Setting S_ObjectsRespawnTime 300
+#Setting S_ToadsRespawnTime 240
+#Setting S_ToadsSpawnRatio 1.
 
 // ---------------------------------- //
 // Constants
 // ---------------------------------- //
 #Const C_ModeSupportedObjects ["Weapon", "Charge", "Mini", "Replie", "Armor", "Fuel"]
-#Const C_RequiredPlayersNb			2		///< Minimum number of players required to start the game
-#Const C_StartCountdownDuration		10000	///< Duration of the cinematic countdown before game start
-#Const C_OffZoneMinShrinkDuration	60		///< Minimum Tornado shrinking duration
-#Const C_OffZoneMinimumRadius		36.		///< Minimum radius Tornado is shrinking to
-#Const C_AutoRatioItemsPerPlayer	15		///< Amount of items spawned per player with automatic ratio on
-#Const C_PlayerMaxNbRocketSlots		4		///< Maximum amount of Rockets held by the player
-#Const C_PlayerPointsForSurvival	10		///< Points given for surviving other player elimination
-#Const C_PlayerPointsForObjects		1		///< Points given for picking up Weapon, Charge and Mini
-#Const C_WinnerMinPointsDiff		10		///< Minimum difference in amount of winner points to next player
-#Const C_WeaponItemArmorBonus		100		///< Armor healed when picking up Weapon item
-#Const C_ChargeItemSkillPoints		5		///< Additional skill points given by the Charge item
-#Const C_MiniItemBonusMultiplier	2		///< Mini item multiplier of regular Charge bonus
-#Const C_MiniItemArmorTakenOnPick	100		///< Amont of player armor removed on picking up Mini
-#Const C_ObjectsDropSpreadRadius	1.		///< Maximum distance items can be spawned from player upon elimination
-#Const C_ToadObjectDropChance		.25		///< Chance for a Toad to drop Charge
-#Const C_ToadChanceForArmorDrop		.25		///< Chance that item dropped by Toad will be Armor
-#Const C_GateOpeningDuration		5000	///< Required standing time for a Gate to open
-#Const C_GateAutoCloseDelay			7500	///< Time after which the Gate closes again
-#Const C_CheckpointSafeDistance		12.		///< Tornado distance for a Checkpoint to become unavailable to respawn at
-#Const C_RespawnWaitingDuration		15000	///< Time the player needs to wait to respawn
-#Const C_RespawnCancellingSpeed		2.5		///< Cancel respawn request if the player reaches this speed
+#Const C_RequiredPlayersNb 2///< Minimum number of players required to start the game
+#Const C_StartCountdownDuration 10000///< Duration of the cinematic countdown before game start
+#Const C_OffZoneMinShrinkDuration 60///< Minimum Tornado shrinking duration
+#Const C_OffZoneMinimumRadius 36.///< Minimum radius Tornado is shrinking to
+#Const C_AutoRatioItemsPerPlayer 15///< Amount of items spawned per player with automatic ratio on
+#Const C_PlayerMaxNbRocketSlots 4///< Maximum amount of Rockets held by the player
+#Const C_PlayerPointsForSurvival 10///< Points given for surviving other player elimination
+#Const C_PlayerPointsForObjects 1///< Points given for picking up Weapon, Charge and Mini
+#Const C_WinnerMinPointsDiff 10///< Minimum difference in amount of winner points to next player
+#Const C_WeaponItemArmorBonus 100///< Armor healed when picking up Weapon item
+#Const C_ChargeItemSkillPoints 5///< Additional skill points given by the Charge item
+#Const C_MiniItemBonusMultiplier 2///< Mini item multiplier of regular Charge bonus
+#Const C_MiniItemArmorTakenOnPick 100///< Amont of player armor removed on picking up Mini
+#Const C_ObjectsDropSpreadRadius 1.///< Maximum distance items can be spawned from player upon elimination
+#Const C_ToadObjectDropChance .25///< Chance for a Toad to drop Charge
+#Const C_ToadChanceForArmorDrop .25///< Chance that item dropped by Toad will be Armor
+#Const C_GateOpeningDuration 5000///< Required standing time for a Gate to open
+#Const C_GateAutoCloseDelay 7500///< Time after which the Gate closes again
+#Const C_CheckpointSafeDistance 12.///< Tornado distance for a Checkpoint to become unavailable to respawn at
+#Const C_RespawnWaitingDuration 15000///< Time the player needs to wait to respawn
+#Const C_RespawnCancellingSpeed 2.5///< Cancel respawn request if the player reaches this speed
 
 #Const Description _("TYPE: Free for all\nOBJECTIVE: Protect Pole from Toads attack as long as it's possible. Game is over when 20 Toads reach the Pole.")
 
 /// Amount of weapons players get for touching the pole
-#Const C_PlayerInitialWeapons [
-	CSmMode::EWeapon::Laser => 0,
-	CSmMode::EWeapon::Nucleus => 0,
-	CSmMode::EWeapon::Arrow => 0,
-	CSmMode::EWeapon::Rocket => 4
-]
+#Const C_PlayerInitialWeapons [CSmMode::EWeapon::Laser => 0, CSmMode::EWeapon::Nucleus => 0, CSmMode::EWeapon::Arrow => 0, CSmMode::EWeapon::Rocket => 4]
 
 /// Players skills settings
-#Const C_SkillsPointsStart	["AmmoGain" => 0, "StaminaGain" => 0, "StaminaMax" => 75]
-#Const C_SkillsPointsOnGoal	["AmmoGain" => 50, "StaminaGain" => 20]
-#Const C_SkillsPointsLimit	["AmmoGain" => 300, "StaminaGain" => 100, "StaminaMax" => 300]
+#Const C_SkillsPointsStart ["AmmoGain" => 0, "StaminaGain" => 0, "StaminaMax" => 75]
+#Const C_SkillsPointsOnGoal ["AmmoGain" => 50, "StaminaGain" => 20]
+#Const C_SkillsPointsLimit ["AmmoGain" => 300, "StaminaGain" => 100, "StaminaMax" => 300]
 
 /// Position of the scores table depending on the statistics visibility
 #Const C_ScoresTablePosition [False => <0., 40., 20.>, True => <0., 47., 20.>]
@@ -82,15 +72,18 @@
 // ---------------------------------- //
 // Global variables
 // ---------------------------------- //
-declare Boolean G_IsOffZoneActivated;	///< Tells if the Tornado is active or not
-declare Text[] G_SpawnedPlayers;	///< List of all players who were spawned during the map
-declare Text[] G_LoginsTouchedGoal;	///< Players, who have touched the central Goal
-declare Ident[] G_CreatedObjects;	///< Objects created by the game mode
-declare Vec3 G_CenterGoalPosition;	///< Position of the central Goal landmark
-declare Ident[] G_RespawnLandmarks;	///< Ids of all landmarks on which the player can respawn
-declare Ident[Text] G_ObjectId;	///< Ids of the loaded objects used by the mode
-declare Ident[] G_SpawnsList;	///< List of Spawns available to toss
-declare Ident G_LatestSpawnId;	///< Previously tossed Spawn
+declare Boolean G_IsOffZoneActivated;///< Tells if the Tornado is active or not
+declare Text[] G_SpawnedPlayers;///< List of all players who were spawned during the map
+declare Text[] G_LoginsTouchedGoal;///< Players, who have touched the central Goal
+declare Ident[] G_CreatedObjects;///< Objects created by the game mode
+declare Vec3 G_CenterGoalPosition;///< Position of the central Goal landmark
+declare Ident[] G_RespawnLandmarks;///< Ids of all landmarks on which the player can respawn
+declare Ident[Text] G_ObjectId;///< Ids of the loaded objects used by the mode
+declare Ident[] G_SpawnsList;///< List of Spawns available to toss
+declare Ident G_LatestSpawnId;///< Previously tossed Spawn
+
+
+
 
 // ---------------------------------- //
 // Extend
@@ -101,15 +94,22 @@ Log::RegisterScript(ScriptName, Version);
 Log::RegisterScript(Map::GetScriptName(), Map::GetScriptVersion());
 ***
 
+
+
+
 // ---------------------------------- //
 // Set up matchmaking
 // ---------------------------------- //
 ***MM_SetupMatchmaking***
 ***
 declare Integer[] MatchmakingFormats;
-for (I, 1, S_MatchmakingFormat) MatchmakingFormats.add(1);
+for (I , 1 , S_MatchmakingFormat)
+    MatchmakingFormats.add(1);
 MM_SetFormat(MatchmakingFormats);
 ***
+
+
+
 
 // ---------------------------------- //
 // Scores table
@@ -121,10 +121,13 @@ TopScores::AddCategory("Items", "Found items", "", 1., "", 2.25, 60.);
 TopScores::AddCategory("Survival", "Survived kills", "", 2., "", 2.25, 75.);
 TopScores::SetFormat(3, 1);
 
-ST2::SetPlayerCardImages(" ", C_ImgBase^"STPlayerLeft.png", C_ImgBase^"STPlayerRight.png");
+ST2::SetPlayerCardImages(" ", C_ImgBase ^ "STPlayerLeft.png", C_ImgBase ^ "STPlayerRight.png");
 ST2::SetColWidth("LibST_SMPoints", 5.);
 ST2::DestroyCol("LibST_SMRoundPoints");
 ***
+
+
+
 
 // ---------------------------------- //
 // Update the mode rules
@@ -136,6 +139,9 @@ ModeInfo::SetType(ModeInfo::C_Type_FreeForAll);
 ModeInfo::SetRules("1. You have only one life per map.\n2. At the very beginning of the map, you must activate your skills by touching the Goal.\n3. To get more weapons and develop your character abilities, search and pick up items on the map.\n4. If you are eliminated, you will spectate the rest of the map.\n5. The last player alive wins the game.");
 ModeInfo::SetStatusMessage(Description);
 ***
+
+
+
 
 // ---------------------------------- //
 // Galaxy settings
@@ -152,6 +158,9 @@ GT_KillfeedTranslations = ["$<%1$> is now playing in Games", "$<%1$> tried to es
 GT_CharactersDataFileURL = "";
 ***
 
+
+
+
 // ---------------------------------- //
 // Init server
 // ---------------------------------- //
@@ -160,9 +169,9 @@ GT_CharactersDataFileURL = "";
 MM_EnableMatchReconnect(False);
 
 // Load objects
-G_ObjectId["Weapon"]	= ItemList_Add("HungerGames\\Weapon.Item.Gbx");
-G_ObjectId["Charge"]	= ItemList_Add("HungerGames\\Charge.Item.Gbx");
-G_ObjectId["Mini"]		= ItemList_Add("HungerGames\\Mini.Item.Gbx");
+G_ObjectId["Weapon"] = ItemList_Add("HungerGames\\Weapon.Item.Gbx");
+G_ObjectId["Charge"] = ItemList_Add("HungerGames\\Charge.Item.Gbx");
+G_ObjectId["Mini"] = ItemList_Add("HungerGames\\Mini.Item.Gbx");
 
 // Create custom interfaces
 // UIManager.UIAll.SpectatorForceCameraType = 0; ///< Disables the free-cam ("Cam 7")
@@ -176,6 +185,9 @@ declare PrevPlayersNbAlive = PlayersNbAlive;
 declare SpawnedToads = False;
 declare OffZoneRadiusMax = 0.;
 ***
+
+
+
 
 // ---------------------------------- //
 // Map start
@@ -195,8 +207,12 @@ declare CenterGoal <=> Map::GetLandmarkSector("Goal", 0);
 declare MapValidated = CenterGoal != Null && MapLandmarks_PlayerSpawn.count > 0;
 
 // Skip map if not valid
-if (!MapValidated) GT_SkipInvalidMap();
+if (!MapValidated)
+    GT_SkipInvalidMap();
 ***
+
+
+
 
 // ---------------------------------- //
 // Initialize the map objects
@@ -205,13 +221,14 @@ if (!MapValidated) GT_SkipInvalidMap();
 ***
 // ---------------------------------- //
 // Reset objects landmarks
-foreach (MapLandmark in MapLandmarks_ObjectAnchor) {
-	declare Boolean ObjectSpawned for MapLandmark;
-	declare Integer ObjectNextSpawn for MapLandmark;
-	declare Text ObjectType for MapLandmark;
-	ObjectSpawned = False;
-	ObjectNextSpawn = -1;
-	ObjectType = "";
+foreach (MapLandmark in MapLandmarks_ObjectAnchor)
+{
+    declare Boolean ObjectSpawned for MapLandmark;
+    declare Integer ObjectNextSpawn for MapLandmark;
+    declare Text ObjectType for MapLandmark;
+    ObjectSpawned = False;
+    ObjectNextSpawn = -1;
+    ObjectType = "";
 }
 
 // ---------------------------------- //
@@ -219,19 +236,23 @@ foreach (MapLandmark in MapLandmarks_ObjectAnchor) {
 declare NbObjectsSpawnLandmarks = Integer[Text];
 declare TotalNbObjectsSpawns = 0;
 
-foreach (MapLandmark in MapLandmarks_ObjectAnchor) {
-	if (!C_ModeSupportedObjects.exists(MapLandmark.Tag)) continue;
-	if (!NbObjectsSpawnLandmarks.existskey(MapLandmark.Tag)) NbObjectsSpawnLandmarks[MapLandmark.Tag] = 0;
-	NbObjectsSpawnLandmarks[MapLandmark.Tag] += 1;
-	TotalNbObjectsSpawns += 1;
+foreach (MapLandmark in MapLandmarks_ObjectAnchor)
+{
+    if (!C_ModeSupportedObjects.exists(MapLandmark.Tag))
+        continue;
+    if (!NbObjectsSpawnLandmarks.existskey(MapLandmark.Tag))
+        NbObjectsSpawnLandmarks[MapLandmark.Tag] = 0;
+    NbObjectsSpawnLandmarks[MapLandmark.Tag] += 1;
+    TotalNbObjectsSpawns += 1;
 }
 
 // ---------------------------------- //
 // Get the target objects amount ratio
 declare ObjectsSpawnRatio = ML::Clamp(S_ObjectsSpawnRatio, 0., 1.);
-if (S_ObjectsSpawnRatio < 0) {
-	declare TargetObjectsAmount = C_AutoRatioItemsPerPlayer * Players.count;
-	ObjectsSpawnRatio = ML::Min(ML::ToReal(TargetObjectsAmount) / TotalNbObjectsSpawns, 1.);
+if (S_ObjectsSpawnRatio < 0)
+{
+    declare TargetObjectsAmount = C_AutoRatioItemsPerPlayer * Players.count;
+    ObjectsSpawnRatio = ML::Min(ML::ToReal(TargetObjectsAmount) / TotalNbObjectsSpawns, 1.);
 }
 
 // ---------------------------------- //
@@ -241,27 +262,29 @@ declare CurrentObjectTag = AvailableObjectsTags[0];
 declare NbObjectsToSpawn = Integer[Text];
 declare TotalNbObjectsToSpawn = 0;
 
-while (TotalNbObjectsToSpawn < TotalNbObjectsSpawns * ObjectsSpawnRatio) {
-	if (TotalNbObjectsSpawns <= 0) break;
-	
-	// Initialize tag in array if doesn't exist
-	if (!NbObjectsToSpawn.existskey(CurrentObjectTag)) NbObjectsToSpawn[CurrentObjectTag] = 0;
-	
-	// Go to the next item type if there is enough of current one
-	if (
-		!NbObjectsSpawnLandmarks.existskey(CurrentObjectTag) ||
-		NbObjectsToSpawn[CurrentObjectTag] >= NbObjectsSpawnLandmarks[CurrentObjectTag] * ObjectsSpawnRatio
-	) {
-		declare Removed = AvailableObjectsTags.remove(CurrentObjectTag);
-		if (AvailableObjectsTags.count <= 0) break;
-		
-		CurrentObjectTag = AvailableObjectsTags[0];
-		continue;
-	}
-	
-	// Increase the amount of object
-	NbObjectsToSpawn[CurrentObjectTag] += 1;
-	TotalNbObjectsToSpawn += 1;
+while (TotalNbObjectsToSpawn < TotalNbObjectsSpawns * ObjectsSpawnRatio)
+{
+    if (TotalNbObjectsSpawns <= 0)
+        break;
+
+    // Initialize tag in array if doesn't exist
+    if (!NbObjectsToSpawn.existskey(CurrentObjectTag))
+        NbObjectsToSpawn[CurrentObjectTag] = 0;
+
+    // Go to the next item type if there is enough of current one
+    if (!NbObjectsSpawnLandmarks.existskey(CurrentObjectTag) || NbObjectsToSpawn[CurrentObjectTag] >= NbObjectsSpawnLandmarks[CurrentObjectTag] * ObjectsSpawnRatio)
+    {
+        declare Removed = AvailableObjectsTags.remove(CurrentObjectTag);
+        if (AvailableObjectsTags.count <= 0)
+            break;
+
+        CurrentObjectTag = AvailableObjectsTags[0];
+        continue;
+    }
+
+    // Increase the amount of object
+    NbObjectsToSpawn[CurrentObjectTag] += 1;
+    TotalNbObjectsToSpawn += 1;
 }
 
 // ---------------------------------- //
@@ -269,55 +292,72 @@ while (TotalNbObjectsToSpawn < TotalNbObjectsSpawns * ObjectsSpawnRatio) {
 declare Ident[] AvailableLandmarksIds;
 declare CSmMapLandmark[][Text] AvailableLandmarksOfType;
 
-foreach (MapLandmark in MapLandmarks_ObjectAnchor) {
-	if (!AvailableLandmarksOfType.existskey(MapLandmark.Tag))
-	    AvailableLandmarksOfType[MapLandmark.Tag] = [];
-	AvailableLandmarksOfType[MapLandmark.Tag].add(MapLandmark);
-	if (MapLandmark.Tag != "Armor") AvailableLandmarksIds.add(MapLandmark.Id);
+foreach (MapLandmark in MapLandmarks_ObjectAnchor)
+{
+    if (!AvailableLandmarksOfType.existskey(MapLandmark.Tag))
+        AvailableLandmarksOfType[MapLandmark.Tag] = [];
+    AvailableLandmarksOfType[MapLandmark.Tag].add(MapLandmark);
+    if (MapLandmark.Tag != "Armor")
+        AvailableLandmarksIds.add(MapLandmark.Id);
 }
 
 // ---------------------------------- //
 // Choose random landmarks spawning Armor and other items, if not randomized
-foreach (Type => ObjectAmount in NbObjectsToSpawn) {
-	if (!AvailableLandmarksOfType.existskey(Type)) continue;
-	if (S_RandomizeObjectsSpawns && Type != "Armor") continue;
-	declare CurObjectSelectedLandmarks = 0;
-	
-	while (CurObjectSelectedLandmarks < ObjectAmount) {
-		if (AvailableLandmarksOfType[Type].count <= 0) break;
-		
-		declare MapLandmark <=> AvailableLandmarksOfType[Type][ML::Rand(0, AvailableLandmarksOfType[Type].count - 1)];
-		declare Removed = AvailableLandmarksOfType[Type].remove(MapLandmark);
-		CurObjectSelectedLandmarks += 1;
-		
-		if (MapLandmark != Null) {
-			declare Text ObjectType for MapLandmark;
-			ObjectType = Type;
-		}
-	}
+foreach (Type => ObjectAmount in NbObjectsToSpawn)
+{
+    if (!AvailableLandmarksOfType.existskey(Type))
+        continue;
+    if (S_RandomizeObjectsSpawns && Type != "Armor")
+        continue;
+    declare CurObjectSelectedLandmarks = 0;
+
+    while (CurObjectSelectedLandmarks < ObjectAmount)
+    {
+        if (AvailableLandmarksOfType[Type].count <= 0)
+            break;
+
+        declare MapLandmark <=> AvailableLandmarksOfType[Type][ML::Rand(0, AvailableLandmarksOfType[Type].count - 1)];
+        declare Removed = AvailableLandmarksOfType[Type].remove(MapLandmark);
+        CurObjectSelectedLandmarks += 1;
+
+        if (MapLandmark != Null)
+        {
+            declare Text ObjectType for MapLandmark;
+            ObjectType = Type;
+        }
+    }
 }
 
 // ---------------------------------- //
 // Choose randomized positions for items other than Armor, if enabled
-if (S_RandomizeObjectsSpawns) foreach (Type => ObjectAmount in NbObjectsToSpawn) {
-	if (Type == "Armor") continue;
-	declare CurObjectSelectedLandmarks = 0;
-	
-	while (CurObjectSelectedLandmarks < ObjectAmount) {
-		if (AvailableLandmarksIds.count <= 0) break;
-		
-		declare MapLandmarkId = AvailableLandmarksIds[ML::Rand(0, AvailableLandmarksIds.count - 1)];
-		declare Removed = AvailableLandmarksIds.remove(MapLandmarkId);
-		CurObjectSelectedLandmarks += 1;
-		
-		if (MapLandmarks.existskey(MapLandmarkId)) {
-			declare MapLandmark <=> MapLandmarks[MapLandmarkId];
-			declare Text ObjectType for MapLandmark;
-			ObjectType = Type;
-		}
-	}
-}
+if (S_RandomizeObjectsSpawns)
+    foreach (Type => ObjectAmount in NbObjectsToSpawn)
+    {
+        if (Type == "Armor")
+            continue;
+        declare CurObjectSelectedLandmarks = 0;
+
+        while (CurObjectSelectedLandmarks < ObjectAmount)
+        {
+            if (AvailableLandmarksIds.count <= 0)
+                break;
+
+            declare MapLandmarkId = AvailableLandmarksIds[ML::Rand(0, AvailableLandmarksIds.count - 1)];
+            declare Removed = AvailableLandmarksIds.remove(MapLandmarkId);
+            CurObjectSelectedLandmarks += 1;
+
+            if (MapLandmarks.existskey(MapLandmarkId))
+            {
+                declare MapLandmark <=> MapLandmarks[MapLandmarkId];
+                declare Text ObjectType for MapLandmark;
+                ObjectType = Type;
+            }
+        }
+    }
 ***
+
+
+
 
 // ---------------------------------- //
 // Round start
@@ -330,9 +370,10 @@ UISetNbPlayersAlive(0);
 MiniMap::Hide();
 
 // Matchmaking: don't allow substitutes and disable penalty
-if (MM_IsMatchServer()) {
-	MM_AllowSubstitutes(False);
-	MM_EnablePenalty(False);
+if (MM_IsMatchServer())
+{
+    MM_AllowSubstitutes(False);
+    MM_EnablePenalty(False);
 }
 
 // ---------------------------------- //
@@ -353,52 +394,61 @@ OffZoneRadius = 0.;
 
 // ---------------------------------- //
 // Initialize the central Goal
-if (CenterGoal != Null) {
-	UIManager.UIAll.SpectatorForcedTarget = CenterGoal.Id;
-	CenterGoalLandmarkId = CenterGoal.Id;
-	CenterGoal.Gauge.ValueReal = 1.;
-	CenterGoal.Gauge.Captured = True;
-	
-	G_CenterGoalPosition = CenterGoal.Position;
-	MiniMap::SetMarker("Goal", "Goal.png", Vec3, G_CenterGoalPosition);
+if (CenterGoal != Null)
+{
+    UIManager.UIAll.SpectatorForcedTarget = CenterGoal.Id;
+    CenterGoalLandmarkId = CenterGoal.Id;
+    CenterGoal.Gauge.ValueReal = 1.;
+    CenterGoal.Gauge.Captured = True;
+
+    G_CenterGoalPosition = CenterGoal.Position;
+    MiniMap::SetMarker("Goal", "Goal.png", Vec3, G_CenterGoalPosition);
 }
 
 // ---------------------------------- //
 // Get landmarks distances to the central Goal
-foreach (MapLandmark in MapLandmarks) {
-	if (MapLandmark.Id == CenterGoalLandmarkId) continue;
-	declare Real CenterGoalDistance for MapLandmark;
-	CenterGoalDistance = GT_Distance2D(MapLandmark.Position, G_CenterGoalPosition);
+foreach (MapLandmark in MapLandmarks)
+{
+    if (MapLandmark.Id == CenterGoalLandmarkId)
+        continue;
+    declare Real CenterGoalDistance for MapLandmark;
+    CenterGoalDistance = GT_Distance2D(MapLandmark.Position, G_CenterGoalPosition);
 }
 
 // ---------------------------------- //
 // Configure Gate landmarks
-foreach (MapLandmark in MapLandmarks_Gate) {
-	MapLandmark.Gate.AutoOpenSpeed = 1;
-	MapLandmark.Gate.AutoCloseDelay = C_GateAutoCloseDelay;
-	MapLandmark.Gate.Clan = 1;
-	MapLandmark.Gauge.Max = C_GateOpeningDuration;
+foreach (MapLandmark in MapLandmarks_Gate)
+{
+    MapLandmark.Gate.AutoOpenSpeed = 1;
+    MapLandmark.Gate.AutoCloseDelay = C_GateAutoCloseDelay;
+    MapLandmark.Gate.Clan = 1;
+    MapLandmark.Gauge.Max = C_GateOpeningDuration;
 }
 
 // ---------------------------------- //
 // Get the respawnable Checkpoints landmarks
 foreach (MapLandmark in MapLandmarks_Gauge)
-	if (MapLandmark.Tag == "Checkpoint") G_RespawnLandmarks.add(MapLandmark.Id);
+    if (MapLandmark.Tag == "Checkpoint")
+        G_RespawnLandmarks.add(MapLandmark.Id);
 
 // ---------------------------------- //
 // Wait for enough players to start the game
 UIManager.UIAll.BigMessage = _("Waiting for players...");
-while (!ServerShutdownRequested && !MatchEndRequested && (Players.count < C_RequiredPlayersNb || CupAdmin::IsCupPaused())) MB_Yield();
+while (!ServerShutdownRequested && !MatchEndRequested && (Players.count < C_RequiredPlayersNb || CupAdmin::IsCupPaused()))
+    MB_Yield();
 UIManager.UIAll.BigMessage = "";
 
 // Reset UI
-foreach (Player in AllPlayers) {
-	UISetPlayerSurvivedPosition(Player, 0);
+foreach (Player in AllPlayers)
+{
+    UISetPlayerSurvivedPosition(Player, 0);
 }
 
 // ---------------------------------- //
 // Initialize objects
----InitializeObjects---
+---
+InitializeObjects
+---
 
 // ---------------------------------- //
 // Begin match
@@ -409,14 +459,19 @@ UISetStartTime(StartTime);
 StoragePlayer::SetCountdown(StartTime, 10000);
 
 // Set the Tornado activation countdown
-if (S_OffZoneActivationTime <= 0) UIManager.UIAll.CountdownEndTime = -1;
-else UIManager.UIAll.CountdownEndTime = StartTime + S_OffZoneActivationTime * 1000;
+if (S_OffZoneActivationTime <= 0)
+    UIManager.UIAll.CountdownEndTime = -1;
+else
+    UIManager.UIAll.CountdownEndTime = StartTime + S_OffZoneActivationTime * 1000;
 
 // Setup interface
 Layers::Attach("HungerGames:Statistics");
 ST2::SetPos(C_ScoresTablePosition[True]);
 ST2::Build("SM");
 ***
+
+
+
 
 // ---------------------------------- //
 // Start play loop
@@ -427,11 +482,15 @@ MiniMap::Hide();
 
 // ---------------------------------- //
 // Spawn players for the game
-foreach (Player in Players) HG_SpawnPlayer(Player);
+foreach (Player in Players)
+    HG_SpawnPlayer(Player);
 PrevPlayersNbAlive = PlayersNbAlive;
 UISetNbPlayersAlive(PlayersNbAlive);
-ST2::SetFooterText(TL::Compose("%1 "^PlayersNbAlive, _("Remaining players: ")));
+ST2::SetFooterText(TL::Compose("%1 " ^ PlayersNbAlive, _("Remaining players: ")));
 ***
+
+
+
 
 // ---------------------------------- //
 // On armor empty
@@ -440,22 +499,29 @@ ST2::SetFooterText(TL::Compose("%1 "^PlayersNbAlive, _("Remaining players: ")));
 ***
 // ---------------------------------- //
 // Drop the player objects
-if (!Event.Victim.IsBot && PlayersNbAlive > 2) {
-	DropPlayerObjects(Event.Victim, S_ObjectsDroppingRatio);
-	if (MMCommon::IsMatchServer()) UISetPlayerSurvivedPosition(Event.Victim, PlayersNbAlive + 1);
+if (!Event.Victim.IsBot && PlayersNbAlive > 2)
+{
+    DropPlayerObjects(Event.Victim, S_ObjectsDroppingRatio);
+    if (MMCommon::IsMatchServer())
+        UISetPlayerSurvivedPosition(Event.Victim, PlayersNbAlive + 1);
 }
 
 // ---------------------------------- //
 // Chance for Toads to drop an item
-if (Event.Victim.IsBot && Event.Shooter != Null && C_ToadObjectDropChance > 0 && ML::Rand(0., 1.) <= C_ToadObjectDropChance) {
-	declare NewObjectTag = "Charge";
-	
-	// Small chance for item to be Armor
-	if (Event.Shooter.Armor < Event.Shooter.ArmorMax && ML::Rand(0., 1.) <= C_ToadChanceForArmorDrop) NewObjectTag = "Armor";
-	
-	declare Object = SpawnObject(Event.Victim.Position, NewObjectTag);
+if (Event.Victim.IsBot && Event.Shooter != Null && C_ToadObjectDropChance > 0 && ML::Rand(0., 1.) <= C_ToadObjectDropChance)
+{
+    declare NewObjectTag = "Charge";
+
+    // Small chance for item to be Armor
+    if (Event.Shooter.Armor < Event.Shooter.ArmorMax && ML::Rand(0., 1.) <= C_ToadChanceForArmorDrop)
+        NewObjectTag = "Armor";
+
+    declare Object = SpawnObject(Event.Victim.Position, NewObjectTag);
 }
 ***
+
+
+
 
 // ---------------------------------- //
 // On player touches object
@@ -465,7 +531,8 @@ if (Event.Victim.IsBot && Event.Shooter != Null && C_ToadObjectDropChance > 0 &&
 Discard(Event);
 
 // Ignore all events caused by bots and players who haven't touched the goal
-if (Event.Player.IsBot || !G_LoginsTouchedGoal.exists(Event.Player.Login)) continue;
+if (Event.Player.IsBot || !G_LoginsTouchedGoal.exists(Event.Player.Login))
+    continue;
 
 // Cache Tag and AnchorId, as it gets destroyed with object
 declare Ident AnchorId for Event.Object;
@@ -475,34 +542,42 @@ declare ObjectTag = Tag;
 
 // Pick up the object
 declare PickedUpObject = GalaxyTitles::PickUpObject(Event, True);
-if (!PickedUpObject) PickedUpObject = PickUpObject(Event);
+if (!PickedUpObject)
+    PickedUpObject = PickUpObject(Event);
 
 // ---------------------------------- //
 // Start item respawn timer
-if (PickedUpObject && MapLandmarks_ObjectAnchor.existskey(ObjectAnchorId)) {
-	declare MapLandmark <=> MapLandmarks_ObjectAnchor[ObjectAnchorId];
-	declare Boolean ObjectSpawned for MapLandmark;
-	declare Integer ObjectNextSpawn for MapLandmark;
-	
-	declare FasterRespawnObjects = ["Armor", "Fuel", "Replie"];
-	declare RespawnDuration = S_ObjectsRespawnTime;
-	if (FasterRespawnObjects.exists(ObjectTag)) RespawnDuration = S_ArmorRespawnTime;
-	
-	ObjectSpawned = RespawnDuration <= 0;
-	ObjectNextSpawn = Now + RespawnDuration * 1000;
+if (PickedUpObject && MapLandmarks_ObjectAnchor.existskey(ObjectAnchorId))
+{
+    declare MapLandmark <=> MapLandmarks_ObjectAnchor[ObjectAnchorId];
+    declare Boolean ObjectSpawned for MapLandmark;
+    declare Integer ObjectNextSpawn for MapLandmark;
+
+    declare FasterRespawnObjects = ["Armor", "Fuel", "Replie"];
+    declare RespawnDuration = S_ObjectsRespawnTime;
+    if (FasterRespawnObjects.exists(ObjectTag))
+        RespawnDuration = S_ArmorRespawnTime;
+
+    ObjectSpawned = RespawnDuration <= 0;
+    ObjectNextSpawn = Now + RespawnDuration * 1000;
 }
 ***
+
+
+
 
 // ---------------------------------- //
 // On hit event
 // ---------------------------------- //
 ***OnHitConditions***
 ***
-if (Clans::AreTeammates(Event.Shooter, Event.Victim)) {
-	Discard(Event);
-	continue;
+if (Clans::AreTeammates(Event.Shooter, Event.Victim))
+{
+    Discard(Event);
+    continue;
 }
 ***
+
 
 ***OnHit***
 ***
@@ -511,13 +586,17 @@ declare Integer PlayerRespawnStartTime for Event.Victim;
 
 // ---------------------------------- //
 // Stop respawn request
-if (PlayerRequestsRespawn) {
-	Translations::SendStatusMessage(Event.Victim, "Respawn aborted: you've taken damage!", 3000, 0);
-	PlayerRequestsRespawn = False;
-	PlayerRespawnStartTime = -1;
-	UISetRespawnStartTime(Event.Victim, -1);
+if (PlayerRequestsRespawn)
+{
+    Translations::SendStatusMessage(Event.Victim, "Respawn aborted: you've taken damage!", 3000, 0);
+    PlayerRequestsRespawn = False;
+    PlayerRespawnStartTime = -1;
+    UISetRespawnStartTime(Event.Victim, -1);
 }
 ***
+
+
+
 
 // ---------------------------------- //
 // On shoot event
@@ -529,13 +608,17 @@ declare Integer PlayerRespawnStartTime for Event.Shooter;
 
 // ---------------------------------- //
 // Stop respawn request
-if (PlayerRequestsRespawn) {
-	Translations::SendStatusMessage(Event.Shooter, "Respawn aborted: you started attacking", 3000, 0);
-	PlayerRequestsRespawn = False;
-	PlayerRespawnStartTime = -1;
-	UISetRespawnStartTime(Event.Shooter, -1);
+if (PlayerRequestsRespawn)
+{
+    Translations::SendStatusMessage(Event.Shooter, "Respawn aborted: you started attacking", 3000, 0);
+    PlayerRequestsRespawn = False;
+    PlayerRespawnStartTime = -1;
+    UISetRespawnStartTime(Event.Shooter, -1);
 }
 ***
+
+
+
 
 // ---------------------------------- //
 // Play loop
@@ -543,339 +626,398 @@ if (PlayerRequestsRespawn) {
 ***Match_PlayLoop***
 ***
 // Spawn the objects (only after players are spawned)
-if (Now >= StartTime) SpawnObjects();
+if (Now >= StartTime)
+    SpawnObjects();
 
 // ---------------------------------- //
 // Manage events
-foreach (Event in PendingEvents) {
-	// ---------------------------------- //
-	// Player touching goal
-	if (Event.Type == CSmModeEvent::EType::OnPlayerTriggersSector) {
-		declare LandmarkId = NullId;
-		foreach (MapLandmark in MapLandmarks_Sector) if (MapLandmark.Sector == Event.Sector) LandmarkId = MapLandmark.Id;
-		if (LandmarkId != CenterGoalLandmarkId) continue;
-		
-		// Register the Goal touch
-		if (G_LoginsTouchedGoal.exists(Event.Player.Login)) continue;
-		G_LoginsTouchedGoal.add(Event.Player.Login);
-		Event.Player.HasShield = True;
-		
-		// Set the player skills
-		foreach (SkillType => SkillPoints in C_SkillsPointsOnGoal)
-			SetPlayerSkill(Event.Player, SkillType, SkillPoints);
-		
-		// Set player weapons
-		foreach (Weapon => Amount in C_PlayerInitialWeapons) Inventory::SetWeaponSlots(Event.Player, Weapon, Amount);
-		UIAddPlayerTouchingGoal(Event.Player.User.Login);
-	}
-	// ---------------------------------- //
-	// On player request respawn
-	else if (Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn) {
-		declare Boolean PlayerRequestsRespawn for Event.Player;
-		declare Integer PlayerRespawnStartTime for Event.Player;
-		
-		// ---------------------------------- //
-		// Cancel ongoing respawn request
-		if (PlayerRequestsRespawn) {
-			PlayerRequestsRespawn = False;
-			PlayerRespawnStartTime = -1;
-			UISetRespawnStartTime(Event.Player, -1);
-		}
-		
-		// Respawn is disabled by the server
-		else if (!S_AllowPlayersRespawn)
-			Translations::SendStatusMessage(Event.Player, "Respawn is not allowed on this server", 3000, 0);
-		
-		// Player must touch the Goal first
-		else if (!G_LoginsTouchedGoal.exists(Event.Player.Login))
-			Translations::SendStatusMessage(Event.Player, "You must touch the Goal before respawning!", 3000, 0);
-		
-		// No checkpoints available for respawn
-		else if (G_RespawnLandmarks.count <= 0)
-			Translations::SendStatusMessage(Event.Player, "No respawn Checkpoints available on map!", 3000, 0);
-		
-		// ---------------------------------- //
-		// Start new respawn request
-		else {
-			PlayerRequestsRespawn = True;
-			PlayerRespawnStartTime = Now;
-			UISetRespawnStartTime(Event.Player, Now);
-		}
-		
-		// Always discard the event
-		Discard(Event);
-	}
+foreach (Event in PendingEvents)
+{
+    // ---------------------------------- //
+    // Player touching goal
+    if (Event.Type == CSmModeEvent::EType::OnPlayerTriggersSector)
+    {
+        declare LandmarkId = NullId;
+        foreach (MapLandmark in MapLandmarks_Sector)
+            if (MapLandmark.Sector == Event.Sector)
+                LandmarkId = MapLandmark.Id;
+        if (LandmarkId != CenterGoalLandmarkId)
+            continue;
+
+        // Register the Goal touch
+        if (G_LoginsTouchedGoal.exists(Event.Player.Login))
+            continue;
+        G_LoginsTouchedGoal.add(Event.Player.Login);
+        Event.Player.HasShield = True;
+
+        // Set the player skills
+        foreach (SkillType => SkillPoints in C_SkillsPointsOnGoal)
+            SetPlayerSkill(Event.Player, SkillType, SkillPoints);
+
+        // Set player weapons
+        foreach (Weapon => Amount in C_PlayerInitialWeapons)
+            Inventory::SetWeaponSlots(Event.Player, Weapon, Amount);
+        UIAddPlayerTouchingGoal(Event.Player.User.Login);
+    }
+    // ---------------------------------- //
+    // On player request respawn
+    else if (Event.Type == CSmModeEvent::EType::OnPlayerRequestRespawn)
+    {
+        declare Boolean PlayerRequestsRespawn for Event.Player;
+        declare Integer PlayerRespawnStartTime for Event.Player;
+
+        // ---------------------------------- //
+        // Cancel ongoing respawn request
+        if (PlayerRequestsRespawn)
+        {
+            PlayerRequestsRespawn = False;
+            PlayerRespawnStartTime = -1;
+            UISetRespawnStartTime(Event.Player, -1);
+        }
+
+        // Respawn is disabled by the server
+        else if (!S_AllowPlayersRespawn)Translations::SendStatusMessage(Event.Player, "Respawn is not allowed on this server", 3000, 0);
+
+        // Player must touch the Goal first
+        else if (!G_LoginsTouchedGoal.exists(Event.Player.Login))Translations::SendStatusMessage(Event.Player, "You must touch the Goal before respawning!", 3000, 0);
+
+        // No checkpoints available for respawn
+        else if (G_RespawnLandmarks.count <= 0)Translations::SendStatusMessage(Event.Player, "No respawn Checkpoints available on map!", 3000, 0);
+
+        // ---------------------------------- //
+        // Start new respawn request
+        else
+        {
+            PlayerRequestsRespawn = True;
+            PlayerRespawnStartTime = Now;
+            UISetRespawnStartTime(Event.Player, Now);
+        }
+
+        // Always discard the event
+        Discard(Event);
+    }
 }
 
 // ---------------------------------- //
 // Disable cinematic stripes and show minimap
-if (Now >= StartTime - 1500 && UIManager.UIAll.UISequence != CUIConfig::EUISequence::Playing) {
-	Interfancy::SetModuleVisibility("Countdown", Now < UIManager.UIAll.CountdownEndTime);
-	UIManager.UIAll.UISequence = CUIConfig::EUISequence::Playing;
-	UIManager.UIAll.SpectatorForcedTarget = NullId;
-	MiniMap::Show();
+if (Now >= StartTime - 1500 && UIManager.UIAll.UISequence != CUIConfig::EUISequence::Playing)
+{
+    Interfancy::SetModuleVisibility("Countdown", Now < UIManager.UIAll.CountdownEndTime);
+    UIManager.UIAll.UISequence = CUIConfig::EUISequence::Playing;
+    UIManager.UIAll.SpectatorForcedTarget = NullId;
+    MiniMap::Show();
 }
 
 // ---------------------------------- //
 // Tornado is not active yet
-if (!G_IsOffZoneActivated) {
-	// ---------------------------------- //
-	// Update current Tornado activation time limit
-	if (PrevTimeLimit != S_OffZoneActivationTime) {
-		PrevTimeLimit = S_OffZoneActivationTime;
-		
-		if (S_OffZoneActivationTime <= 0) UIManager.UIAll.CountdownEndTime = -1;
-		else UIManager.UIAll.CountdownEndTime = StartTime + (S_OffZoneActivationTime * 1000);
-		Interfancy::SetModuleVisibility("Countdown", Now >= StartTime - 1500 && Now < UIManager.UIAll.CountdownEndTime);
-	}
-	
-	// ---------------------------------- //
-	// Initialize Toads
-	if (S_ToadsFirstSpawnDelay >= 0 && !SpawnedToads && Now >= StartTime + S_ToadsFirstSpawnDelay * 1000) {
-		GalaxyTitles::InitToads(S_ToadsSpawnRatio);
-		SpawnedToads = True;
-	}
-	
-	// ---------------------------------- //
-	// Start the Tornado
-	if (Now > StartTime && S_OffZoneActivationTime > 0 && (PlayersNbAlive <= 2 || Now >= UIManager.UIAll.CountdownEndTime)) {
-		G_IsOffZoneActivated = True;
-		UIManager.UIAll.CountdownEndTime = -1;
-		
-		// ---------------------------------- //
-		// Compute the initial OffZone radius
-		declare MapCorners = [<0., 0., 0.>, <384., 0., 0.>, <0., 0., 384.>, <384., 0., 384.>];
-		foreach (CornerPosition in MapCorners) {
-			declare Distance = GT_Distance2D(G_CenterGoalPosition, CornerPosition);
-			if (Distance > OffZoneRadiusMax) OffZoneRadiusMax = Distance;
-		}
-		
-		// ---------------------------------- //
-		// Start the OffZone
-		declare OffZoneShrinkDuration = ML::Max(S_OffZoneShrinkDuration, C_OffZoneMinShrinkDuration);
-		OffZoneCenterLandmarkId = CenterGoalLandmarkId;
-		OffZoneRadiusSpeed = (OffZoneRadiusMax - C_OffZoneMinimumRadius) / OffZoneShrinkDuration;
-		OffZoneRadius = OffZoneRadiusMax;
-		
-		// ---------------------------------- //
-		// Start decreasing the pole gauge
-		CenterGoal.Gauge.Max = OffZoneShrinkDuration * 1000;
-		CenterGoal.Gauge.Value = CenterGoal.Gauge.Max;
-		CenterGoal.Gauge.Speed = -1;
-		
-		// Send notice
-		Message::SendStatusMessage(_("Tornado activated."), 4000, 1, CUIConfig::EUISound::Notice, 0);
-		Interfancy::SetModuleVisibility("Countdown", False);
-	}
+if (!G_IsOffZoneActivated)
+{
+    // ---------------------------------- //
+    // Update current Tornado activation time limit
+    if (PrevTimeLimit != S_OffZoneActivationTime)
+    {
+        PrevTimeLimit = S_OffZoneActivationTime;
+
+        if (S_OffZoneActivationTime <= 0)
+            UIManager.UIAll.CountdownEndTime = -1;
+        else
+            UIManager.UIAll.CountdownEndTime = StartTime + (S_OffZoneActivationTime * 1000);
+        Interfancy::SetModuleVisibility("Countdown", Now >= StartTime - 1500 && Now < UIManager.UIAll.CountdownEndTime);
+    }
+
+    // ---------------------------------- //
+    // Initialize Toads
+    if (S_ToadsFirstSpawnDelay >= 0 && !SpawnedToads && Now >= StartTime + S_ToadsFirstSpawnDelay * 1000)
+    {
+        GalaxyTitles::InitToads(S_ToadsSpawnRatio);
+        SpawnedToads = True;
+    }
+
+    // ---------------------------------- //
+    // Start the Tornado
+    if (Now > StartTime && S_OffZoneActivationTime > 0 && (PlayersNbAlive <= 2 || Now >= UIManager.UIAll.CountdownEndTime))
+    {
+        G_IsOffZoneActivated = True;
+        UIManager.UIAll.CountdownEndTime = -1;
+
+        // ---------------------------------- //
+        // Compute the initial OffZone radius
+        declare MapCorners = [<0., 0., 0.>, <384., 0., 0.>, <0., 0., 384.>, <384., 0., 384.>];
+        foreach (CornerPosition in MapCorners)
+        {
+            declare Distance = GT_Distance2D(G_CenterGoalPosition, CornerPosition);
+            if (Distance > OffZoneRadiusMax)
+                OffZoneRadiusMax = Distance;
+        }
+
+        // ---------------------------------- //
+        // Start the OffZone
+        declare OffZoneShrinkDuration = ML::Max(S_OffZoneShrinkDuration, C_OffZoneMinShrinkDuration);
+        OffZoneCenterLandmarkId = CenterGoalLandmarkId;
+        OffZoneRadiusSpeed = (OffZoneRadiusMax - C_OffZoneMinimumRadius) / OffZoneShrinkDuration;
+        OffZoneRadius = OffZoneRadiusMax;
+
+        // ---------------------------------- //
+        // Start decreasing the pole gauge
+        CenterGoal.Gauge.Max = OffZoneShrinkDuration * 1000;
+        CenterGoal.Gauge.Value = CenterGoal.Gauge.Max;
+        CenterGoal.Gauge.Speed = -1;
+
+        // Send notice
+        Message::SendStatusMessage(_("Tornado activated."), 4000, 1, CUIConfig::EUISound::Notice, 0);
+        Interfancy::SetModuleVisibility("Countdown", False);
+    }
 }
 // ---------------------------------- //
 // Tornado is active
-else if (OffZoneRadius > 0) {
-	// ---------------------------------- //
-	// Stop the Tornado
-	if (OffZoneRadius <= C_OffZoneMinimumRadius) {
-		OffZoneRadius = C_OffZoneMinimumRadius;
-		OffZoneRadiusSpeed = 0.;
-		CenterGoal.Gauge.ValueReal = 0.;
-	}
-	
-	// ---------------------------------- //
-	// Destroy objects behind Tornado
-	declare Ident[] ObjectsToDestroy;
-	foreach (Object in Objects) {
-		declare Real CenterGoalDistance for Object;
-		if (CenterGoalDistance >= OffZoneRadius && !ObjectsToDestroy.exists(Object.Id)) ObjectsToDestroy.add(Object.Id);
-	}
-	while (ObjectsToDestroy.count > 0) {
-		declare Boolean Removed;
-		Removed = DestroyObject(Objects[ObjectsToDestroy[0]]);
-		Removed = ObjectsToDestroy.removekey(0);
-	}
+else if (OffZoneRadius > 0)
+{
+    // ---------------------------------- //
+    // Stop the Tornado
+    if (OffZoneRadius <= C_OffZoneMinimumRadius)
+    {
+        OffZoneRadius = C_OffZoneMinimumRadius;
+        OffZoneRadiusSpeed = 0.;
+        CenterGoal.Gauge.ValueReal = 0.;
+    }
 
-	// ---------------------------------- //
-	// Manage landmarks
-	foreach (MapLandmark in MapLandmarks) {
-		if (MapLandmark.Id == CenterGoalLandmarkId) continue;
-		declare Real CenterGoalDistance for MapLandmark;
-		if (CenterGoalDistance <= 0) continue;
+    // ---------------------------------- //
+    // Destroy objects behind Tornado
+    declare Ident[] ObjectsToDestroy;
+    foreach (Object in Objects)
+    {
+        declare Real CenterGoalDistance for Object;
+        if (CenterGoalDistance >= OffZoneRadius && !ObjectsToDestroy.exists(Object.Id))
+            ObjectsToDestroy.add(Object.Id);
+    }
+    while (ObjectsToDestroy.count > 0)
+    {
+        declare Boolean Removed;
+        Removed = DestroyObject(Objects[ObjectsToDestroy[0]]);
+        Removed = ObjectsToDestroy.removekey(0);
+    }
 
-		// ---------------------------------- //
-		// Turn off Bases behind the Tornado
-		if (MapLandmark.Base != Null && MapLandmark.Base.IsActive && CenterGoalDistance >= OffZoneRadius)
-			MapLandmark.Base.IsActive = False;
-		
-		// ---------------------------------- //
-		// Make the Gates open as fast as close the Tornado is
-		if (MapLandmark.Gate != Null && MapLandmark.Gate.Automatic) {
-			// ---------------------------------- //
-			// Open the Gate when behind the Tornado
-			if (CenterGoalDistance >= OffZoneRadius) {
-				MapLandmark.Gate.Automatic = False;
-				MapLandmark.Gate.ManualClosed = False;
-				MapLandmark.Gauge.ValueReal = 0.;
-			}
-			// ---------------------------------- //
-			// Compute the Gate opening duration
-			else {
-				declare TornadoDistance = OffZoneRadius - CenterGoalDistance;
-				declare TornadoDistanceMax = OffZoneRadiusMax - CenterGoalDistance;
-				MapLandmark.Gauge.Max = ML::FloorInteger(C_GateOpeningDuration * TornadoDistance / TornadoDistanceMax);
-			}
-		}
-		
-		// ---------------------------------- //
-		// Remove respawn Checkpoint close to the Tornado
-		if (
-			MapLandmark.Gauge != Null && G_RespawnLandmarks.exists(MapLandmark.Id) &&
-			CenterGoalDistance >= OffZoneRadius - C_CheckpointSafeDistance
-		) {
-			declare Removed = G_RespawnLandmarks.remove(MapLandmark.Id);
-		}
-	}
+    // ---------------------------------- //
+    // Manage landmarks
+    foreach (MapLandmark in MapLandmarks)
+    {
+        if (MapLandmark.Id == CenterGoalLandmarkId)
+            continue;
+        declare Real CenterGoalDistance for MapLandmark;
+        if (CenterGoalDistance <= 0)
+            continue;
+
+        // ---------------------------------- //
+        // Turn off Bases behind the Tornado
+        if (MapLandmark.Base != Null && MapLandmark.Base.IsActive && CenterGoalDistance >= OffZoneRadius)
+            MapLandmark.Base.IsActive = False;
+
+        // ---------------------------------- //
+        // Make the Gates open as fast as close the Tornado is
+        if (MapLandmark.Gate != Null && MapLandmark.Gate.Automatic)
+        {
+            // ---------------------------------- //
+            // Open the Gate when behind the Tornado
+            if (CenterGoalDistance >= OffZoneRadius)
+            {
+                MapLandmark.Gate.Automatic = False;
+                MapLandmark.Gate.ManualClosed = False;
+                MapLandmark.Gauge.ValueReal = 0.;
+            }
+            // ---------------------------------- //
+            // Compute the Gate opening duration
+            else
+            {
+                declare TornadoDistance = OffZoneRadius - CenterGoalDistance;
+                declare TornadoDistanceMax = OffZoneRadiusMax - CenterGoalDistance;
+                MapLandmark.Gauge.Max = ML::FloorInteger(C_GateOpeningDuration * TornadoDistance / TornadoDistanceMax);
+            }
+        }
+
+        // ---------------------------------- //
+        // Remove respawn Checkpoint close to the Tornado
+        if (MapLandmark.Gauge != Null && G_RespawnLandmarks.exists(MapLandmark.Id) && CenterGoalDistance >= OffZoneRadius - C_CheckpointSafeDistance)
+        {
+            declare Removed = G_RespawnLandmarks.remove(MapLandmark.Id);
+        }
+    }
 }
 
 // ---------------------------------- //
 // Manage players functions
-foreach (Player in Players) {
-	// ---------------------------------- //
-	// A new player joins the game after start
-	if (!G_SpawnedPlayers.exists(Player.User.Login)) {
-		if (!G_IsOffZoneActivated && S_NewcomersJoinTime > 0 && Now - StartTime <= S_NewcomersJoinTime * 1000) {
-			HG_SpawnPlayer(Player);
-			if (Now > StartTime) Killfeed::SendNotice(["$<%1$> is now playing in Games", Player.User.Name]);
-		}
-		else {
-			G_SpawnedPlayers.add(Player.Login);
-			Translations::SendChat(Player, "You came too late to join this match. Please wait for the next map. Good luck!");
-		}
-	}
-	
-	// ---------------------------------- //
-	// Unspawn players trying to escape arena
-	if (Player.SpawnStatus == CSmPlayer::ESpawnStatus::Spawned) {
-		declare IsOutsideArena = False;
-		for (I, 0, 2) if (I != 1 && (Player.Position[I] < 0 || Player.Position[I] > 384)) IsOutsideArena = True;
-		if (Player.Position.Y < -50) IsOutsideArena = True;
+foreach (Player in Players)
+{
+    // ---------------------------------- //
+    // A new player joins the game after start
+    if (!G_SpawnedPlayers.exists(Player.User.Login))
+    {
+        if (!G_IsOffZoneActivated && S_NewcomersJoinTime > 0 && Now - StartTime <= S_NewcomersJoinTime * 1000)
+        {
+            HG_SpawnPlayer(Player);
+            if (Now > StartTime)
+                Killfeed::SendNotice(["$<%1$> is now playing in Games", Player.User.Name]);
+        }
+        else
+        {
+            G_SpawnedPlayers.add(Player.Login);
+            Translations::SendChat(Player, "You came too late to join this match. Please wait for the next map. Good luck!");
+        }
+    }
 
-		// ---------------------------------- //
-		// Eliminate player
-		if (IsOutsideArena) {
-			// Notify everyone about elimination and drop player objects
-			if (PlayersNbAlive >= 2) {
-				Killfeed::SendNotice(["$<%1$> tried to escape arena", Player.User.Name]);
-				DropPlayerObjects(Player, S_ObjectsDroppingRatio);
-			}
-			UnspawnPlayer(Player);
-		}
-	}
-	
-	// ---------------------------------- //
-	// Respawning players on checkpoints
-	declare Boolean PlayerRequestsRespawn for Player;
-	declare Integer PlayerRespawnStartTime for Player;
-	declare StopRespawnRequest = False;
-	
-	if (PlayerRequestsRespawn) {
-		// ---------------------------------- //
-		// Cancel respawn if the player is not spawned anymore
-		if (Player.SpawnStatus != CSmPlayer::ESpawnStatus::Spawned) StopRespawnRequest = True;
-		
-		// ---------------------------------- //
-		// Successfully respawn the player
-		else if (Now >= PlayerRespawnStartTime + C_RespawnWaitingDuration) {
-			// ---------------------------------- //
-			// Get nearest player distance for all Checkpoints 
-			declare Real[Ident] LandmarksDistances;
-			foreach (MapLandmark in MapLandmarks_Gauge) {
-				if (!G_RespawnLandmarks.exists(MapLandmark.Id)) continue;
-				declare NearestPlayerDistance = 0.;
-				foreach (Player2 in Players) if (Player2.SpawnStatus == CSmPlayer::ESpawnStatus::Spawned) {
-					declare Distance = ML::Distance(Player2.Position, MapLandmark.Position);
-					if (NearestPlayerDistance <= 0 || Distance < NearestPlayerDistance) NearestPlayerDistance = Distance;
-				}
-				if (NearestPlayerDistance > 0) LandmarksDistances[MapLandmark.Id] = -NearestPlayerDistance;
-			}
-			
-			// ---------------------------------- //
-			// Respawn the player on the Checkpoint furthest from any players
-			LandmarksDistances = LandmarksDistances.sort();
-			foreach (MapLandmarkId => Distance in LandmarksDistances) {
-				RespawnPlayer(Player, MapLandmarks[MapLandmarkId]);
-				break;
-			}
-			
-			PlayerRequestsRespawn = False;
-			PlayerRespawnStartTime = -1;
-		}
-		// ---------------------------------- //
-		// Cancel respawn if the player has moved
-		else if (Player.Speed >= C_RespawnCancellingSpeed) {
-			Translations::SendStatusMessage(Player, "Respawn aborted: you moved!", 3000, 0);
-			StopRespawnRequest = True;
-		}
-		// ---------------------------------- //
-		// Cancel request if all Checkpoints are behind Tornado
-		else if (G_RespawnLandmarks.count <= 0) {
-			Translations::SendStatusMessage(Player, "Respawn aborted: no respawn Checkpoints avaliable anymore", 3000, 0);
-			StopRespawnRequest = True;
-		}
-	}
-	
-	// ---------------------------------- //
-	// Stop respawn request
-	if (StopRespawnRequest) {
-		PlayerRequestsRespawn = False;
-		PlayerRespawnStartTime = -1;
-		UISetRespawnStartTime(Player, -1);
-	}
+    // ---------------------------------- //
+    // Unspawn players trying to escape arena
+    if (Player.SpawnStatus == CSmPlayer::ESpawnStatus::Spawned)
+    {
+        declare IsOutsideArena = False;
+        for (I , 0 , 2)
+            if (I != 1 && (Player.Position[I] < 0 || Player.Position[I] > 384))
+                IsOutsideArena = True;
+        if (Player.Position.Y < -50)
+            IsOutsideArena = True;
+
+        // ---------------------------------- //
+        // Eliminate player
+        if (IsOutsideArena)
+        {
+            // Notify everyone about elimination and drop player objects
+            if (PlayersNbAlive >= 2)
+            {
+                Killfeed::SendNotice(["$<%1$> tried to escape arena", Player.User.Name]);
+                DropPlayerObjects(Player, S_ObjectsDroppingRatio);
+            }
+            UnspawnPlayer(Player);
+        }
+    }
+
+    // ---------------------------------- //
+    // Respawning players on checkpoints
+    declare Boolean PlayerRequestsRespawn for Player;
+    declare Integer PlayerRespawnStartTime for Player;
+    declare StopRespawnRequest = False;
+
+    if (PlayerRequestsRespawn)
+    {
+        // ---------------------------------- //
+        // Cancel respawn if the player is not spawned anymore
+        if (Player.SpawnStatus != CSmPlayer::ESpawnStatus::Spawned)
+            StopRespawnRequest = True;
+
+        // ---------------------------------- //
+        // Successfully respawn the player
+        else if (Now >= PlayerRespawnStartTime + C_RespawnWaitingDuration)
+        {
+            // ---------------------------------- //
+            // Get nearest player distance for all Checkpoints 
+            declare Real[Ident] LandmarksDistances;
+            foreach (MapLandmark in MapLandmarks_Gauge)
+            {
+                if (!G_RespawnLandmarks.exists(MapLandmark.Id))
+                    continue;
+                declare NearestPlayerDistance = 0.;
+                foreach (Player2 in Players)
+                    if (Player2.SpawnStatus == CSmPlayer::ESpawnStatus::Spawned)
+                    {
+                        declare Distance = ML::Distance(Player2.Position, MapLandmark.Position);
+                        if (NearestPlayerDistance <= 0 || Distance < NearestPlayerDistance)
+                            NearestPlayerDistance = Distance;
+                    }
+                if (NearestPlayerDistance > 0)
+                    LandmarksDistances[MapLandmark.Id] = -NearestPlayerDistance;
+            }
+
+            // ---------------------------------- //
+            // Respawn the player on the Checkpoint furthest from any players
+            LandmarksDistances = LandmarksDistances.sort();
+            foreach (MapLandmarkId => Distance in LandmarksDistances)
+            {
+                RespawnPlayer(Player, MapLandmarks[MapLandmarkId]);
+                break;
+            }
+
+            PlayerRequestsRespawn = False;
+            PlayerRespawnStartTime = -1;
+        }
+        // ---------------------------------- //
+        // Cancel respawn if the player has moved
+        else if (Player.Speed >= C_RespawnCancellingSpeed)
+        {
+            Translations::SendStatusMessage(Player, "Respawn aborted: you moved!", 3000, 0);
+            StopRespawnRequest = True;
+        }
+        // ---------------------------------- //
+        // Cancel request if all Checkpoints are behind Tornado
+        else if (G_RespawnLandmarks.count <= 0)
+        {
+            Translations::SendStatusMessage(Player, "Respawn aborted: no respawn Checkpoints avaliable anymore", 3000, 0);
+            StopRespawnRequest = True;
+        }
+    }
+
+    // ---------------------------------- //
+    // Stop respawn request
+    if (StopRespawnRequest)
+    {
+        PlayerRequestsRespawn = False;
+        PlayerRespawnStartTime = -1;
+        UISetRespawnStartTime(Player, -1);
+    }
 }
 
 // ---------------------------------- //
 // Update amount of players alive
-if (PrevPlayersNbAlive != PlayersNbAlive) {
-	ST2::SetFooterText(TL::Compose("%1 "^PlayersNbAlive, _("Remaining players: ")));
-	UISetNbPlayersAlive(PlayersNbAlive);
+if (PrevPlayersNbAlive != PlayersNbAlive)
+{
+    ST2::SetFooterText(TL::Compose("%1 " ^ PlayersNbAlive, _("Remaining players: ")));
+    UISetNbPlayersAlive(PlayersNbAlive);
 
-	if (Now > StartTime) {
-		// ---------------------------------- //
-		// Give survival points to all players alive
-		if (PlayersNbAlive < PrevPlayersNbAlive) {
-			foreach (Player in Players) {
-				if (Player.SpawnStatus != CSmPlayer::ESpawnStatus::Spawned) continue;
-				TopScores::AddPoints(Player.Score, "Survival", 1);
-				Scores::AddPlayerMapPoints(Player.Score, C_PlayerPointsForSurvival);
-			}
-			if (PlayersNbAlive >= 2) Message::SendStatusMessage(TL::Compose("%1 "^PlayersNbAlive, _("Remaining players: ")), 4000, 2);
-		}
-	
-		// ---------------------------------- //
-		// Play the victory sound
-		if (Clans::GetNbAliveClans(True) == 1) {
-			UIManager.UIAll.SendNotice(
-				"", CUIConfig::ENoticeLevel::Default,
-				Null, CUIConfig::EAvatarVariant::Default,
-				CUIConfig::EUISound::VictoryPoint, 0
-			);
-			MB_StopMatch();
-		}
-	}
+    if (Now > StartTime)
+    {
+        // ---------------------------------- //
+        // Give survival points to all players alive
+        if (PlayersNbAlive < PrevPlayersNbAlive)
+        {
+            foreach (Player in Players)
+            {
+                if (Player.SpawnStatus != CSmPlayer::ESpawnStatus::Spawned)
+                    continue;
+                TopScores::AddPoints(Player.Score, "Survival", 1);
+                Scores::AddPlayerMapPoints(Player.Score, C_PlayerPointsForSurvival);
+            }
+            if (PlayersNbAlive >= 2)
+                Message::SendStatusMessage(TL::Compose("%1 " ^ PlayersNbAlive, _("Remaining players: ")), 4000, 2);
+        }
 
-	PrevPlayersNbAlive = PlayersNbAlive;
+        // ---------------------------------- //
+        // Play the victory sound
+        if (Clans::GetNbAliveClans(True) == 1)
+        {
+            UIManager.UIAll.SendNotice("", CUIConfig::ENoticeLevel::Default, Null, CUIConfig::EAvatarVariant::Default, CUIConfig::EUISound::VictoryPoint, 0);
+            MB_StopMatch();
+        }
+    }
+
+    PrevPlayersNbAlive = PlayersNbAlive;
 }
 
 // ---------------------------------- //
 // Turn round points into actual total points
-foreach (Score in Scores) {
-	declare RoundPoints = Scores::GetPlayerRoundPoints(Score);
-	if (RoundPoints == 0) continue;
+foreach (Score in Scores)
+{
+    declare RoundPoints = Scores::GetPlayerRoundPoints(Score);
+    if (RoundPoints == 0)
+        continue;
 
-	Scores::AddPlayerMapPoints(Score, RoundPoints);
-	Scores::SetPlayerRoundPoints(Score, 0);
+    Scores::AddPlayerMapPoints(Score, RoundPoints);
+    Scores::SetPlayerRoundPoints(Score, 0);
 }
 
 // Victory conditions
-if (Now > StartTime && PlayersNbAlive <= 1) MB_StopMatch();
+if (Now > StartTime && PlayersNbAlive <= 1)
+    MB_StopMatch();
 ***
+
+
+
 
 // ---------------------------------- //
 // Map end
@@ -891,35 +1033,45 @@ MiniMap::DestroyMarker("Goal");
 
 OffZoneRadiusSpeed = 0.;
 OffZoneRadius = 0.;
-if (CenterGoal != Null) CenterGoal.Gauge.Speed = 0;
+if (CenterGoal != Null)
+    CenterGoal.Gauge.Speed = 0;
 
 // ---------------------------------- //
 // Set the map winner
 declare WinnerId = NullId;
-foreach (Player in Players) {
-	if (PlayersNbAlive != 1) break;
-	if (Player.SpawnStatus != CSmPlayer::ESpawnStatus::Spawned) continue;
-	WinnerId = Player.Id;
+foreach (Player in Players)
+{
+    if (PlayersNbAlive != 1)
+        break;
+    if (Player.SpawnStatus != CSmPlayer::ESpawnStatus::Spawned)
+        continue;
+    WinnerId = Player.Id;
 
-	// ---------------------------------- //
-	// Minimum points for winner
-	declare MinTargetScore = 0;
-	foreach (Score in Scores) {
-		if (Score == Player.Score) continue;
-		declare MapPoints = Scores::GetPlayerMapPoints(Score);
-		if (MapPoints > MinTargetScore) MinTargetScore = MapPoints;
-	}
+    // ---------------------------------- //
+    // Minimum points for winner
+    declare MinTargetScore = 0;
+    foreach (Score in Scores)
+    {
+        if (Score == Player.Score)
+            continue;
+        declare MapPoints = Scores::GetPlayerMapPoints(Score);
+        if (MapPoints > MinTargetScore)
+            MinTargetScore = MapPoints;
+    }
 
-	declare WinnerMapPoints = Scores::GetPlayerMapPoints(Player.Score);
-	declare Difference = WinnerMapPoints - MinTargetScore;
+    declare WinnerMapPoints = Scores::GetPlayerMapPoints(Player.Score);
+    declare Difference = WinnerMapPoints - MinTargetScore;
 
-	if (Difference <= 0) {
-		Scores::SetPlayerMapPoints(Player.Score, MinTargetScore + C_WinnerMinPointsDiff);
-	} else if (Difference < C_WinnerMinPointsDiff) {
-		Scores::AddPlayerMapPoints(Player.Score, C_WinnerMinPointsDiff - Difference);
-	}
+    if (Difference <= 0)
+    {
+        Scores::SetPlayerMapPoints(Player.Score, MinTargetScore + C_WinnerMinPointsDiff);
+    }
+    else if (Difference < C_WinnerMinPointsDiff)
+    {
+        Scores::AddPlayerMapPoints(Player.Score, C_WinnerMinPointsDiff - Difference);
+    }
 
-	break;
+    break;
 }
 
 // Disallow the winner to move after match end
@@ -937,7 +1089,8 @@ ST2::SetPos(C_ScoresTablePosition[False]);
 ST2::Build("SM");
 
 declare Text WinnerName;
-if (Players.existskey(WinnerId)) WinnerName = Players[WinnerId].User.Name;
+if (Players.existskey(WinnerId))
+    WinnerName = Players[WinnerId].User.Name;
 
 // ---------------------------------- //
 // Display the round winner
@@ -945,19 +1098,25 @@ UIManager.UIAll.ScoreTableVisibility = CUIConfig::EVisibility::ForcedVisible;
 UIManager.UIAll.BigMessageSound = CUIConfig::EUISound::EndRound;
 UIManager.UIAll.BigMessageSoundVariant = 0;
 
-if (WinnerName == "") UIManager.UIAll.BigMessage = _("|Match|Draw");
-else UIManager.UIAll.BigMessage = TL::Compose(_("$<%1$> wins the match!"), WinnerName);
+if (WinnerName == "")
+    UIManager.UIAll.BigMessage = _("|Match|Draw");
+else
+    UIManager.UIAll.BigMessage = TL::Compose(_("$<%1$> wins the match!"), WinnerName);
 
 MB_Sleep(6000);
 
 // ---------------------------------- //
 // Podium
 UIManager.UIAll.UISequence = CUIConfig::EUISequence::Podium;
-while(!UIManager.UIAll.UISequenceIsCompleted) MB_Yield();
+while (!UIManager.UIAll.UISequenceIsCompleted)
+    MB_Yield();
 
 UIManager.UIAll.ScoreTableVisibility = CUIConfig::EVisibility::Normal;
 UIManager.UIAll.BigMessage = "";
 ***
+
+
+
 
 // ---------------------------------- //
 // Server end
@@ -968,6 +1127,9 @@ Layers::Destroy("HungerGames:Interface");
 Layers::Destroy("HungerGames:Statistics");
 ***
 
+
+
+
 // ---------------------------------- //
 // Functions
 // ---------------------------------- //
@@ -977,25 +1139,37 @@ Layers::Destroy("HungerGames:Statistics");
  *
  *	@param	_Player		The player to update
  */
-Void UpdatePlayerSkills(CSmPlayer _Player) {
-	if (_Player == Null) return;
-	declare Integer[Text] PlayerSkillPoints for _Player;
-	
-	// ---------------------------------- //
-	// Limit skill points
-	foreach (SkillType => SkillPoints in C_SkillsPointsLimit) {
-		if (!PlayerSkillPoints.existskey(SkillType)) continue;
-		PlayerSkillPoints[SkillType] = ML::Min(PlayerSkillPoints[SkillType], SkillPoints);
-	}
-	
-	// ---------------------------------- //
-	// Apply skill points to the player parameters
-	foreach (SkillType => SkillPoints in PlayerSkillPoints) switch (SkillType) {
-		case "AmmoGain"		: _Player.AmmoGain		= ML::Clamp(SkillPoints / 100., 0., 10.);
-		case "StaminaGain"	: _Player.StaminaGain	= ML::Clamp(SkillPoints / 100., 0., 1.);
-		case "StaminaMax"	: _Player.StaminaMax	= ML::Clamp(SkillPoints / 100., .1, 3.);
-	}
+Void UpdatePlayerSkills(CSmPlayer _Player)
+{
+    if (_Player == Null)
+        return;
+    declare Integer[Text] PlayerSkillPoints for _Player;
+
+    // ---------------------------------- //
+    // Limit skill points
+    foreach (SkillType => SkillPoints in C_SkillsPointsLimit)
+    {
+        if (!PlayerSkillPoints.existskey(SkillType))
+            continue;
+        PlayerSkillPoints[SkillType] = ML::Min(PlayerSkillPoints[SkillType], SkillPoints);
+    }
+
+    // ---------------------------------- //
+    // Apply skill points to the player parameters
+    foreach (SkillType => SkillPoints in PlayerSkillPoints)
+        switch (SkillType)
+        {
+            case "AmmoGain":
+                _Player.AmmoGain = ML::Clamp(SkillPoints / 100., 0., 10.);
+            case "StaminaGain":
+                _Player.StaminaGain = ML::Clamp(SkillPoints / 100., 0., 1.);
+            case "StaminaMax":
+                _Player.StaminaMax = ML::Clamp(SkillPoints / 100., .1, 3.);
+        }
 }
+
+
+
 
 // ---------------------------------- //
 /** Set specific skill points of a player
@@ -1004,14 +1178,19 @@ Void UpdatePlayerSkills(CSmPlayer _Player) {
  *	@param	_SkillType		Type of the skill to set
  *	@param	_SkillPoints	Amount of the skill points to set
  */
-Void SetPlayerSkill(CSmPlayer _Player, Text _SkillType, Integer _SkillPoints) {
-	if (_Player == Null || _SkillType == "") return;
-	
-	declare Integer[Text] PlayerSkillPoints for _Player;
-	PlayerSkillPoints[_SkillType] = ML::Max(0, _SkillPoints);
-	
-	UpdatePlayerSkills(_Player);
+Void SetPlayerSkill(CSmPlayer _Player, Text _SkillType, Integer _SkillPoints)
+{
+    if (_Player == Null || _SkillType == "")
+        return;
+
+    declare Integer[Text] PlayerSkillPoints for _Player;
+    PlayerSkillPoints[_SkillType] = ML::Max(0, _SkillPoints);
+
+    UpdatePlayerSkills(_Player);
 }
+
+
+
 
 // ---------------------------------- //
 /** Add specific skill points for a player
@@ -1020,62 +1199,73 @@ Void SetPlayerSkill(CSmPlayer _Player, Text _SkillType, Integer _SkillPoints) {
  *	@param	_SkillType		Type of the skill to add
  *	@param	_SkillPoints	Amount of the skill points to add
  */
-Void AddPlayerSkill(CSmPlayer _Player, Text _SkillType, Integer _SkillPoints) {
-	if (_Player == Null || _SkillType == "") return;
-	
-	declare Integer[Text] PlayerSkillPoints for _Player;
-	if (!PlayerSkillPoints.existskey(_SkillType)) PlayerSkillPoints[_SkillType] = 0;
-	PlayerSkillPoints[_SkillType] += ML::Max(0, _SkillPoints);
-	
-	UpdatePlayerSkills(_Player);
+Void AddPlayerSkill(CSmPlayer _Player, Text _SkillType, Integer _SkillPoints)
+{
+    if (_Player == Null || _SkillType == "")
+        return;
+
+    declare Integer[Text] PlayerSkillPoints for _Player;
+    if (!PlayerSkillPoints.existskey(_SkillType))
+        PlayerSkillPoints[_SkillType] = 0;
+    PlayerSkillPoints[_SkillType] += ML::Max(0, _SkillPoints);
+
+    UpdatePlayerSkills(_Player);
 }
+
+
+
 
 // ---------------------------------- //
 /** Initialize and spawn a player
  *
  *	@param	_Player		A Player to spawn
  */
-Void HG_SpawnPlayer(CSmPlayer _Player) {
-	if (_Player == Null || _Player.User == Null || G_SpawnedPlayers.exists(_Player.User.Login)) return;
-	
-	// ---------------------------------- //
-	// Initialize through mode base and enable all weapon slots
-	GT_InitPlayer(_Player);
-	Inventory::SetAvailableWeapons(_Player, [
-		CSmMode::EWeapon::Laser,
-		CSmMode::EWeapon::Nucleus,
-		CSmMode::EWeapon::Arrow,
-		CSmMode::EWeapon::Rocket
-	]);
-	Inventory::SetFirstWeapon(_Player);
-	SetPlayerAmmoMax(_Player, CSmMode::EWeapon::Rocket, 0);
-	
-	// ---------------------------------- //
-	// Reset variables
-	declare Text[] ObjectsToDrop for _Player;
-	ObjectsToDrop.clear();
-	
-	// Initialize player skills
-	foreach (SkillType => SkillPoints in C_SkillsPointsStart)
-		SetPlayerSkill(_Player, SkillType, SkillPoints);
-	
-	// ---------------------------------- //
-	// Melee spawn selection method
-	if (G_SpawnsList.count == 0) foreach (MapLandmark in MapLandmarks_PlayerSpawn) G_SpawnsList.add(MapLandmark.Id);
-	declare SpawnId = NullId;
-	while (True) {
-		SpawnId = G_SpawnsList[ML::Rand(0, G_SpawnsList.count - 1)];
-		if (SpawnId != G_LatestSpawnId) break;
-		if (G_SpawnsList.count == 1) break;
-	}
-	G_LatestSpawnId = SpawnId;
-	declare Removed = G_SpawnsList.remove(SpawnId);
-	
-	// Spawn the player
-	SM::Spawn(_Player, 0, MapLandmarks_PlayerSpawn[SpawnId].PlayerSpawn);
-	G_SpawnedPlayers.add(_Player.Login);
-	_Player.HasShield = False;
+Void HG_SpawnPlayer(CSmPlayer _Player)
+{
+    if (_Player == Null || _Player.User == Null || G_SpawnedPlayers.exists(_Player.User.Login))
+        return;
+
+    // ---------------------------------- //
+    // Initialize through mode base and enable all weapon slots
+    GT_InitPlayer(_Player);
+    Inventory::SetAvailableWeapons(_Player, [CSmMode::EWeapon::Laser, CSmMode::EWeapon::Nucleus, CSmMode::EWeapon::Arrow, CSmMode::EWeapon::Rocket]);
+    Inventory::SetFirstWeapon(_Player);
+    SetPlayerAmmoMax(_Player, CSmMode::EWeapon::Rocket, 0);
+
+    // ---------------------------------- //
+    // Reset variables
+    declare Text[] ObjectsToDrop for _Player;
+    ObjectsToDrop.clear();
+
+    // Initialize player skills
+    foreach (SkillType => SkillPoints in C_SkillsPointsStart)
+        SetPlayerSkill(_Player, SkillType, SkillPoints);
+
+    // ---------------------------------- //
+    // Melee spawn selection method
+    if (G_SpawnsList.count == 0)
+        foreach (MapLandmark in MapLandmarks_PlayerSpawn)
+            G_SpawnsList.add(MapLandmark.Id);
+    declare SpawnId = NullId;
+    while (True)
+    {
+        SpawnId = G_SpawnsList[ML::Rand(0, G_SpawnsList.count - 1)];
+        if (SpawnId != G_LatestSpawnId)
+            break;
+        if (G_SpawnsList.count == 1)
+            break;
+    }
+    G_LatestSpawnId = SpawnId;
+    declare Removed = G_SpawnsList.remove(SpawnId);
+
+    // Spawn the player
+    SM::Spawn(_Player, 0, MapLandmarks_PlayerSpawn[SpawnId].PlayerSpawn);
+    G_SpawnedPlayers.add(_Player.Login);
+    _Player.HasShield = False;
 }
+
+
+
 
 // ---------------------------------- //
 /** Spawn an object
@@ -1086,47 +1276,59 @@ Void HG_SpawnPlayer(CSmPlayer _Player) {
  *
  *	@return		The created object
  */
-CSmObject SpawnObject(Vec3 _Position, Text _ObjectTag, Ident _AnchorId) {
-	if (_Position == <0., 0., 0.> || !C_ModeSupportedObjects.exists(_ObjectTag)) return Null;
+CSmObject SpawnObject(Vec3 _Position, Text _ObjectTag, Ident _AnchorId)
+{
+    if (_Position == < 0. , 0., 0.>|| !C_ModeSupportedObjects.exists(_ObjectTag))
+        return Null;
 
-	// Check if the given id belongs to a real object anchor landmark
-	declare AnchorId = NullId;
-	if (MapLandmarks_ObjectAnchor.existskey(_AnchorId)) AnchorId = _AnchorId;
-	
-	// Object may belong to the GalaxyTitles library
-	declare Object = GalaxyTitles::SpawnObject(_Position, _ObjectTag);
-	
-	// ---------------------------------- //
-	// Create the object
-	if (Object == Null) {
-		switch (_ObjectTag) {
-			case "Weapon"	: Object = ObjectCreate(G_ObjectId["Weapon"]);
-			case "Charge"	: Object = ObjectCreate(G_ObjectId["Charge"]);
-			case "Mini"		: Object = ObjectCreate(G_ObjectId["Mini"]);
-		}
-		if (Object == Null) return Null;
-		
-		// Spawn object
-		Object.SetPosition(_Position);
-	}
+    // Check if the given id belongs to a real object anchor landmark
+    declare AnchorId = NullId;
+    if (MapLandmarks_ObjectAnchor.existskey(_AnchorId))
+        AnchorId = _AnchorId;
 
-	// ---------------------------------- //
-	// Set object properties
-	declare Ident AnchorId as ObjectAnchorId for Object;
-	declare Text Tag for Object;
-	ObjectAnchorId = AnchorId;
-	Tag = _ObjectTag;
-	
-	// Save created object id
-	G_CreatedObjects.add(Object.Id);
-	
-	// ---------------------------------- //
-	// Save central Goal distance in the object
+    // Object may belong to the GalaxyTitles library
+    declare Object = GalaxyTitles::SpawnObject(_Position, _ObjectTag);
+
+    // ---------------------------------- //
+    // Create the object
+    if (Object == Null)
+    {
+        switch (_ObjectTag)
+        {
+            case "Weapon":
+                Object = ObjectCreate(G_ObjectId["Weapon"]);
+            case "Charge":
+                Object = ObjectCreate(G_ObjectId["Charge"]);
+            case "Mini":
+                Object = ObjectCreate(G_ObjectId["Mini"]);
+        }
+        if (Object == Null)
+            return Null;
+
+        // Spawn object
+        Object.SetPosition(_Position);
+    }
+
+    // ---------------------------------- //
+    // Set object properties
+    declare Ident AnchorId as ObjectAnchorId for Object;
+    declare Text Tag for Object;
+    ObjectAnchorId = AnchorId;
+    Tag = _ObjectTag;
+
+    // Save created object id
+    G_CreatedObjects.add(Object.Id);
+
+    // ---------------------------------- //
+    // Save central Goal distance in the object
     declare Real CenterGoalDistance for Object;
-	CenterGoalDistance = GT_Distance2D(Object.Position, G_CenterGoalPosition);
-	
-	return Object;
+    CenterGoalDistance = GT_Distance2D(Object.Position, G_CenterGoalPosition);
+
+    return Object;
 }
+
+
+
 
 // ---------------------------------- //
 /** Spawn an object
@@ -1136,54 +1338,79 @@ CSmObject SpawnObject(Vec3 _Position, Text _ObjectTag, Ident _AnchorId) {
  *
  *	@return		The created object
  */
-CSmObject SpawnObject(Vec3 _Position, Text _ObjectTag) { return SpawnObject(_Position, _ObjectTag, NullId); }
+CSmObject SpawnObject(Vec3 _Position, Text _ObjectTag)
+{
+    return SpawnObject(_Position, _ObjectTag, NullId);
+}
+
+
+
 
 // ---------------------------------- //
 /// Spawn objects on landmarks
-Void SpawnObjects() {
-	foreach (MapLandmark in MapLandmarks_ObjectAnchor) {
-		declare ObjectSpawned for MapLandmark = False;
-		declare ObjectNextSpawn for MapLandmark = Now;
-		declare ObjectType for MapLandmark = "";
-		
-		// ---------------------------------- //
-		// Continue if landmark has object or object can't be spawned
-		if (ObjectType == "" || ObjectSpawned || Now < ObjectNextSpawn) continue;
-		
-		// ---------------------------------- //
-		// Create object
-		declare Object = SpawnObject(MapLandmark.Position, ObjectType, MapLandmark.Id);
-		ObjectSpawned = Object != Null;
-	}
+Void SpawnObjects()
+{
+    foreach (MapLandmark in MapLandmarks_ObjectAnchor)
+    {
+        declare ObjectSpawned for MapLandmark = False;
+        declare ObjectNextSpawn for MapLandmark = Now;
+        declare ObjectType for MapLandmark = "";
+
+        // ---------------------------------- //
+        // Continue if landmark has object or object can't be spawned
+        if (ObjectType == "" || ObjectSpawned || Now < ObjectNextSpawn)
+            continue;
+
+        // ---------------------------------- //
+        // Create object
+        declare Object = SpawnObject(MapLandmark.Position, ObjectType, MapLandmark.Id);
+        ObjectSpawned = Object != Null;
+    }
 }
+
+
+
 
 // ---------------------------------- //
 /** Destroy an object
  *
  *	@param	_Object		The object to destroy
  */
-Boolean DestroyObject(CSmObject _Object) {
-	if (_Object == Null) return False;
-	if (GalaxyTitles::DestroyObject(_Object)) return True;
-	
-	declare Removed = G_CreatedObjects.remove(_Object.Id);
-	
-	// Destroy object (unspawning the object gives a quiet sound)
-	_Object.SetUnspawned();
-	ObjectDestroy(_Object);
-	return True;
+Boolean DestroyObject(CSmObject _Object)
+{
+    if (_Object == Null)
+        return False;
+    if (GalaxyTitles::DestroyObject(_Object))
+        return True;
+
+    declare Removed = G_CreatedObjects.remove(_Object.Id);
+
+    // Destroy object (unspawning the object gives a quiet sound)
+    _Object.SetUnspawned();
+    ObjectDestroy(_Object);
+    return True;
 }
+
+
+
 
 // ---------------------------------- //
 /// Destroy all objects created in the mode
-Void DestroyAllObjects() {
-	if (G_CreatedObjects.count <= 0) return;
-	foreach (ObjectId in G_CreatedObjects) {
-		if (!Objects.existskey(ObjectId)) continue;
-		declare Removed = DestroyObject(Objects[ObjectId]);
-	}
-	G_CreatedObjects.clear();
+Void DestroyAllObjects()
+{
+    if (G_CreatedObjects.count <= 0)
+        return;
+    foreach (ObjectId in G_CreatedObjects)
+    {
+        if (!Objects.existskey(ObjectId))
+            continue;
+        declare Removed = DestroyObject(Objects[ObjectId]);
+    }
+    G_CreatedObjects.clear();
 }
+
+
+
 
 // ---------------------------------- //
 /** Pick up object
@@ -1192,110 +1419,116 @@ Void DestroyAllObjects() {
  *
  *	@return		True, if the object was picked up
  */
-Boolean PickUpObject(CSmModeEvent _Event) {
-	if (
-		_Event == Null || _Event.Type != CSmModeEvent::EType::OnPlayerTouchesObject ||
-		_Event.Object == Null || _Event.Player == Null || _Event.Player.IsBot ||
-		_Event.Player.SpawnStatus != CSmPlayer::ESpawnStatus::Spawned
-	) return False;
-	
-	declare Text Tag for _Event.Object;
-	declare Boolean DroppedByPlayer for _Event.Object;
-	
-	// Manage only Weapons, Charges and Minis
-	declare SupportedTags = ["Weapon", "Charge", "Mini"];
-	if (!SupportedTags.exists(Tag)) return False;
-	
-	// ---------------------------------- //
-	// Pick conditions
-	declare CSmMode::EWeapon[] PossibleWeapons;
-	declare CanPickUpObject = True;
-	
-	switch (Tag) {
-		// ---------------------------------- //
-		// Weapon conditions
-		case "Weapon" : {
-			// Add weapons if player haven't maxed them out yet
-			foreach (Weapon => A in C_PlayerInitialWeapons) {
-				declare WeaponMaxSlots = S_MaximumNbWeapons;
-				if (Weapon == CSmMode::EWeapon::Rocket) WeaponMaxSlots = C_PlayerMaxNbRocketSlots;
-				if (WeaponMaxSlots <= 0 || Inventory::GetWeaponSlots(_Event.Player, Weapon) < WeaponMaxSlots)
-					PossibleWeapons.add(Weapon);
-			}
-			
-			CanPickUpObject = PossibleWeapons.count > 0;
-		}
-		// ---------------------------------- //
-		// Mini conditions
-		case "Mini" : CanPickUpObject = DroppedByPlayer || _Event.Player.Armor - C_MiniItemArmorTakenOnPick > 0;
-	}
-	
-	// Continue, if the object can't be picked up
-	if (!CanPickUpObject) return False;
-	
-	// ---------------------------------- //
-	// Apply effect
-	switch (Tag) {
-		// ---------------------------------- //
-		// Weapon: gives 1 weapon and reloads 1 armor
-		case "Weapon" : {
-			declare NewWeapon = PossibleWeapons[ML::Rand(0, PossibleWeapons.count - 1)];
-			Inventory::AddWeaponSlots(_Event.Player, NewWeapon, 1);
-			
-			// Notify player about the new weapon received
-			declare WeaponName = TL::Split("::", ""^NewWeapon);
-			Interfancy::SendCrosshairNote(_Event.Player, ["+1 %1 ", WeaponName[WeaponName.count - 1]], 2000);
-			
-			// Heal the player (if object was naturally generated)
-			if (!DroppedByPlayer) GalaxyTitles::GivePlayerArmor(_Event.Player, C_WeaponItemArmorBonus);
-		}
-		// ---------------------------------- //
-		// Charge: increase reload, stamina gain and max
-		case "Charge" : {
-			declare SkillsToIncrease = ["AmmoGain", "StaminaGain", "StaminaMax"];
-			foreach (SkillType in SkillsToIncrease)
-				AddPlayerSkill(_Event.Player, SkillType, C_ChargeItemSkillPoints);
-			
-			// Notify player about new abilities
-			Interfancy::SendCrosshairNote(
-				_Event.Player,
-				["+%1% %2 ", TL::ToText(C_ChargeItemSkillPoints), "Skills"],
-				2000
-			);
-		}
-		// ---------------------------------- //
-		// MiniCharge: double bonus as Charge, removes 1 armor
-		case "Mini" : {
-			declare SkillsToIncrease = ["AmmoGain", "StaminaGain", "StaminaMax"];
-			foreach (SkillType in SkillsToIncrease)
-				AddPlayerSkill(_Event.Player, SkillType, C_ChargeItemSkillPoints * C_MiniItemBonusMultiplier);
-			
-			// Remove player armor (if object was naturally generated)
-			if (!DroppedByPlayer) RemovePlayerArmor(_Event.Player, C_MiniItemArmorTakenOnPick, Null, 0);
-			
-			// Notify player about new abilities
-			Interfancy::SendCrosshairNote(
-				_Event.Player,
-				["+%1% %2 ", TL::ToText(C_ChargeItemSkillPoints * C_MiniItemBonusMultiplier), "Skills"],
-				2000
-			);
-		}
-	}
-	
-	// ---------------------------------- //
-	// Bind object tag to a player for eventual late drop
-	declare Text[] ObjectsToDrop for _Event.Player;
-	ObjectsToDrop.add(Tag);
+Boolean PickUpObject(CSmModeEvent _Event)
+{
+    if (_Event == Null || _Event.Type != CSmModeEvent::EType::OnPlayerTouchesObject || _Event.Object == Null || _Event.Player == Null || _Event.Player.IsBot || _Event.Player.SpawnStatus != CSmPlayer::ESpawnStatus::Spawned)
+        return False;
 
-	// ---------------------------------- //
-	// Give points for picking up the item
-	TopScores::AddPoints(_Event.Player.Score, "Items", 1);
-	Scores::AddPlayerMapPoints(_Event.Player.Score, C_PlayerPointsForObjects);
-	
-	// Destroy object
-	declare Destroyed = DestroyObject(_Event.Object);
-	return True;
+    declare Text Tag for _Event.Object;
+    declare Boolean DroppedByPlayer for _Event.Object;
+
+    // Manage only Weapons, Charges and Minis
+    declare SupportedTags = ["Weapon", "Charge", "Mini"];
+    if (!SupportedTags.exists(Tag))
+        return False;
+
+    // ---------------------------------- //
+    // Pick conditions
+    declare CSmMode::EWeapon[] PossibleWeapons;
+    declare CanPickUpObject = True;
+
+    switch (Tag)
+    {
+        // ---------------------------------- //
+        // Weapon conditions
+        case "Weapon":
+        {
+            // Add weapons if player haven't maxed them out yet
+            foreach (Weapon => A in C_PlayerInitialWeapons)
+            {
+                declare WeaponMaxSlots = S_MaximumNbWeapons;
+                if (Weapon == CSmMode::EWeapon::Rocket)
+                    WeaponMaxSlots = C_PlayerMaxNbRocketSlots;
+                if (WeaponMaxSlots <= 0 || Inventory::GetWeaponSlots(_Event.Player, Weapon) < WeaponMaxSlots)
+                    PossibleWeapons.add(Weapon);
+            }
+
+            CanPickUpObject = PossibleWeapons.count > 0;
+        }
+        // ---------------------------------- //
+        // Mini conditions
+        case "Mini":
+            CanPickUpObject = DroppedByPlayer || _Event.Player.Armor - C_MiniItemArmorTakenOnPick > 0;
+    }
+
+    // Continue, if the object can't be picked up
+    if (!CanPickUpObject)
+        return False;
+
+    // ---------------------------------- //
+    // Apply effect
+    switch (Tag)
+    {
+        // ---------------------------------- //
+        // Weapon: gives 1 weapon and reloads 1 armor
+        case "Weapon":
+        {
+            declare NewWeapon = PossibleWeapons[ML::Rand(0, PossibleWeapons.count - 1)];
+            Inventory::AddWeaponSlots(_Event.Player, NewWeapon, 1);
+
+            // Notify player about the new weapon received
+            declare WeaponName = TL::Split("::", "" ^ NewWeapon);
+            Interfancy::SendCrosshairNote(_Event.Player, ["+1 %1 ", WeaponName[WeaponName.count - 1]], 2000);
+
+            // Heal the player (if object was naturally generated)
+            if (!DroppedByPlayer)
+                GalaxyTitles::GivePlayerArmor(_Event.Player, C_WeaponItemArmorBonus);
+        }
+        // ---------------------------------- //
+        // Charge: increase reload, stamina gain and max
+        case "Charge":
+        {
+            declare SkillsToIncrease = ["AmmoGain", "StaminaGain", "StaminaMax"];
+            foreach (SkillType in SkillsToIncrease)
+                AddPlayerSkill(_Event.Player, SkillType, C_ChargeItemSkillPoints);
+
+            // Notify player about new abilities
+            Interfancy::SendCrosshairNote(_Event.Player, ["+%1% %2 ", TL::ToText(C_ChargeItemSkillPoints), "Skills"], 2000);
+        }
+        // ---------------------------------- //
+        // MiniCharge: double bonus as Charge, removes 1 armor
+        case "Mini":
+        {
+            declare SkillsToIncrease = ["AmmoGain", "StaminaGain", "StaminaMax"];
+            foreach (SkillType in SkillsToIncrease)
+                AddPlayerSkill(_Event.Player, SkillType, C_ChargeItemSkillPoints * C_MiniItemBonusMultiplier);
+
+            // Remove player armor (if object was naturally generated)
+            if (!DroppedByPlayer)
+                RemovePlayerArmor(_Event.Player, C_MiniItemArmorTakenOnPick, Null, 0);
+
+            // Notify player about new abilities
+            Interfancy::SendCrosshairNote(_Event.Player, ["+%1% %2 ", TL::ToText(C_ChargeItemSkillPoints * C_MiniItemBonusMultiplier), "Skills"], 2000);
+        }
+    }
+
+    // ---------------------------------- //
+    // Bind object tag to a player for eventual late drop
+    declare Text[] ObjectsToDrop for _Event.Player;
+    ObjectsToDrop.add(Tag);
+
+    // ---------------------------------- //
+    // Give points for picking up the item
+    TopScores::AddPoints(_Event.Player.Score, "Items", 1);
+    Scores::AddPlayerMapPoints(_Event.Player.Score, C_PlayerPointsForObjects);
+
+    // Destroy object
+    declare Destroyed = DestroyObject(_Event.Object);
+    return True;
 }
+
+
+
 
 // ---------------------------------- //
 /** Drop objects picked up by a player
@@ -1303,66 +1536,89 @@ Boolean PickUpObject(CSmModeEvent _Event) {
  *	@param	_Player		The player whoose objects are dropped
  *	@param	_DropRatio	Percentage ratio of the dropped objects
  */
-Void DropPlayerObjects(CSmPlayer _Player, Real _DropRatio) {
-	if (_Player == Null || _DropRatio <= 0) return;
-	
-	// ---------------------------------- //
-	// Get all objects of the player
-	declare Text[] ObjectsToDrop for _Player;
-	declare PlayerReplies = Inventory::GetItemAmount(_Player, "LibGalaxyTitles_Replie");
-	if (PlayerReplies > 0) for (I, 1, PlayerReplies) ObjectsToDrop.add("Replie");
-	declare TotalObjectsCount = ObjectsToDrop.count;
-	
-	// Remove random objects when there are too many
-	while (ObjectsToDrop.count > TotalObjectsCount * _DropRatio) {
-		declare Removed = ObjectsToDrop.removekey(ML::Rand(0, ObjectsToDrop.count - 1));
-	}
-	
-	// ---------------------------------- //
-	// Spawn player objects
-	foreach (NewObjectTag in ObjectsToDrop) {
-		declare ObjectPosition = _Player.Position;
-		for (I, 0, 1) ObjectPosition[I*2] += ML::Rand(-C_ObjectsDropSpreadRadius, C_ObjectsDropSpreadRadius);
-		
-		// Create object
-		declare Object = SpawnObject(ObjectPosition, NewObjectTag);
-		if (Object == Null) continue;
-		
-		// Indicate that object was dropped by a player
-		declare Boolean DroppedByPlayer for Object;
-		DroppedByPlayer = True;
-	}
+Void DropPlayerObjects(CSmPlayer _Player, Real _DropRatio)
+{
+    if (_Player == Null || _DropRatio <= 0)
+        return;
+
+    // ---------------------------------- //
+    // Get all objects of the player
+    declare Text[] ObjectsToDrop for _Player;
+    declare PlayerReplies = Inventory::GetItemAmount(_Player, "LibGalaxyTitles_Replie");
+    if (PlayerReplies > 0)
+        for (I , 1 , PlayerReplies)
+            ObjectsToDrop.add("Replie");
+    declare TotalObjectsCount = ObjectsToDrop.count;
+
+    // Remove random objects when there are too many
+    while (ObjectsToDrop.count > TotalObjectsCount * _DropRatio)
+    {
+        declare Removed = ObjectsToDrop.removekey(ML::Rand(0, ObjectsToDrop.count - 1));
+    }
+
+    // ---------------------------------- //
+    // Spawn player objects
+    foreach (NewObjectTag in ObjectsToDrop)
+    {
+        declare ObjectPosition = _Player.Position;
+        for (I , 0 , 1)
+            ObjectPosition[I * 2] += ML::Rand(-C_ObjectsDropSpreadRadius, C_ObjectsDropSpreadRadius);
+
+        // Create object
+        declare Object = SpawnObject(ObjectPosition, NewObjectTag);
+        if (Object == Null)
+            continue;
+
+        // Indicate that object was dropped by a player
+        declare Boolean DroppedByPlayer for Object;
+        DroppedByPlayer = True;
+    }
 }
+
+
+
 
 // ---------------------------------- //
 /** Set start time for the UI
  *
  *	@param	_StartTime	The start time
  */
-Void UISetStartTime(Integer _StartTime) {
-	declare netwrite Integer Net_HungerGames_StartTime for Teams[0];
-	Net_HungerGames_StartTime = _StartTime;
+Void UISetStartTime(Integer _StartTime)
+{
+    declare netwrite Integer Net_HungerGames_StartTime for Teams[0];
+    Net_HungerGames_StartTime = _StartTime;
 }
+
+
+
 
 // ---------------------------------- //
 /** Set alive players amount for the UI
  *
  *	@param	_PlayersNbAlive		Amount of alive players
  */
-Void UISetNbPlayersAlive(Integer _PlayersNbAlive) {
-	declare netwrite Integer Net_HungerGames_PlayersAlive for Teams[0];
-	Net_HungerGames_PlayersAlive = _PlayersNbAlive;
+Void UISetNbPlayersAlive(Integer _PlayersNbAlive)
+{
+    declare netwrite Integer Net_HungerGames_PlayersAlive for Teams[0];
+    Net_HungerGames_PlayersAlive = _PlayersNbAlive;
 }
+
+
+
 
 // ---------------------------------- //
 /** Add player who touched Goal to the UI
  *
  *	@param	_Login	Login of the player
  */
-Void UIAddPlayerTouchingGoal(Text _Login) {
-	declare netwrite Text[] Net_HungerGames_TouchedGoal for Teams[0];
-	Net_HungerGames_TouchedGoal.add(_Login);
+Void UIAddPlayerTouchingGoal(Text _Login)
+{
+    declare netwrite Text[] Net_HungerGames_TouchedGoal for Teams[0];
+    Net_HungerGames_TouchedGoal.add(_Login);
 }
+
+
+
 
 // ---------------------------------- //
 /** Set player respawn time on the UI
@@ -1370,28 +1626,39 @@ Void UIAddPlayerTouchingGoal(Text _Login) {
  *	@param	_Player		The player to set time
  *	@param	_Time		Player respawn start time
  */
-Void UISetRespawnStartTime(CSmPlayer _Player, Integer _Time) {
-	if (_Player == Null || _Player.IsBot || _Player.User == Null) return;
-	declare Login = _Player.User.Login;
-	
-	// Set respawn start time
-	declare netwrite Integer[Text] Net_HungerGames_RespawnStart for Teams[0];
-	if (_Time > 0) Net_HungerGames_RespawnStart[Login] = _Time;
-	
-	// Reset start time
-	else if (Net_HungerGames_RespawnStart.existskey(Login)) {
-		declare Removed = Net_HungerGames_RespawnStart.removekey(Login);
-	}
+Void UISetRespawnStartTime(CSmPlayer _Player, Integer _Time)
+{
+    if (_Player == Null || _Player.IsBot || _Player.User == Null)
+        return;
+    declare Login = _Player.User.Login;
+
+    // Set respawn start time
+    declare netwrite Integer[Text] Net_HungerGames_RespawnStart for Teams[0];
+    if (_Time > 0)
+        Net_HungerGames_RespawnStart[Login] = _Time;
+
+    // Reset start time
+    else if (Net_HungerGames_RespawnStart.existskey(Login))
+    {
+        declare Removed = Net_HungerGames_RespawnStart.removekey(Login);
+    }
 }
+
+
+
 
 // ---------------------------------- //
 /// Clear interfaces
-Void UIResetAll() {
-	declare netwrite Text[] Net_HungerGames_TouchedGoal for Teams[0];
-	declare netwrite Integer[Text] Net_HungerGames_RespawnStart for Teams[0];
-	Net_HungerGames_TouchedGoal.clear();
-	Net_HungerGames_RespawnStart.clear();
+Void UIResetAll()
+{
+    declare netwrite Text[] Net_HungerGames_TouchedGoal for Teams[0];
+    declare netwrite Integer[Text] Net_HungerGames_RespawnStart for Teams[0];
+    Net_HungerGames_TouchedGoal.clear();
+    Net_HungerGames_RespawnStart.clear();
 }
+
+
+
 
 // ---------------------------------- //
 /** Set player's survived position.
@@ -1399,22 +1666,29 @@ Void UIResetAll() {
  *	@param	_Player				The player to set position
  *	@param	_SurvivedPosition	The survived position
  */
-Void UISetPlayerSurvivedPosition(CSmPlayer _Player, Integer _SurvivedPosition) {
-	if (_Player == Null) return;
-	declare UI <=> UIManager.GetUI(_Player);
-	if (UI == Null) return;
+Void UISetPlayerSurvivedPosition(CSmPlayer _Player, Integer _SurvivedPosition)
+{
+    if (_Player == Null)
+        return;
+    declare UI <=> UIManager.GetUI(_Player);
+    if (UI == Null)
+        return;
 
-	declare netwrite Integer Net_HungerGames_SurvivedPosition for UI;
-	Net_HungerGames_SurvivedPosition = _SurvivedPosition;
+    declare netwrite Integer Net_HungerGames_SurvivedPosition for UI;
+    Net_HungerGames_SurvivedPosition = _SurvivedPosition;
 }
+
+
+
 
 // ---------------------------------- //
 /** Create manialink for the interface module
  *
  *	@return		The interface manialink
  */
-Text CreateManialinkInterface() {
-	return """
+Text CreateManialinkInterface()
+{
+    return """
 <manialink version="3" name="HungerGames:Interface">
 <stylesheet>
 	<style class="font" halign="center" valign="center2" textsize="1" textemboss="1" textcolor="FFF" textfont="Eurostile_Bold" />
@@ -1763,14 +2037,18 @@ main() {
 </manialink>""";
 }
 
+
+
+
 // ---------------------------------- //
 /** Create manialink for the statistics module
  *
  *	@return		The statistics manialink
  */
-Text CreateManialinkStatistics() {
-	declare WB = "file://Media/Manialinks/ShootMania/Window/";
-	return """
+Text CreateManialinkStatistics()
+{
+    declare WB = "file://Media/Manialinks/ShootMania/Window/";
+    return """
 <manialink version="3" name="HungerGames:Statistics">
 <stylesheet>
 	<style class="font" valign="center2" textemboss="1" textcolor="FFF" textsize="1" textfont="Eurostile_Bold" />

@@ -1,12 +1,14 @@
-#Const C_ModeSupportedObjects ["Weapon", "Charge", "Mini", "Replie", "Armor", "Fuel"]
+/// Position of the scores table depending on the statistics visibility
+#Const C_ScoresTablePosition [False => <0., 40., 20.>, True => <0., 47., 20.>]
 
-  Void Private_Test    (   )
+Void Private_Test()
 {
-    UI.SendNotice("",
-            CUIConfig::ENoticeLevel::PlayerInfo );
+    UI.SendNotice("", CUIConfig::ENoticeLevel::PlayerInfo);
 
-    if(True) {
+    if (Mdr[0])
+    {
 
 
-log("MDR"); }
-            }
+        log("MDR");
+    }
+}

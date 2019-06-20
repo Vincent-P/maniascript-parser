@@ -314,11 +314,6 @@ impl<'a> Parser<'a> {
                 setting.set_setting(self.next_token_node())?;
                 setting.set_name(self.expect_node(TokenKind::Identifier)?)?;
                 setting.set_value(self.parse_expr()?)?;
-
-                if self.next_token_is(TokenKind::As) {
-                    setting.set_as_(self.next_token_node())?;
-                    setting.set_description(self.parse_expr()?)?;
-                }
                 Ok(self.tree.end_node(NodeKind::Setting(setting)))
             }
             TokenKind::RequireContext => {
