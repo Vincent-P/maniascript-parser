@@ -108,6 +108,7 @@ impl Token {
             k if k.is_binary_op() => {
                 let mut binop = BinaryOp::new(parser.tree.start_node());
                 binop.set_lhs(lhs)?;
+                parser.tree.link_nodes(binop.syntax(), lhs);
                 binop.set_operator(parser.tree.add_node(Node::from(self)))?;
                 binop.set_rhs(parser.expression(self.lbp())?)?;
                 Ok(parser.tree.end_node(NodeKind::BinaryOp(binop)))
@@ -118,6 +119,7 @@ impl Token {
                 let mut array_access = ArrayAccess::new(parser.tree.start_node());
 
                 array_access.set_lhs(lhs)?;
+                parser.tree.link_nodes(array_access.syntax(), lhs);
                 array_access.set_lsquare(parser.tree.add_node(Node::from(self)))?;
                 array_access.set_index(parser.expression(self.lbp())?)?;
                 array_access.set_rsquare(parser.expect_node(TokenKind::CloseSquare)?)?;
@@ -130,6 +132,7 @@ impl Token {
                 let mut function_call = FunctionCall::new(parser.tree.start_node());
 
                 function_call.set_lhs(lhs)?;
+                parser.tree.link_nodes(function_call.syntax(), lhs);
                 function_call.set_lparen(parser.tree.add_node(Node::from(self)))?;
 
                 if parser.next_token_is(TokenKind::CloseParen) {
@@ -225,6 +228,7 @@ impl<'a> Parser<'a> {
     }
 
     fn expression(&mut self, rbp: u32) -> Result<NodeId, String> {
+        self.tree.start_node();
         let mut left = self.parse_nud()?;
 
         while let Some(t) = self.tokens.peek() {
@@ -235,13 +239,11 @@ impl<'a> Parser<'a> {
             left = self.parse_led(left)?;
         }
 
-        Ok(left)
+        Ok(self.tree.end_node(NodeKind::Expr))
     }
 
     pub fn parse_expr(&mut self) -> Result<NodeId, String> {
-        self.tree.start_node();
-        self.expression(1)?;
-        Ok(self.tree.end_node(NodeKind::Expr))
+        self.expression(1)
     }
     // EXPRESSIONS PARSING END
 
@@ -328,7 +330,7 @@ impl<'a> Parser<'a> {
                     .end_node(NodeKind::RequireContext(require_context)))
             }
             TokenKind::Extends => {
-                let mut extends = Extends::new(self.tree.new_node());
+                let mut extends = Extends::new(self.tree.start_node());
                 extends.set_extends(self.next_token_node())?;
                 extends.set_path(self.expect_node(TokenKind::LineString)?)?;
                 Ok(self.tree.end_node(NodeKind::Extends(extends)))
@@ -502,7 +504,7 @@ impl<'a> Parser<'a> {
         }
 
         let semi = self.expect_node(TokenKind::Semicolon)?;
-        self.tree.add_child_id(vardec.syntax(), semi);
+        self.tree.link_nodes(vardec.syntax(), semi);
 
         Ok(self.tree.end_node(NodeKind::VarDec(vardec)))
     }
@@ -537,7 +539,7 @@ impl<'a> Parser<'a> {
         if_.set_condition(self.parse_expr()?)?;
 
         if self.next_token_is(TokenKind::CloseParen) {
-            if_.set_if_(self.next_token_node())?;
+            if_.set_rparen(self.next_token_node())?;
         }
 
         if_.set_body(self.parse_statement()?)?;
@@ -578,14 +580,22 @@ impl<'a> Parser<'a> {
                 self.tree.end_node(NodeKind::LabelCall(label))
             }
 
-            TokenKind::Break | TokenKind::Continue | TokenKind::Yield | TokenKind::Return => {
+            TokenKind::Return => {
+                let mut return_ = Return::new(self.tree.start_node());
+                return_.set_return_(self.next_token_node())?;
+                if !self.next_token_is(TokenKind::Semicolon) {
+                    return_.set_value(self.parse_expr()?)?;
+                }
+                self.tree.end_node(NodeKind::Return(return_))
+            }
+
+            TokenKind::Break | TokenKind::Continue | TokenKind::Yield => {
                 self.tree.start_node();
                 self.next_token_node();
                 self.tree.end_node(match &tkind {
                     TokenKind::Break => NodeKind::Break,
                     TokenKind::Continue => NodeKind::Continue,
                     TokenKind::Yield => NodeKind::Yield,
-                    TokenKind::Return => NodeKind::Return,
                     _ => unreachable!(),
                 })
             }
@@ -703,7 +713,7 @@ impl<'a> Parser<'a> {
         for_.set_value_start(self.parse_expr()?)?;
 
         if self.next_token_is(TokenKind::Comma) {
-            for_.set_comma1(self.next_token_node())?;
+            for_.set_comma2(self.next_token_node())?;
         }
 
         for_.set_value_end(self.parse_expr()?)?;

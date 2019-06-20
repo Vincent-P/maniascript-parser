@@ -5,4 +5,8 @@
     UI.SendNotice("",
             CUIConfig::ENoticeLevel::PlayerInfo );
 
+    if(True) {
+
+
+log("MDR"); }
             }

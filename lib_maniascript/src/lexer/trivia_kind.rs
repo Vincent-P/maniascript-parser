@@ -13,13 +13,17 @@ pub enum TriviaKind {
 
 impl TriviaKind {
     pub fn is_line_break(&self) -> bool {
+        self.line_count() > 0
+    }
+
+    pub fn line_count(&self) -> usize {
         match self {
-            TriviaKind::Newline(_)
-            | TriviaKind::FormFeed(_)
-            | TriviaKind::CarriageReturn(_)
-            | TriviaKind::CarriageReturnNewline(_)
-            | TriviaKind::VerticalTab(_) => true,
-            _ => false,
+            TriviaKind::Newline(s)
+            | TriviaKind::FormFeed(s)
+            | TriviaKind::CarriageReturn(s)
+            | TriviaKind::CarriageReturnNewline(s)
+            | TriviaKind::VerticalTab(s) => *s,
+            _ => 0,
         }
     }
 

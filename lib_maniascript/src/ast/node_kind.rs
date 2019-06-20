@@ -35,7 +35,7 @@ pub enum NodeKind {
     Statement(Statement),
     Continue,
     Break,
-    Return,
+    Return(Return),
     Yield,
     LabelCall(LabelCall),
     Assignment(Assignment),
@@ -182,7 +182,7 @@ pub struct FuncDec {
     type_: NodeRef,
     name: NodeRef,
     lparen: NodeRef,
-    pub args: Vec<NodeId>,
+    args: Vec<NodeId>,
     rparen: NodeRef,
     body: NodeRef,
 }
@@ -190,6 +190,9 @@ pub struct FuncDec {
 impl FuncDec {
     pub fn add_arg(&mut self, data: NodeId) {
         self.args.push(data);
+    }
+    pub fn get_args(&self) -> &Vec<NodeId> {
+        &self.args
     }
 }
 
@@ -207,6 +210,10 @@ pub struct LabelImpl {
 impl LabelImpl {
     pub fn add_statement(&mut self, data: NodeId) {
         self.statements.push(data);
+    }
+
+    pub fn get_statements(&self) -> &Vec<NodeId> {
+        &self.statements
     }
 }
 
@@ -246,6 +253,9 @@ pub struct Switch {
 impl Switch {
     pub fn add_case(&mut self, data: NodeId) {
         self.cases.push(data);
+    }
+    pub fn get_cases(&self) -> &Vec<NodeId> {
+        &self.cases
     }
 }
 
@@ -308,13 +318,16 @@ pub struct While {
 pub struct Block {
     syntax: NodeId,
     lbrace: NodeRef,
-    pub statements: Vec<NodeId>,
+    statements: Vec<NodeId>,
     rbrace: NodeRef,
 }
 
 impl Block {
     pub fn add_statement(&mut self, data: NodeId) {
         self.statements.push(data);
+    }
+    pub fn get_statements(&self) -> &Vec<NodeId> {
+        &self.statements
     }
 }
 
@@ -348,6 +361,19 @@ impl Type {
     pub fn add_array(&mut self, open: NodeId, array_type: NodeRef, close: NodeId) {
         self.arrays.push((open, array_type, close));
     }
+    pub fn get_members(&self) -> &Vec<(NodeId, NodeId)> {
+        &self.members
+    }
+    pub fn get_arrays(&self) -> &Vec<(NodeId, NodeRef, NodeId)> {
+        &self.arrays
+    }
+}
+
+#[derive(AstNode, Default, Debug, Clone)]
+pub struct Return {
+    syntax: NodeId,
+    return_: NodeRef,
+    value: NodeRef,
 }
 
 #[derive(AstNode, Default, Debug, Clone)]
@@ -378,6 +404,9 @@ impl Vector {
     pub fn add_value(&mut self, value: NodeId, comma: NodeRef) {
         self.values.push((value, comma));
     }
+    pub fn get_values(&self) -> &Vec<(NodeId, NodeRef)> {
+        &self.values
+    }
 }
 
 #[derive(AstNode, Default, Debug, Clone)]
@@ -391,6 +420,9 @@ pub struct Array {
 impl Array {
     pub fn add_value(&mut self, value: NodeId, comma: NodeRef) {
         self.values.push((value, comma));
+    }
+    pub fn get_values(&self) -> &Vec<(NodeId, NodeRef)> {
+        &self.values
     }
 }
 
@@ -423,12 +455,15 @@ pub struct FunctionCall {
     syntax: NodeId,
     lhs: NodeRef,
     lparen: NodeRef,
-    pub args: Vec<(NodeId, NodeRef)>,
+    args: Vec<(NodeId, NodeRef)>,
     rparen: NodeRef,
 }
 
 impl FunctionCall {
     pub fn add_arg(&mut self, arg: NodeId, comma: NodeRef) {
         self.args.push((arg, comma));
+    }
+    pub fn get_args(&self) -> &Vec<(NodeId, NodeRef)> {
+        &self.args
     }
 }

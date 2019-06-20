@@ -45,7 +45,7 @@ impl Tree {
         self.parents.push(0);
 
         if self.current_parent != node_id {
-            self.add_child_id(self.current_parent, node_id);
+            self.link_nodes(self.current_parent, node_id);
         }
 
         node_id
@@ -73,7 +73,7 @@ impl Tree {
     }
 
     // Link two nodes
-    pub fn add_child_id(&mut self, parent_id: NodeId, child_id: NodeId) -> NodeId {
+    pub fn link_nodes(&mut self, parent_id: NodeId, child_id: NodeId) -> NodeId {
         if parent_id == child_id {
             panic!("Cannot link a node to itself");
         }
