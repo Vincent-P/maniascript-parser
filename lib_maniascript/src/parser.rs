@@ -3,9 +3,9 @@ use crate::lexer::token::Token;
 use crate::lexer::token_kind::TokenKind;
 use crate::lexer::Lexer;
 
-use std::iter::Peekable;
-use std::fmt;
 use std::error::Error;
+use std::fmt;
+use std::iter::Peekable;
 
 pub struct Parser<'a> {
     tokens: Peekable<Lexer<'a>>,
@@ -27,12 +27,23 @@ pub type ParseResult<T> = Result<T, ParseError>;
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ParseError::ExpectedToken(e, Some((l, c, g))) => f.write_str(&format!("{}:{} Expected {} but got {}.", l, c, e, g)),
+            ParseError::ExpectedToken(e, Some((l, c, g))) => {
+                f.write_str(&format!("{}:{} Expected {} but got {}.", l, c, e, g))
+            }
             ParseError::ExpectedToken(e, None) => f.write_str(&format!("Expected {} token.", e)),
-            ParseError::ExpectedExpr(l, c, g) => f.write_str(&format!("{}:{} Expected an expression but got {}.", l, c, g)),
-            ParseError::ExpectedOperator(l, c, g) => f.write_str(&format!("{}:{} Expected an operator but got {}.", l, c, g)),
-            ParseError::UnexpectedToken(l, c, g) => f.write_str(&format!("{}:{} Unexpected token {}.", l, c, g)),
-            ParseError::GlobalsNotFirst => f.write_str("Globals need to be declared before functions and labels."),
+            ParseError::ExpectedExpr(l, c, g) => f.write_str(&format!(
+                "{}:{} Expected an expression but got {}.",
+                l, c, g
+            )),
+            ParseError::ExpectedOperator(l, c, g) => {
+                f.write_str(&format!("{}:{} Expected an operator but got {}.", l, c, g))
+            }
+            ParseError::UnexpectedToken(l, c, g) => {
+                f.write_str(&format!("{}:{} Unexpected token {}.", l, c, g))
+            }
+            ParseError::GlobalsNotFirst => {
+                f.write_str("Globals need to be declared before functions and labels.")
+            }
             ParseError::IncompleteExpr => f.write_str("Incomplete expression."),
         }
     }
@@ -41,12 +52,23 @@ impl fmt::Display for ParseError {
 impl fmt::Debug for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ParseError::ExpectedToken(e, Some((l, c, g))) => f.write_str(&format!("{}:{} Expected {} but got {}.", l, c, e, g)),
+            ParseError::ExpectedToken(e, Some((l, c, g))) => {
+                f.write_str(&format!("{}:{} Expected {} but got {}.", l, c, e, g))
+            }
             ParseError::ExpectedToken(e, None) => f.write_str(&format!("Expected {} token.", e)),
-            ParseError::ExpectedExpr(l, c, g) => f.write_str(&format!("{}:{} Expected an expression but got {}.", l, c, g)),
-            ParseError::ExpectedOperator(l, c, g) => f.write_str(&format!("{}:{} Expected an operator but got {}.", l, c, g)),
-            ParseError::UnexpectedToken(l, c, g) => f.write_str(&format!("{}:{} Unexpected token {}.", l, c, g)),
-            ParseError::GlobalsNotFirst => f.write_str("Globals need to be declared before functions and labels."),
+            ParseError::ExpectedExpr(l, c, g) => f.write_str(&format!(
+                "{}:{} Expected an expression but got {}.",
+                l, c, g
+            )),
+            ParseError::ExpectedOperator(l, c, g) => {
+                f.write_str(&format!("{}:{} Expected an operator but got {}.", l, c, g))
+            }
+            ParseError::UnexpectedToken(l, c, g) => {
+                f.write_str(&format!("{}:{} Unexpected token {}.", l, c, g))
+            }
+            ParseError::GlobalsNotFirst => {
+                f.write_str("Globals need to be declared before functions and labels.")
+            }
             ParseError::IncompleteExpr => f.write_str("Incomplete expression."),
         }
     }
@@ -195,7 +217,7 @@ impl Token {
                 Ok(parser.tree.end_node(NodeKind::FunctionCall(function_call)))
             }
 
-            k => Err(ParseError::ExpectedOperator(self.line, self.col, k))
+            k => Err(ParseError::ExpectedOperator(self.line, self.col, k)),
         }
     }
 }
@@ -223,7 +245,10 @@ impl<'a> Parser<'a> {
     fn expect(&mut self, token_kind: TokenKind) -> ParseResult<Token> {
         match self.tokens.peek() {
             Some(ref t) if t.kind == token_kind => Ok(self.tokens.next().unwrap()),
-            Some(ref t) => Err(ParseError::ExpectedToken(token_kind, Some((t.line, t.col, t.kind)))),
+            Some(ref t) => Err(ParseError::ExpectedToken(
+                token_kind,
+                Some((t.line, t.col, t.kind)),
+            )),
             _ => Err(ParseError::ExpectedToken(token_kind, None)),
         }
     }

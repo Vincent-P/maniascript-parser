@@ -1,7 +1,7 @@
 use crate::ast::node_kind::*;
 use crate::ast::*;
-use crate::lexer::trivia_kind::*;
 use crate::lexer::token_kind::*;
+use crate::lexer::trivia_kind::*;
 
 #[derive(Debug, Copy, Clone)]
 struct FormatContext {
@@ -34,7 +34,7 @@ fn format_node(node: &mut Node, ctx: FormatContext) {
             }
         }
 
-        leading_newlines =  leading_newlines || ctx.lines_before > 0;
+        leading_newlines = leading_newlines || ctx.lines_before > 0;
 
         let spaces = if leading_newlines {
             ctx.indent * 4
@@ -65,7 +65,7 @@ fn format_node(node: &mut Node, ctx: FormatContext) {
                     }
                     leadings.push(trivia.clone());
                 }
-                t if t.is_line_break() && ctx.lines_before > 0  => {
+                t if t.is_line_break() && ctx.lines_before > 0 => {
                     leading_lines += t.line_count();
                     leadings.push(trivia.clone());
                 }
@@ -80,7 +80,7 @@ fn format_node(node: &mut Node, ctx: FormatContext) {
                 ctx.lines_before
             };
             if leading_lines < newlines {
-                leadings.push(TriviaKind::Newline(newlines-leading_lines));
+                leadings.push(TriviaKind::Newline(newlines - leading_lines));
             }
 
             if spaces > 0 {
@@ -98,7 +98,7 @@ fn format_node(node: &mut Node, ctx: FormatContext) {
             }
         }
 
-        for _i in last_comment+1..trailings.len() {
+        for _i in last_comment + 1..trailings.len() {
             trailings.pop();
         }
 
@@ -110,8 +110,7 @@ fn format_node(node: &mut Node, ctx: FormatContext) {
 
         if ctx.space_after > 0 && trailing_spaces < ctx.space_after {
             trailings.push(TriviaKind::Space(ctx.space_after));
-        }
-        else if trailing_spaces > ctx.space_after {
+        } else if trailing_spaces > ctx.space_after {
             trailings.pop();
             if ctx.space_after != 0 {
                 trailings.push(TriviaKind::Space(ctx.space_after));
@@ -258,16 +257,26 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
 
             ctx.lines_before = 0;
 
-            for i in 1..children[f.syntax()].len()-2 {
+            for i in 1..children[f.syntax()].len() - 2 {
                 format_rec(children, nodes, children[f.syntax()][i], ctx);
             }
 
             ctx.space_after = 0;
             if children[f.syntax()].len() > 2 {
-                format_rec(children, nodes, children[f.syntax()][children[f.syntax()].len()-2], ctx);
+                format_rec(
+                    children,
+                    nodes,
+                    children[f.syntax()][children[f.syntax()].len() - 2],
+                    ctx,
+                );
             }
             if children[f.syntax()].len() > 1 {
-                format_rec(children, nodes, children[f.syntax()][children[f.syntax()].len()-1], ctx);
+                format_rec(
+                    children,
+                    nodes,
+                    children[f.syntax()][children[f.syntax()].len() - 1],
+                    ctx,
+                );
             }
         }
 
@@ -391,11 +400,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
         NodeKind::Else(i) => {
             let old_lines = ctx.lines_before;
 
-            ctx.space_after = if i.get_if_().is_none() {
-                0
-            } else {
-                1
-            };
+            ctx.space_after = if i.get_if_().is_none() { 0 } else { 1 };
 
             if let Some(child) = i.get_else_() {
                 format_rec(children, nodes, *child, ctx);
@@ -620,7 +625,6 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
             }
         }
 
-
         NodeKind::Block(b) => {
             ctx.lines_before = 1;
             let is_indented = ctx.indent > 0;
@@ -648,7 +652,6 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
             if is_indented {
                 ctx.indent += 1;
             }
-
         }
 
         NodeKind::Parenthesised(p) => {
@@ -683,7 +686,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
         NodeKind::Type(t) => {
             let old_ctx = ctx;
             ctx.space_after = 0;
-            for i in 0..children[t.syntax()].len()-1 {
+            for i in 0..children[t.syntax()].len() - 1 {
                 format_rec(children, nodes, children[t.syntax()][i], ctx);
             }
             ctx.space_after = old_ctx.space_after;
@@ -695,11 +698,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
         NodeKind::Return(t) => {
             let old_ctx = ctx;
 
-            ctx.space_after = if t.get_value().is_none() {
-                0
-            } else {
-                1
-            };
+            ctx.space_after = if t.get_value().is_none() { 0 } else { 1 };
 
             if let Some(child) = t.get_return_() {
                 format_rec(children, nodes, *child, ctx);
@@ -805,11 +804,15 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
                 Some(tn) => {
                     let token = &nodes[*tn];
                     match token.kind {
-                        NodeKind::Token(ref t) if t.kind == TokenKind::ColonColon || t.kind == TokenKind::Dot => false,
-                        _ => true
+                        NodeKind::Token(ref t)
+                            if t.kind == TokenKind::ColonColon || t.kind == TokenKind::Dot =>
+                        {
+                            false
+                        }
+                        _ => true,
                     }
                 }
-                _ => false
+                _ => false,
             };
 
             let old_safter = ctx.space_after;
@@ -846,13 +849,18 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
 
             ctx.lines_before = 0;
 
-            for i in 1..children[f.syntax()].len()-1 {
+            for i in 1..children[f.syntax()].len() - 1 {
                 format_rec(children, nodes, children[f.syntax()][i], ctx);
             }
 
             ctx.space_after = old_ctx.space_after;
             if children[f.syntax()].len() > 1 {
-                format_rec(children, nodes, children[f.syntax()][children[f.syntax()].len()-1], ctx);
+                format_rec(
+                    children,
+                    nodes,
+                    children[f.syntax()][children[f.syntax()].len() - 1],
+                    ctx,
+                );
             }
         }
 

@@ -16,7 +16,12 @@ fn calculate_hash(node: NodeId) -> usize {
     node
 }
 
-fn print_dot_rec<T: Write>(buffer: &mut T, tree: &Tree, root: NodeId, source: &str) -> std::io::Result<()> {
+fn print_dot_rec<T: Write>(
+    buffer: &mut T,
+    tree: &Tree,
+    root: NodeId,
+    source: &str,
+) -> std::io::Result<()> {
     let node = tree.get_node(root).unwrap();
     let hashed_root = calculate_hash(root);
 
@@ -51,8 +56,12 @@ fn print_dot_rec<T: Write>(buffer: &mut T, tree: &Tree, root: NodeId, source: &s
 /* Print an AST Tree in DOT format in a Write object.
  * The dot format is used in the graphviz tools.
  */
-pub fn print_dot<T: Write>(buffer: &mut T, tree: &Tree, root: NodeId, source: &str) -> std::io::Result<()> {
-
+pub fn print_dot<T: Write>(
+    buffer: &mut T,
+    tree: &Tree,
+    root: NodeId,
+    source: &str,
+) -> std::io::Result<()> {
     buffer.write_all(b"digraph ast {\n")?;
     print_dot_rec(buffer, tree, root, source)?;
     buffer.write_all(b"}\n")?;
@@ -63,7 +72,12 @@ pub fn print_dot<T: Write>(buffer: &mut T, tree: &Tree, root: NodeId, source: &s
 /* Print an AST Tree as text in a Write object.
  * If the AST is exactly the one parsed from a file, print_ast will write the exact same content as the file.
  */
-pub fn print_ast<T: Write>(buffer: &mut T, tree: &Tree, root: NodeId, source: &str) -> std::io::Result<()> {
+pub fn print_ast<T: Write>(
+    buffer: &mut T,
+    tree: &Tree,
+    root: NodeId,
+    source: &str,
+) -> std::io::Result<()> {
     let node = tree.get_node(root).unwrap();
 
     if let NodeKind::Token(token) = &node.kind {
