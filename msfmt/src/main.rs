@@ -10,7 +10,7 @@ use std::io::Read;
 use std::path::Path;
 use std::time::Instant;
 
-fn main() -> Result<(), Box<std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("MSfmt - ManiaScript formatter")
         .version("0.1.0")
         .arg(

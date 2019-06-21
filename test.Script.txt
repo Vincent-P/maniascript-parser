@@ -1,6 +1,8 @@
 /// Position of the scores table depending on the statistics visibility
 #Const C_ScoresTablePosition [False => <0., 40., 20.>, True => <0., 47., 20.>]
 
+
+
 Void Private_Test()
 {
     UI.SendNotice("", CUIConfig::ENoticeLevel::PlayerInfo);
@@ -12,3 +14,5 @@ Void Private_Test()
         log("MDR");
     }
 }
+
+declare MyTpye lol = 1;

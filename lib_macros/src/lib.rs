@@ -46,12 +46,11 @@ fn impl_ast_node(ast: &syn::DeriveInput) -> TokenStream {
                                         &self.#ident
                                     }
 
-                                    pub fn #setter_name(&mut self, value: NodeId) -> Result<(), String> {
-                                        if self.#ident.is_none() {
-                                            self.#ident = Some(value);
-                                            return Ok(())
+                                    pub fn #setter_name(&mut self, value: NodeId) {
+                                        if !self.#ident.is_none() {
+                                            panic!(#error_msg)
                                         }
-                                        Err(String::from(#error_msg))
+                                        self.#ident = Some(value);
                                     }
                                 }
                             };
