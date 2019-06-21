@@ -4,7 +4,7 @@ pub mod printer;
 use crate::lexer::token::*;
 pub use node_kind::*;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Tree {
     pub parents: Vec<NodeId>,
     pub children: Vec<Vec<NodeId>>,

@@ -1,9 +1,6 @@
 use crate::ast::node_kind::NodeKind;
 use crate::ast::{NodeId, Tree};
-
-use std::fs::File;
 use std::io::prelude::*;
-use std::path::Path;
 
 /*
 use std::collections::hash_map::DefaultHasher;

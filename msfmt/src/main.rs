@@ -39,7 +39,6 @@ fn main() -> Result<(), Box<std::error::Error>> {
         let path = Path::new(file);
         // file name without extension
         let file_stem = path.file_stem().unwrap();
-        let file_ext = path.extension().unwrap();
 
         // Read the file
         let mut input = String::new();
@@ -60,14 +59,14 @@ fn main() -> Result<(), Box<std::error::Error>> {
         if matches.is_present("dot") {
             let out_dot = format!("{}.dot", file_stem.to_str().unwrap());
             let mut dotfile = File::create(out_dot)?;
-            print_dot(&mut dotfile, &mut tree, 0, &input)?;
+            print_dot(&mut dotfile, &tree, 0, &input)?;
         }
 
         if matches.is_present("overwrite") {
             let mut formated_file = File::create(path)?;
-            print_ast(&mut formated_file, &mut tree, 0, &input)?;
+            print_ast(&mut formated_file, &tree, 0, &input)?;
         } else {
-            print_ast(&mut io::stdout(), &mut tree, 0, &input)?;
+            print_ast(&mut io::stdout(), &tree, 0, &input)?;
         }
 
         // print(file_stem.to_str().unwrap(), &tree, 0, &input)?;

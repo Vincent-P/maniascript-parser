@@ -11,13 +11,6 @@ struct FormatContext {
     pub space_after: usize,
 }
 
-fn is_not_space(trivia: &TriviaKind) -> bool {
-    if let TriviaKind::Space(_) = trivia {
-        return false;
-    }
-    true
-}
-
 fn is_not_tab(trivia: &TriviaKind) -> bool {
     if let TriviaKind::Tab(_) = trivia {
         return false;
@@ -96,8 +89,8 @@ fn format_node(node: &mut Node, ctx: FormatContext) {
         }
 
         let mut last_comment = 0;
-        for i in 0..trailings.len() {
-            match trailings[i] {
+        for (i, trailing) in trailings.iter().enumerate() {
+            match trailing {
                 TriviaKind::LineComment(_) | TriviaKind::BlockComment(_) => {
                     last_comment = i;
                 }
@@ -105,7 +98,7 @@ fn format_node(node: &mut Node, ctx: FormatContext) {
             }
         }
 
-        for i in last_comment+1..trailings.len() {
+        for _i in last_comment+1..trailings.len() {
             trailings.pop();
         }
 
@@ -279,7 +272,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
         }
 
         NodeKind::FormalArg(f) => {
-            let old_ctx = ctx.clone();
+            let old_ctx = ctx;
 
             if let Some(child) = f.get_type_() {
                 format_rec(children, nodes, *child, ctx);
@@ -659,7 +652,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
         }
 
         NodeKind::Parenthesised(p) => {
-            let old_ctx = ctx.clone();
+            let old_ctx = ctx;
             ctx.space_after = 0;
 
             if let Some(child) = p.get_lparen() {
@@ -688,7 +681,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
         }
 
         NodeKind::Type(t) => {
-            let old_ctx = ctx.clone();
+            let old_ctx = ctx;
             ctx.space_after = 0;
             for i in 0..children[t.syntax()].len()-1 {
                 format_rec(children, nodes, children[t.syntax()][i], ctx);
@@ -700,7 +693,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
         }
 
         NodeKind::Return(t) => {
-            let old_ctx = ctx.clone();
+            let old_ctx = ctx;
 
             ctx.space_after = if t.get_value().is_none() {
                 0
@@ -793,7 +786,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
         }
 
         NodeKind::UnOp(o) => {
-            let old_ctx = ctx.clone();
+            let old_ctx = ctx;
             ctx.space_after = 0;
 
             if let Some(child) = o.get_operator() {
@@ -844,7 +837,7 @@ fn format_rec(children: &[Vec<NodeId>], nodes: &mut Vec<Node>, n: usize, mut ctx
         }
 
         NodeKind::ArrayAccess(f) => {
-            let old_ctx = ctx.clone();
+            let old_ctx = ctx;
             ctx.space_after = 0;
 
             if !children[f.syntax()].is_empty() {
