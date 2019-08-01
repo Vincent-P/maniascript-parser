@@ -9,7 +9,6 @@ use handlers::register_handlers;
 use jsonrpc_core::MetaIoHandler;
 use log::info;
 use server::ServerBuilder;
-use std::sync::Arc;
 
 fn main() {
     flexi_logger::Logger::with_str("info")
@@ -20,7 +19,7 @@ fn main() {
     info!("ManiaLSP started.");
 
     let mut io = MetaIoHandler::default();
-    let app = Arc::new(AppState::new());
+    let app = AppState::new();
 
     register_handlers(&mut io);
 
