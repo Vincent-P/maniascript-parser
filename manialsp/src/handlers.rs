@@ -1,7 +1,7 @@
 pub mod initialize;
 use crate::app_state::AppCtx;
 pub use initialize::*;
-use jsonrpc_core::{types::{params::Params, Value}, MetaIoHandler};
+use jsonrpc_core::{types::params::Params, MetaIoHandler};
 use log::info;
 use lsp_types::{notification::{Initialized, Notification}, request::{Initialize, Request}};
 use tokio::prelude::{future::IntoFuture, Future};

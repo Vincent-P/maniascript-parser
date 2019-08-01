@@ -44,12 +44,8 @@ impl ServerBuilder {
                         handler
                             .handle_request(&request, app_ctx.clone())
                             .map(|response| match response {
-                                Some(res) => {
-                                    res
-                                }
-                                None => {
-                                    String::from("")
-                                }
+                                Some(res) => res,
+                                None => String::from(""),
                             })
                             .map_err(|e| panic!("{:?}", e))
                     })

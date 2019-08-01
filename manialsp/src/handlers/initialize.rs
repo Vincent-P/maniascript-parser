@@ -1,7 +1,7 @@
 use crate::app_state::AppCtx;
 use log::info;
-use lsp_types::{notification::{Notification, ShowMessage, LogMessage}, InitializeParams, InitializeResult, InitializedParams, MessageType, ShowMessageParams};
-use tokio::prelude::{future::ok, Future, Sink};
+use lsp_types::{notification::ShowMessage, InitializeParams, InitializeResult, InitializedParams, MessageType, ShowMessageParams};
+use tokio::prelude::{future::ok, Future};
 
 pub fn initialize_handler(
     _param: InitializeParams,
@@ -30,21 +30,5 @@ pub fn initialized_handler(
         message: "Server correctly initialized!".to_string(),
     };
 
-    let r = format!(
-        r#"{{"jsonrpc":"2.0","method":"{}","params":{}}}"#,
-        ShowMessage::METHOD,
-        serde_json::to_value(&msg).unwrap()
-    );
-
-    let r2 = format!(
-        r#"{{"jsonrpc":"2.0","method":"{}","params":{}}}"#,
-        LogMessage::METHOD,
-        serde_json::to_value(&msg).unwrap()
-    );
-
-    app.sender
-        .send(r)
-        .and_then(|sender| sender.send(r2))
-        .map_err(|_| ())
-        .and_then(|_| Ok(()))
+    app.send_notification::<ShowMessage>(msg)
 }
