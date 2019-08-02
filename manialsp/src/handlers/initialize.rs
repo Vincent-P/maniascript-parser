@@ -7,19 +7,24 @@ pub fn initialize_handler(
     _param: InitializeParams,
     app: AppCtx,
 ) -> impl Future<Item = InitializeResult, Error = ()> {
+    use lsp_types::{TextDocumentSyncCapability, TextDocumentSyncKind};
+
     // get the write lock, write() is blocking
     let initialized = app.state.is_initialized.read().unwrap();
     if *initialized {
         info!("Received an initialize request more than once!");
     }
 
-    ok(InitializeResult::default())
+    let mut result = InitializeResult::default();
+
+    // for now we take the entire content of a file
+    result.capabilities.text_document_sync =
+        Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::Full));
+
+    ok(result)
 }
 
-pub fn initialized_handler(
-    _param: InitializedParams,
-    app: AppCtx,
-) -> impl Future<Item = (), Error = ()> {
+pub fn initialized_handler(_param: InitializedParams, app: AppCtx) {
     // get the write lock, write() is blocking
     let mut initialized = app.state.is_initialized.write().unwrap();
     *initialized = true;
@@ -30,5 +35,5 @@ pub fn initialized_handler(
         message: "Server correctly initialized!".to_string(),
     };
 
-    app.send_notification::<ShowMessage>(msg)
+    app.send_notification::<ShowMessage>(msg);
 }

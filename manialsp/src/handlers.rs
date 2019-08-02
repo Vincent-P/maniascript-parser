@@ -1,9 +1,15 @@
 pub mod initialize;
+pub mod shutdown;
+pub mod text_document;
+
 use crate::app_state::AppCtx;
 pub use initialize::*;
+pub use shutdown::*;
+pub use text_document::*;
+
 use jsonrpc_core::{types::params::Params, MetaIoHandler};
 use log::info;
-use lsp_types::{notification::{Initialized, Notification}, request::{Initialize, Request}};
+use lsp_types::{notification::Notification, request::Request};
 use tokio::prelude::{future::IntoFuture, Future};
 
 trait LspHandler {
@@ -16,13 +22,11 @@ trait LspHandler {
         B: IntoFuture<Item = R::Result, Error = (), Future = A>,
         F: 'static + Send + Sync + Fn(R::Params, AppCtx) -> B;
 
-    fn add_notification_handler<N, F, A, B>(&mut self, handler: F)
+    fn add_notification_handler<N, F>(&mut self, handler: F)
     where
         N: Notification,
         for<'de> N::Params: serde::Serialize + serde::de::Deserialize<'de> + std::fmt::Debug,
-        A: Future<Item = (), Error = ()> + Send + 'static,
-        B: IntoFuture<Item = (), Error = (), Future = A>,
-        F: 'static + Send + Sync + Fn(N::Params, AppCtx) -> B;
+        F: 'static + Send + Sync + Fn(N::Params, AppCtx);
 }
 
 impl LspHandler for MetaIoHandler<AppCtx> {
@@ -51,24 +55,29 @@ impl LspHandler for MetaIoHandler<AppCtx> {
         });
     }
 
-    fn add_notification_handler<N, F, A, B>(&mut self, handler: F)
+    fn add_notification_handler<N, F>(&mut self, handler: F)
     where
         N: Notification,
         for<'de> N::Params: serde::Serialize + serde::de::Deserialize<'de> + std::fmt::Debug,
-        A: Future<Item = (), Error = ()> + Send + 'static,
-        B: IntoFuture<Item = (), Error = (), Future = A>,
-        F: 'static + Send + Sync + Fn(N::Params, AppCtx) -> B,
+        F: 'static + Send + Sync + Fn(N::Params, AppCtx),
     {
         info!("Adding notification handler for {}", N::METHOD);
         self.add_notification_with_meta(N::METHOD, move |params: Params, app: AppCtx| {
             let params: N::Params = params.parse().unwrap();
             info!("Notification param: {:?}", params);
-            tokio::spawn(handler(params, app).into_future());
+            handler(params, app);
         });
     }
 }
 
 pub fn register_handlers(io: &mut MetaIoHandler<AppCtx>) {
+    use lsp_types::{notification::*, request::*};
+
     io.add_request_handler::<Initialize, _, _, _>(initialize::initialize_handler);
-    io.add_notification_handler::<Initialized, _, _, _>(initialize::initialized_handler);
+    io.add_notification_handler::<Initialized, _>(initialize::initialized_handler);
+    io.add_request_handler::<Shutdown, _, _, _>(shutdown::shutdown_handler);
+    io.add_notification_handler::<Exit, _>(shutdown::exit_handler);
+
+    io.add_notification_handler::<DidSaveTextDocument, _>(text_document::did_save_handler);
+    io.add_notification_handler::<DidChangeTextDocument, _>(text_document::did_change_handler);
 }

@@ -13,6 +13,23 @@ pub struct Parser<'a> {
     pub tree: Tree,
 }
 
+#[derive(Clone, Copy)]
+pub struct Span(usize, usize);
+
+impl Span {
+    pub fn new(line: usize, col: usize) -> Self {
+        Span(line, col)
+    }
+
+    pub fn line(&self) -> usize {
+        self.0
+    }
+
+    pub fn col(&self) -> usize {
+        self.1
+    }
+}
+
 pub enum ParseError {
     ExpectedToken(TokenKind, Option<(usize, usize, TokenKind)>),
     ExpectedExpr(usize, usize, TokenKind),
@@ -20,6 +37,10 @@ pub enum ParseError {
     UnexpectedToken(usize, usize, TokenKind),
     GlobalsNotFirst,
     IncompleteExpr,
+
+    Token(Token, Option<TokenKind>, Span),
+    String(Token, Option<String>, Span),
+    EOF
 }
 
 pub type ParseResult<T> = Result<T, ParseError>;
@@ -45,6 +66,9 @@ impl fmt::Display for ParseError {
                 f.write_str("Globals need to be declared before functions and labels.")
             }
             ParseError::IncompleteExpr => f.write_str("Incomplete expression."),
+
+            ParseError::Token(ref t, Some(e), _) => f.write_str(&format!("Expecting a {} but got a {}", t.kind, e)),
+            ParseError::String(ref t, Some(ref e), _) => f.write_str(&format!("Expecting a {} but got a {}", t.kind, e))
         }
     }
 }
@@ -78,7 +102,7 @@ impl Error for ParseError {}
 
 impl Token {
     // Nud is called when the token is the first of an expression
-    fn nud(&self, parser: &mut Parser) -> ParseResult<NodeId> {
+    fn nud(self, parser: &mut Parser) -> ParseResult<NodeId> {
         match self.kind {
             TokenKind::Identifier => {
                 parser.tree.start_node();
@@ -95,7 +119,7 @@ impl Token {
             // If the first token of an expr is - or ! it is an unary expression
             TokenKind::Minus | TokenKind::Not => {
                 let mut unary_op = UnOp::new(parser.tree.start_node());
-                unary_op.set_operator(parser.tree.add_node(Node::from(self)));
+                unary_op.set_operator(parser.tree.add_node(Node::from(&self)));
                 unary_op.set_operand(parser.expression(self.rbp())?);
                 Ok(parser.tree.end_node(NodeKind::UnOp(unary_op)))
             }
@@ -104,7 +128,7 @@ impl Token {
             TokenKind::OpenParen => {
                 let mut parenthesised = Parenthesised::new(parser.tree.start_node());
 
-                parenthesised.set_lparen(parser.tree.add_node(Node::from(self)));
+                parenthesised.set_lparen(parser.tree.add_node(Node::from(&self)));
                 parenthesised.set_expr(parser.expression(self.rbp())?);
 
                 if parser.next_token_is(TokenKind::CloseParen) {
@@ -117,7 +141,7 @@ impl Token {
             // An expression starting with < is a vector, <1., 2.> or <1., 2., 3.>
             TokenKind::Inf => {
                 let mut vector = Vector::new(parser.tree.start_node());
-                vector.set_langle(parser.tree.add_node(Node::from(self)));
+                vector.set_langle(parser.tree.add_node(Node::from(&self)));
 
                 let mut expr_id = parser.expression(self.rbp())?;
 
@@ -138,7 +162,7 @@ impl Token {
             TokenKind::OpenSquare => {
                 let mut array = Array::new(parser.tree.start_node());
 
-                array.set_lsquare(parser.tree.add_node(Node::from(self)));
+                array.set_lsquare(parser.tree.add_node(Node::from(&self)));
 
                 if parser.next_token_is(TokenKind::CloseSquare) {
                     array.set_rsquare(parser.next_token_node());
@@ -160,18 +184,21 @@ impl Token {
                 Ok(parser.tree.end_node(NodeKind::Array(array)))
             }
 
-            k => Err(ParseError::ExpectedExpr(self.line, self.col, k)),
+            _ => {
+                let (l, c) = (self.line, self.col);
+                Err(ParseError::String(self, Some("expression".to_string()), Span::new(l, c)))
+            }
         }
     }
 
     // Led is called when there is a token in the middle of an expression
-    fn led(&self, parser: &mut Parser, lhs: NodeId) -> ParseResult<NodeId> {
+    fn led(self, parser: &mut Parser, lhs: NodeId) -> ParseResult<NodeId> {
         match self.kind {
             k if k.is_binary_op() => {
                 let mut binop = BinaryOp::new(parser.tree.start_node());
                 binop.set_lhs(lhs);
                 parser.tree.link_nodes(binop.syntax(), lhs);
-                binop.set_operator(parser.tree.add_node(Node::from(self)));
+                binop.set_operator(parser.tree.add_node(Node::from(&self)));
                 binop.set_rhs(parser.expression(self.lbp())?);
                 Ok(parser.tree.end_node(NodeKind::BinaryOp(binop)))
             }
@@ -182,7 +209,7 @@ impl Token {
 
                 array_access.set_lhs(lhs);
                 parser.tree.link_nodes(array_access.syntax(), lhs);
-                array_access.set_lsquare(parser.tree.add_node(Node::from(self)));
+                array_access.set_lsquare(parser.tree.add_node(Node::from(&self)));
                 array_access.set_index(parser.expression(self.lbp())?);
                 array_access.set_rsquare(parser.expect_node(TokenKind::CloseSquare)?);
 
@@ -195,7 +222,7 @@ impl Token {
 
                 function_call.set_lhs(lhs);
                 parser.tree.link_nodes(function_call.syntax(), lhs);
-                function_call.set_lparen(parser.tree.add_node(Node::from(self)));
+                function_call.set_lparen(parser.tree.add_node(Node::from(&self)));
 
                 if parser.next_token_is(TokenKind::CloseParen) {
                     function_call.set_rparen(parser.next_token_node());
@@ -217,7 +244,10 @@ impl Token {
                 Ok(parser.tree.end_node(NodeKind::FunctionCall(function_call)))
             }
 
-            k => Err(ParseError::ExpectedOperator(self.line, self.col, k)),
+            _ => {
+                let (l, c) = (self.line, self.col);
+                Err(ParseError::String(self, Some("operator".to_string()), Span::new(l, c)))
+            }
         }
     }
 }
@@ -245,11 +275,16 @@ impl<'a> Parser<'a> {
     fn expect(&mut self, token_kind: TokenKind) -> ParseResult<Token> {
         match self.tokens.peek() {
             Some(ref t) if t.kind == token_kind => Ok(self.tokens.next().unwrap()),
-            Some(ref t) => Err(ParseError::ExpectedToken(
-                token_kind,
-                Some((t.line, t.col, t.kind)),
-            )),
-            _ => Err(ParseError::ExpectedToken(token_kind, None)),
+
+            Some(_) => {
+                let t = self.tokens.next().unwrap();
+                let (l, c) = (t.line, t.col);
+                Err(ParseError::Token(t, Some(token_kind), Span::new(l, c)))
+            }
+
+            None => {
+                Err(ParseError::EOF)
+            }
         }
     }
 
@@ -275,14 +310,14 @@ impl<'a> Parser<'a> {
     fn parse_nud(&mut self) -> ParseResult<NodeId> {
         match self.tokens.next() {
             Some(t) => t.nud(self),
-            _ => Err(ParseError::IncompleteExpr),
+            _ => Err(ParseError::EOF),
         }
     }
 
     fn parse_led(&mut self, expr: NodeId) -> ParseResult<NodeId> {
         match self.tokens.next() {
             Some(t) => t.led(self, expr),
-            _ => Err(ParseError::IncompleteExpr),
+            _ => Err(ParseError::EOF),
         }
     }
 
@@ -328,7 +363,9 @@ impl<'a> Parser<'a> {
                 }
 
                 TokenKind::Declare => {
-                    return Err(ParseError::GlobalsNotFirst);
+                    let t = self.tokens.next().unwrap();
+                    let span = Span::new(t.line, t.col);
+                    return Err(ParseError::String(t, Some("global".to_string()), span));
                 }
 
                 TokenKind::Identifier => {
