@@ -1,7 +1,7 @@
 use crate::app_state::AppCtx;
 use log::info;
 use lsp_types::{notification::ShowMessage, MessageType, ShowMessageParams};
-use tokio::prelude::{future::ok, Future};
+use tokio::prelude::Future;
 
 pub fn shutdown_handler(_param: (), app: AppCtx) -> impl Future<Item = (), Error = ()> {
     let mut has_shutdown = app.state.has_shutdown.write().unwrap();

@@ -9,6 +9,7 @@ use std::iter::Peekable;
 
 pub struct Parser<'a> {
     tokens: Peekable<Lexer<'a>>,
+    last_token: Token,
     pub source: &'a str,
     pub tree: Tree,
 }
@@ -31,16 +32,9 @@ impl Span {
 }
 
 pub enum ParseError {
-    ExpectedToken(TokenKind, Option<(usize, usize, TokenKind)>),
-    ExpectedExpr(usize, usize, TokenKind),
-    ExpectedOperator(usize, usize, TokenKind),
-    UnexpectedToken(usize, usize, TokenKind),
-    GlobalsNotFirst,
-    IncompleteExpr,
-
     Token(Token, Option<TokenKind>, Span),
     String(Token, Option<String>, Span),
-    EOF
+    EOF(Span)
 }
 
 pub type ParseResult<T> = Result<T, ParseError>;
@@ -48,27 +42,11 @@ pub type ParseResult<T> = Result<T, ParseError>;
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ParseError::ExpectedToken(e, Some((l, c, g))) => {
-                f.write_str(&format!("{}:{} Expected {} but got {}.", l, c, e, g))
-            }
-            ParseError::ExpectedToken(e, None) => f.write_str(&format!("Expected {} token.", e)),
-            ParseError::ExpectedExpr(l, c, g) => f.write_str(&format!(
-                "{}:{} Expected an expression but got {}.",
-                l, c, g
-            )),
-            ParseError::ExpectedOperator(l, c, g) => {
-                f.write_str(&format!("{}:{} Expected an operator but got {}.", l, c, g))
-            }
-            ParseError::UnexpectedToken(l, c, g) => {
-                f.write_str(&format!("{}:{} Unexpected token {}.", l, c, g))
-            }
-            ParseError::GlobalsNotFirst => {
-                f.write_str("Globals need to be declared before functions and labels.")
-            }
-            ParseError::IncompleteExpr => f.write_str("Incomplete expression."),
-
-            ParseError::Token(ref t, Some(e), _) => f.write_str(&format!("Expecting a {} but got a {}", t.kind, e)),
-            ParseError::String(ref t, Some(ref e), _) => f.write_str(&format!("Expecting a {} but got a {}", t.kind, e))
+            ParseError::Token(ref t, Some(e), _) => f.write_str(&format!("Expecting a {:?} but got a {:?}", t.kind, e)),
+            ParseError::String(ref t, Some(ref e), _) => f.write_str(&format!("Expecting a {:?} but got a {}", t.kind, e)),
+            ParseError::Token(ref t, None, _) => f.write_str(&format!("Got a {:?}", t.kind)),
+            ParseError::String(ref t, None, _) => f.write_str(&format!("Got a {:?}", t.kind)),
+            ParseError::EOF(_) => f.write_str("Expecting got EOF"),
         }
     }
 }
@@ -76,24 +54,11 @@ impl fmt::Display for ParseError {
 impl fmt::Debug for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ParseError::ExpectedToken(e, Some((l, c, g))) => {
-                f.write_str(&format!("{}:{} Expected {} but got {}.", l, c, e, g))
-            }
-            ParseError::ExpectedToken(e, None) => f.write_str(&format!("Expected {} token.", e)),
-            ParseError::ExpectedExpr(l, c, g) => f.write_str(&format!(
-                "{}:{} Expected an expression but got {}.",
-                l, c, g
-            )),
-            ParseError::ExpectedOperator(l, c, g) => {
-                f.write_str(&format!("{}:{} Expected an operator but got {}.", l, c, g))
-            }
-            ParseError::UnexpectedToken(l, c, g) => {
-                f.write_str(&format!("{}:{} Unexpected token {}.", l, c, g))
-            }
-            ParseError::GlobalsNotFirst => {
-                f.write_str("Globals need to be declared before functions and labels.")
-            }
-            ParseError::IncompleteExpr => f.write_str("Incomplete expression."),
+            ParseError::Token(ref t, Some(e), _) => f.write_str(&format!("Expecting a {:?} but got a {:?}", t.kind, e)),
+            ParseError::String(ref t, Some(ref e), _) => f.write_str(&format!("Expecting a {:?} but got a {}", t.kind, e)),
+            ParseError::Token(ref t, None, _) => f.write_str(&format!("Got a {:?}", t.kind)),
+            ParseError::String(ref t, None, _) => f.write_str(&format!("Got a {:?}", t.kind)),
+            ParseError::EOF(_) => f.write_str("Expecting got EOF"),
         }
     }
 }
@@ -256,9 +221,19 @@ impl<'a> Parser<'a> {
     pub fn new(lexer: Lexer) -> Parser {
         let source = lexer.source;
         let tokens = lexer.peekable();
+        let last_token = Token {
+            kind: TokenKind::EOF,
+            position: 0,
+            len:  0,
+            line: 0,
+            col: 0,
+            leading_trivia: Box::new([]),
+            trailing_trivia: Box::new([])
+        };
         let tree = Tree::new();
         Parser {
             tokens,
+            last_token,
             source,
             tree,
         }
@@ -272,9 +247,15 @@ impl<'a> Parser<'a> {
     }
 
     // UTILITY FUNCTIONS
-    fn expect(&mut self, token_kind: TokenKind) -> ParseResult<Token> {
+    fn next_token(&mut self) -> &Token {
+        let t = self.tokens.next().unwrap();
+        self.last_token = t;
+        &self.last_token
+    }
+
+    fn expect(&mut self, token_kind: TokenKind) -> ParseResult<&Token> {
         match self.tokens.peek() {
-            Some(ref t) if t.kind == token_kind => Ok(self.tokens.next().unwrap()),
+            Some(ref t) if t.kind == token_kind => Ok(self.next_token()),
 
             Some(_) => {
                 let t = self.tokens.next().unwrap();
@@ -283,18 +264,20 @@ impl<'a> Parser<'a> {
             }
 
             None => {
-                Err(ParseError::EOF)
+                let (l, c) = (self.last_token.line, self.last_token.col);
+                Err(ParseError::EOF(Span::new(l, c)))
             }
         }
     }
 
     fn expect_node(&mut self, token_kind: TokenKind) -> ParseResult<NodeId> {
-        let token = self.expect(token_kind)?;
-        Ok(self.tree.add_node(Node::from(token)))
+        let node = Node::from(self.expect(token_kind)?);
+        Ok(self.tree.add_node(node))
     }
 
     fn next_token_node(&mut self) -> NodeId {
-        self.tree.add_node(Node::from(self.tokens.next().unwrap()))
+        let node = Node::from(self.next_token());
+        self.tree.add_node(node)
     }
 
     fn next_token_is(&mut self, expected: TokenKind) -> bool {
@@ -310,14 +293,20 @@ impl<'a> Parser<'a> {
     fn parse_nud(&mut self) -> ParseResult<NodeId> {
         match self.tokens.next() {
             Some(t) => t.nud(self),
-            _ => Err(ParseError::EOF),
+            _ => {
+                let (l, c) = (self.last_token.line, self.last_token.col);
+                Err(ParseError::EOF(Span::new(l, c)))
+            },
         }
     }
 
     fn parse_led(&mut self, expr: NodeId) -> ParseResult<NodeId> {
         match self.tokens.next() {
             Some(t) => t.led(self, expr),
-            _ => Err(ParseError::EOF),
+            _ => {
+                let (l, c) = (self.last_token.line, self.last_token.col);
+                Err(ParseError::EOF(Span::new(l, c)))
+            },
         }
     }
 
@@ -376,8 +365,10 @@ impl<'a> Parser<'a> {
                     file.add_label(self.parse_labeldec()?);
                 }
 
-                k => {
-                    return Err(ParseError::UnexpectedToken(next.line, next.col, k));
+                _ => {
+                    let t = self.tokens.next().unwrap();
+                    let span = Span::new(t.line, t.col);
+                    return Err(ParseError::String(t, Some("unexpected".to_string()), span));
                 }
             }
         }
@@ -390,9 +381,15 @@ impl<'a> Parser<'a> {
             TokenKind::Include => {
                 let mut include = Include::new(self.tree.start_node());
                 include.set_include(self.next_token_node());
-                include.set_path(self.expect_node(TokenKind::LineString)?);
-                include.set_as_(self.expect_node(TokenKind::As)?);
-                include.set_name(self.expect_node(TokenKind::Identifier)?);
+                if self.next_token_is(TokenKind::LineString) {
+                    include.set_path(self.next_token_node());
+                }
+                if self.next_token_is(TokenKind::As) {
+                    include.set_as_(self.next_token_node());
+                }
+                if self.next_token_is(TokenKind::Identifier) {
+                    include.set_name(self.next_token_node());
+                }
                 Ok(self.tree.end_node(NodeKind::Include(include)))
             }
             TokenKind::Const => {
@@ -640,24 +637,23 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_statement(&mut self) -> ParseResult<NodeId> {
-        let mut statement = Statement::new(self.tree.start_node());
-
         let tkind = self.tokens.peek().unwrap().kind;
-        let substatement = match &tkind {
-            TokenKind::OpenBrace => self.parse_block()?,
-            TokenKind::Declare => self.parse_vardec()?,
-            TokenKind::If => self.parse_if()?,
-            TokenKind::Switch | TokenKind::SwitchType => self.parse_switch()?,
-            TokenKind::For => self.parse_for()?,
-            TokenKind::Foreach => self.parse_foreach()?,
-            TokenKind::While => self.parse_while()?,
+        // parse node that are statement
+        match &tkind {
+            TokenKind::OpenBrace => return self.parse_block(),
+            TokenKind::Declare => return self.parse_vardec(),
+            TokenKind::If => return self.parse_if(),
+            TokenKind::Switch | TokenKind::SwitchType => return self.parse_switch(),
+            TokenKind::For => return self.parse_for(),
+            TokenKind::Foreach => return self.parse_foreach(),
+            TokenKind::While => return self.parse_while(),
 
             TokenKind::LabelPlus => {
                 let mut label = LabelCall::new(self.tree.start_node());
                 label.set_start(self.next_token_node());
                 label.set_name(self.expect_node(TokenKind::Identifier)?);
                 label.set_end(self.expect_node(TokenKind::LabelPlus)?);
-                self.tree.end_node(NodeKind::LabelCall(label))
+                return Ok(self.tree.end_node(NodeKind::LabelCall(label)));
             }
 
             TokenKind::LabelMinus => {
@@ -665,9 +661,15 @@ impl<'a> Parser<'a> {
                 label.set_start(self.next_token_node());
                 label.set_name(self.expect_node(TokenKind::Identifier)?);
                 label.set_end(self.expect_node(TokenKind::LabelMinus)?);
-                self.tree.end_node(NodeKind::LabelCall(label))
+                return Ok(self.tree.end_node(NodeKind::LabelCall(label)));
             }
 
+            _ => {}
+        }
+
+        // wrap other nodes in a statement node
+        let mut statement = Statement::new(self.tree.start_node());
+        let substatement = match &tkind {
             TokenKind::Return => {
                 let mut return_ = Return::new(self.tree.start_node());
                 return_.set_return_(self.next_token_node());
