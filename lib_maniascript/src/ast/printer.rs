@@ -2,20 +2,6 @@ use crate::ast::node_kind::NodeKind;
 use crate::ast::{NodeId, Tree};
 use std::io::prelude::*;
 
-/*
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
-fn calculate_hash<T: Hash>(t: &T) -> u64 {
-    let mut s = DefaultHasher::new();
-    t.hash(&mut s);
-    s.finish()
-}
- */
-
-fn calculate_hash(node: NodeId) -> usize {
-    node
-}
-
 fn print_dot_rec<T: Write>(
     buffer: &mut T,
     tree: &Tree,
@@ -23,12 +9,11 @@ fn print_dot_rec<T: Write>(
     source: &str,
 ) -> std::io::Result<()> {
     let node = tree.get_node(root).unwrap();
-    let hashed_root = calculate_hash(root);
 
     match &node.kind {
         NodeKind::Token(_) => {
             buffer.write_all(b"    ")?;
-            buffer.write_all(hashed_root.to_string().as_bytes())?;
+            buffer.write_all(root.to_string().as_bytes())?;
             buffer.write_all(b"[label=\"")?;
             buffer.write_all(
                 source[node.span.0..node.span.1]
@@ -38,13 +23,14 @@ fn print_dot_rec<T: Write>(
             buffer.write_all(b"\"];\n")?;
         }
         _ => {
-            let label = format!("    {} [label=\"{:?}\"];\n", hashed_root, node.kind);
+            let label = format!("    {} [label=\"{:?} {:?}\"];\n", root, node.kind, node.span);
             buffer.write_all(label.as_bytes())?;
         }
     };
 
+
     for child in &tree.children[root] {
-        let link = format!("    {} -> {};\n", hashed_root, calculate_hash(*child));
+        let link = format!("    {} -> {};\n", root, *child);
         buffer.write_all(link.as_bytes())?;
 
         print_dot_rec(buffer, tree, *child, source)?;
