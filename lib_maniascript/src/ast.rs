@@ -59,17 +59,40 @@ impl Tree {
         let node_id = self.new_node();
         self.set_parent(node_id);
         node_id
-    }
+}
 
-    pub fn end_node(&mut self, node_kind: NodeKind) -> NodeId {
-        let node_id = self.current_parent;
-        self.nodes[node_id].kind = node_kind;
-        self.revert_parent();
-        node_id
-    }
+pub fn end_node(&mut self, node_kind: NodeKind) -> NodeId {
+    let node_id = self.current_parent;
+    self.nodes[node_id].kind = node_kind;
+    self.revert_parent();
+    node_id
+}
 
-    pub fn get_node(&self, node: NodeId) -> Option<&Node> {
-        self.nodes.get(node)
+pub fn get_node(&self, node: NodeId) -> Option<&Node> {
+    self.nodes.get(node)
+}
+
+    fn update_span(&mut self, node: NodeId) {
+        let parent = self.parents[node];
+        let children = &self.children[node];
+
+        let mut span = (0, 0);
+
+        for child in children {
+            let cspan = self.nodes[*child].span;
+
+            if span.0 == 0 && span.1 == 0 {
+                span = cspan;
+            } else {
+                span.1 = cspan.1;
+            }
+        }
+
+        self.nodes[node].span = span;
+
+        if parent != node {
+            self.update_span(parent);
+        }
     }
 
     // Link two nodes
@@ -115,6 +138,8 @@ impl Tree {
             // .1 is the second element of the span
             self.nodes[parent_id].span.1 = self.nodes[child_id].span.1;
         }
+
+        self.update_span(parent_id);
 
         child_id
     }
