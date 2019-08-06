@@ -12,7 +12,6 @@ use server::ServerBuilder;
 
 fn main() {
     flexi_logger::Logger::with_str("info")
-        .log_to_file()
         .start()
         .unwrap();
 
