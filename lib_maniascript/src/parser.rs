@@ -65,6 +65,18 @@ impl fmt::Debug for ParseError {
 
 impl Error for ParseError {}
 
+
+macro_rules! optionnal_field {
+    ($parser:expr, $field:ident, $method:ident, $kind:expr) => {
+        {
+            if $parser.next_token_is($kind) {
+                $field.$method($parser.next_token_node());
+            }
+        }
+    };
+}
+
+
 impl Token {
     // Nud is called when the token is the first of an expression
     fn nud(self, parser: &mut Parser) -> ParseResult<NodeId> {
@@ -92,14 +104,9 @@ impl Token {
             // If the first token of an expr is ( a parenthesised expression ( expr )
             TokenKind::OpenParen => {
                 let mut parenthesised = Parenthesised::new(parser.tree.start_node());
-
                 parenthesised.set_lparen(parser.tree.add_node(Node::from(&self)));
                 parenthesised.set_expr(parser.expression(self.rbp())?);
-
-                if parser.next_token_is(TokenKind::CloseParen) {
-                    parenthesised.set_rparen(parser.next_token_node());
-                }
-
+                optionnal_field!(parser, parenthesised, set_rparen, TokenKind::CloseParen);
                 Ok(parser.tree.end_node(NodeKind::Parenthesised(parenthesised)))
             }
 
@@ -118,8 +125,8 @@ impl Token {
                 }
 
                 vector.add_value(expr_id, None);
+                optionnal_field!(parser, vector, set_rangle, TokenKind::Sup);
 
-                vector.set_rangle(parser.expect_node(TokenKind::Sup)?);
                 Ok(parser.tree.end_node(NodeKind::Vector(vector)))
             }
 
@@ -144,7 +151,7 @@ impl Token {
                 }
 
                 array.add_value(expr_id, None);
-                array.set_rsquare(parser.expect_node(TokenKind::CloseSquare)?);
+                optionnal_field!(parser, array, set_rsquare, TokenKind::CloseSquare);
 
                 Ok(parser.tree.end_node(NodeKind::Array(array)))
             }
@@ -176,7 +183,9 @@ impl Token {
                 parser.tree.link_nodes(array_access.syntax(), lhs);
                 array_access.set_lsquare(parser.tree.add_node(Node::from(&self)));
                 array_access.set_index(parser.expression(self.lbp())?);
-                array_access.set_rsquare(parser.expect_node(TokenKind::CloseSquare)?);
+                if parser.next_token_is(TokenKind::CloseSquare) {
+                    array_access.set_rsquare(parser.next_token_node());
+                }
 
                 Ok(parser.tree.end_node(NodeKind::ArrayAccess(array_access)))
             }
@@ -204,7 +213,9 @@ impl Token {
                 }
 
                 function_call.add_arg(expr_id, None);
-                function_call.set_rparen(parser.expect_node(TokenKind::CloseParen)?);
+                if parser.next_token_is(TokenKind::CloseParen) {
+                    function_call.set_rparen(parser.next_token_node());
+                }
 
                 Ok(parser.tree.end_node(NodeKind::FunctionCall(function_call)))
             }
@@ -216,6 +227,7 @@ impl Token {
         }
     }
 }
+
 
 impl<'a> Parser<'a> {
     pub fn new(lexer: Lexer) -> Parser {
@@ -395,21 +407,21 @@ impl<'a> Parser<'a> {
             TokenKind::Const => {
                 let mut const_ = Const::new(self.tree.start_node());
                 const_.set_const_(self.next_token_node());
-                const_.set_name(self.expect_node(TokenKind::Identifier)?);
+                optionnal_field!(self, const_, set_name, TokenKind::Identifier);
                 const_.set_value(self.parse_expr()?);
                 Ok(self.tree.end_node(NodeKind::Const(const_)))
             }
             TokenKind::Setting => {
                 let mut setting = Setting::new(self.tree.start_node());
                 setting.set_setting(self.next_token_node());
-                setting.set_name(self.expect_node(TokenKind::Identifier)?);
+                optionnal_field!(self, setting, set_name, TokenKind::Identifier);
                 setting.set_value(self.parse_expr()?);
                 Ok(self.tree.end_node(NodeKind::Setting(setting)))
             }
             TokenKind::RequireContext => {
                 let mut require_context = RequireContext::new(self.tree.start_node());
                 require_context.set_require_context(self.next_token_node());
-                require_context.set_name(self.expect_node(TokenKind::Identifier)?);
+                optionnal_field!(self, require_context, set_name, TokenKind::Identifier);
                 Ok(self
                     .tree
                     .end_node(NodeKind::RequireContext(require_context)))
@@ -417,7 +429,7 @@ impl<'a> Parser<'a> {
             TokenKind::Extends => {
                 let mut extends = Extends::new(self.tree.start_node());
                 extends.set_extends(self.next_token_node());
-                extends.set_path(self.expect_node(TokenKind::LineString)?);
+                optionnal_field!(self, extends, set_path, TokenKind::LineString);
                 Ok(self.tree.end_node(NodeKind::Extends(extends)))
             }
             _ => unreachable!(),
@@ -573,7 +585,7 @@ impl<'a> Parser<'a> {
 
         if self.next_token_is(TokenKind::As) {
             vardec.set_as_(self.next_token_node());
-            vardec.set_alias(self.expect_node(TokenKind::Identifier)?);
+            optionnal_field!(self, vardec, set_alias, TokenKind::Identifier);
         }
 
         if self.next_token_is(TokenKind::For) {
@@ -588,8 +600,7 @@ impl<'a> Parser<'a> {
             }
         }
 
-        let semi = self.expect_node(TokenKind::Semicolon)?;
-        self.tree.link_nodes(vardec.syntax(), semi);
+        optionnal_field!(self, vardec, set_semicolon, TokenKind::Semicolon);
 
         Ok(self.tree.end_node(NodeKind::VarDec(vardec)))
     }
@@ -651,16 +662,16 @@ impl<'a> Parser<'a> {
             TokenKind::LabelPlus => {
                 let mut label = LabelCall::new(self.tree.start_node());
                 label.set_start(self.next_token_node());
-                label.set_name(self.expect_node(TokenKind::Identifier)?);
-                label.set_end(self.expect_node(TokenKind::LabelPlus)?);
+                optionnal_field!(self, label, set_name, TokenKind::Identifier);
+                optionnal_field!(self, label, set_end, TokenKind::LabelPlus);
                 return Ok(self.tree.end_node(NodeKind::LabelCall(label)));
             }
 
             TokenKind::LabelMinus => {
                 let mut label = LabelCall::new(self.tree.start_node());
                 label.set_start(self.next_token_node());
-                label.set_name(self.expect_node(TokenKind::Identifier)?);
-                label.set_end(self.expect_node(TokenKind::LabelMinus)?);
+                optionnal_field!(self, label, set_name, TokenKind::Identifier);
+                optionnal_field!(self, label, set_end, TokenKind::LabelMinus);
                 return Ok(self.tree.end_node(NodeKind::LabelCall(label)));
             }
 
@@ -763,7 +774,7 @@ impl<'a> Parser<'a> {
 
         case.set_case(self.next_token_node());
         case.set_value(self.parse_expr()?);
-        case.set_colon(self.expect_node(TokenKind::Colon)?);
+        optionnal_field!(self, case, set_colon, TokenKind::Colon);
         case.set_statement(self.parse_statement()?);
 
         Ok(self.tree.end_node(NodeKind::Case(case)))
@@ -786,7 +797,7 @@ impl<'a> Parser<'a> {
     pub fn parse_for(&mut self) -> ParseResult<NodeId> {
         let mut for_ = For::new(self.tree.start_node());
 
-        for_.set_for_(self.expect_node(TokenKind::For)?);
+        optionnal_field!(self, for_, set_for_, TokenKind::For);
 
         if self.next_token_is(TokenKind::OpenParen) {
             for_.set_lparen(self.next_token_node());
@@ -819,7 +830,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_foreach(&mut self) -> ParseResult<NodeId> {
         let mut foreach = Foreach::new(self.tree.start_node());
-        foreach.set_foreach(self.expect_node(TokenKind::Foreach)?);
+        optionnal_field!(self, foreach, set_foreach, TokenKind::Foreach);
 
         if self.next_token_is(TokenKind::OpenParen) {
             foreach.set_lparen(self.next_token_node());
@@ -831,7 +842,7 @@ impl<'a> Parser<'a> {
 
         if self.next_token_is(TokenKind::Arrow) {
             foreach.set_arrow(self.next_token_node());
-            foreach.set_name2(self.expect_node(TokenKind::Identifier)?);
+            optionnal_field!(self, foreach, set_name2, TokenKind::Identifier);
         }
 
         if self.next_token_is(TokenKind::In) {
@@ -851,7 +862,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_while(&mut self) -> ParseResult<NodeId> {
         let mut while_ = While::new(self.tree.start_node());
-        while_.set_while_(self.expect_node(TokenKind::While)?);
+        optionnal_field!(self, while_, set_while_, TokenKind::While);
 
         if self.next_token_is(TokenKind::OpenParen) {
             while_.set_lparen(self.next_token_node());
@@ -871,7 +882,7 @@ impl<'a> Parser<'a> {
     pub fn parse_type(&mut self) -> ParseResult<NodeId> {
         let mut type_ = Type::new(self.tree.start_node());
 
-        type_.set_basename(self.expect_node(TokenKind::Identifier)?);
+        optionnal_field!(self, type_, set_basename, TokenKind::Identifier);
 
         while self.next_token_is(TokenKind::ColonColon) {
             let colon = self.next_token_node();

@@ -66,6 +66,8 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
             check_present!(i.get_semicolon(), "Missing semicolon", errors, n, nodes);
         }
 
+        //TODO(vincent): Check left/right punctuation
+
         // Recursive calls to children
         _ => {
             for child_id in &children[n] {

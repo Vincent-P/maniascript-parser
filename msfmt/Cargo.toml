@@ -4,6 +4,9 @@ version = "0.1.0"
 authors = ["Vincent Parizet <vincent.parizet@hotmail.fr>"]
 edition = "2018"
 
+[profile.release]
+debug = true
+
 [dependencies]
 lib_maniascript = { path = "../lib_maniascript" }
 clap = "~2.33"

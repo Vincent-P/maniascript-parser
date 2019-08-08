@@ -80,4 +80,5 @@ pub fn register_handlers(io: &mut MetaIoHandler<AppCtx>) {
 
     io.add_notification_handler::<DidSaveTextDocument, _>(text_document::did_save_handler);
     io.add_notification_handler::<DidChangeTextDocument, _>(text_document::did_change_handler);
+    io.add_notification_handler::<DidOpenTextDocument, _>(text_document::did_open_handler);
 }

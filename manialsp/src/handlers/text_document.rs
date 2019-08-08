@@ -1,16 +1,13 @@
 use crate::app_state::AppCtx;
 use lib_maniascript::{lexer::Lexer, parser::{ParseError, Parser}};
 use log::info;
-use lsp_types::{notification::{PublishDiagnostics, ShowMessage}, Diagnostic, DidChangeTextDocumentParams, DidSaveTextDocumentParams, MessageType, Position, PublishDiagnosticsParams, Range, ShowMessageParams};
+use lsp_types::{notification::{PublishDiagnostics}, Diagnostic, DidChangeTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams, MessageType, Position, PublishDiagnosticsParams, Range, Url};
 use std::convert::TryInto;
 
 pub fn did_save_handler(_param: DidSaveTextDocumentParams, app: AppCtx) {
 }
 
-pub fn did_change_handler(_param: DidChangeTextDocumentParams, app: AppCtx) {
-    let uri = _param.text_document.uri;
-    let text = &_param.content_changes[0].text;
-
+fn validate_document(app: AppCtx, uri: Url, text: &str) {
     let lexer = Lexer::new(text);
 
     let diagnostics = match Parser::new(lexer).parse() {
@@ -86,4 +83,16 @@ pub fn did_change_handler(_param: DidChangeTextDocumentParams, app: AppCtx) {
 
     let params = PublishDiagnosticsParams::new(uri, diagnostics);
     app.send_notification::<PublishDiagnostics>(params);
+}
+
+pub fn did_open_handler(_param: DidOpenTextDocumentParams, app: AppCtx) {
+    let uri = _param.text_document.uri;
+    let text = &_param.text_document.text;
+    validate_document(app, uri, text);
+}
+
+pub fn did_change_handler(_param: DidChangeTextDocumentParams, app: AppCtx) {
+    let uri = _param.text_document.uri;
+    let text = &_param.content_changes[0].text;
+    validate_document(app, uri, text);
 }

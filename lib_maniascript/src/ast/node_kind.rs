@@ -164,6 +164,7 @@ pub struct VarDec {
     target: NodeRef,
     assignment: NodeRef,
     value: NodeRef,
+    semicolon: NodeRef
 }
 
 #[derive(AstNode, Default, Debug, Clone)]

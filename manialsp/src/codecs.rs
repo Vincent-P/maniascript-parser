@@ -47,6 +47,8 @@ impl Decoder for LspRequestCodec {
     fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<String>, io::Error> {
         let bufstr = str::from_utf8(&buf).expect("invalid utf8 data");
 
+        info!("Decoding buffer:\n{}", &bufstr);
+
         if let Some(content_length) = self.len {
             let res = decode_request(buf, content_length, self.start_index);
             if res.is_some() {
