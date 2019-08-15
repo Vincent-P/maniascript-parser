@@ -1,5 +1,5 @@
 use crate::app_state::AppCtx;
-use lib_maniascript::{lexer::Lexer, parser::{ParseError, Parser}};
+use lib_maniascript::{lexer::Lexer, parser::{ParseError, Parser}, document::symbol::*};
 use log::info;
 use lsp_types::{notification::{PublishDiagnostics}, Diagnostic, DidChangeTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams, MessageType, Position, PublishDiagnosticsParams, Range, Url};
 use std::convert::TryInto;
@@ -12,8 +12,7 @@ fn validate_document(app: AppCtx, uri: Url, text: &str) {
 
     let diagnostics = match Parser::new(lexer).parse() {
         Ok(tree) => {
-            let errors = tree.validate();
-            errors
+            let errors: Vec<Diagnostic> = tree.validate()
                 .iter()
                 .map(|error| {
 
@@ -53,7 +52,16 @@ fn validate_document(app: AppCtx, uri: Url, text: &str) {
 
                     Diagnostic::new_simple(range, error.msg.to_string())
                 })
-                .collect()
+                .collect();
+
+            if errors.is_empty() {
+                let symbols = unchecked_find_symbols(&tree, text);
+                info!("Symbols: {:?}", symbols);
+            } else {
+                info!("No symbols found!");
+            }
+
+            errors
         }
 
         Err(e) => {

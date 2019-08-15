@@ -77,7 +77,8 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
 
         NodeKind::FormalArg(i) => {
             check_present!(i.get_name(), "Missing argument name", errors, n, nodes);
-            check_present!(i.get_comma(), "Missing semicolon", errors, n, nodes);
+            // TODO(vincent): It makes a false positive for the last argument
+            // check_present!(i.get_comma(), "Missing comma", errors, n, nodes);
         }
 
         NodeKind::FuncDec(i) => {
@@ -105,7 +106,11 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
         }
 
         NodeKind::Else(i) => {
-            check_present!(i.get_body(), "Missing body", errors, n, nodes);
+            match (i.get_if_(), i.get_body()) {
+                (Some(_), None) => {}
+                (None, Some(_)) => {}
+                _ => not_present!("A else can have either an if or an else body, not both.", errors, n, nodes)
+            }
         }
 
         NodeKind::Switch(i) => {
