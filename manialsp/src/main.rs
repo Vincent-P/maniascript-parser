@@ -1,5 +1,6 @@
 mod app_state;
 mod codecs;
+mod glue;
 mod handlers;
 mod server;
 
@@ -11,9 +12,7 @@ use log::info;
 use server::ServerBuilder;
 
 fn main() {
-    flexi_logger::Logger::with_str("info")
-        .start()
-        .unwrap();
+    flexi_logger::Logger::with_str("info").start().unwrap();
 
     info!("ManiaLSP started.");
 

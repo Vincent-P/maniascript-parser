@@ -1,6 +1,7 @@
 use crate::ast::node_kind::*;
 use crate::ast::*;
 
+#[derive(Debug, Clone, Copy)]
 pub struct ValidationError {
     pub span: (usize, usize),
     pub msg: &'static str,
