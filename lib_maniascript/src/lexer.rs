@@ -48,9 +48,11 @@ impl<'a> Lexer<'a> {
 
     fn scan_word(&mut self) -> TokenKind {
         let start = self.position;
+        let mut is_hash = false;
 
         if let Some('#') = self.char_peek() {
             self.char_next();
+            is_hash = true;
         }
 
         while let Some(c) = self.char_peek() {
@@ -64,6 +66,7 @@ impl<'a> Lexer<'a> {
 
         match TokenKind::from_str(token) {
             Result::Ok(t) => t,
+            _ if is_hash => TokenKind::Unknown,
             _ => TokenKind::Identifier,
         }
     }

@@ -432,6 +432,30 @@ impl<'a> Parser<'a> {
                 optionnal_field!(self, extends, set_path, TokenKind::LineString);
                 Ok(self.tree.end_node(NodeKind::Extends(extends)))
             }
+            TokenKind::Struct => {
+                let mut struct_ = Struct::new(self.tree.start_node());
+                struct_.set_struct_(self.next_token_node());
+                optionnal_field!(self, struct_, set_name, TokenKind::Identifier);
+                optionnal_field!(self, struct_, set_lbrace, TokenKind::OpenBrace);
+
+                while self.next_token_is(TokenKind::Identifier) {
+                    let mut field = StructField::new(self.tree.start_node());
+                    field.set_type_(self.parse_type()?);
+
+                    if self.next_token_is(TokenKind::Identifier) {
+                        field.set_name(self.next_token_node());
+                    }
+
+                    if self.next_token_is(TokenKind::Semicolon) {
+                        field.set_semicolon(self.next_token_node());
+                    }
+
+                    struct_.add_field(self.tree.end_node(NodeKind::StructField(field)));
+                }
+
+                optionnal_field!(self, struct_, set_rbrace, TokenKind::CloseBrace);
+                Ok(self.tree.end_node(NodeKind::Struct(struct_)))
+            }
             _ => unreachable!(),
         }
     }

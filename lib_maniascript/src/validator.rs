@@ -59,6 +59,17 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
             check_present!(i.get_path(), "Missing path", errors, n, nodes);
         }
 
+        NodeKind::StructField(i) => {
+            check_present!(i.get_name(), "Missing struct's field name", errors, n, nodes);
+            check_present!(i.get_semicolon(), "Missing struct's field semicolon", errors, n, nodes);
+        }
+
+        NodeKind::Struct(i) => {
+            check_present!(i.get_name(), "Missing struct's name", errors, n, nodes);
+            check_present!(i.get_lbrace(), "Missing left brace", errors, n, nodes);
+            check_present!(i.get_rbrace(), "Missing right brace", errors, n, nodes);
+        }
+
         NodeKind::VarDec(i) => {
             check_present!(i.get_name(), "Missing name", errors, n, nodes);
             check_present!(i.get_semicolon(), "Missing semicolon", errors, n, nodes);

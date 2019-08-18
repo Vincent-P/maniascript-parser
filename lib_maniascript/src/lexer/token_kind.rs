@@ -112,6 +112,8 @@ pub enum TokenKind {
     RequireContext,
     #[strum(serialize = "#Extends")]
     Extends,
+    #[strum(serialize = "#Struct")]
+    Struct,
 
     #[strum(serialize = "break")]
     Break,
@@ -218,6 +220,7 @@ impl TokenKind {
             | TokenKind::Setting
             | TokenKind::RequireContext
             | TokenKind::Extends => true,
+            | TokenKind::Struct => true,
             _ => false,
         }
     }

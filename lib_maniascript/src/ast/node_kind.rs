@@ -12,6 +12,8 @@ pub enum NodeKind {
     Setting(Setting),
     RequireContext(RequireContext),
     Extends(Extends),
+    StructField(StructField),
+    Struct(Struct),
     VarDec(VarDec),
     FormalArg(FormalArg),
     FuncDec(FuncDec),
@@ -146,6 +148,33 @@ pub struct Extends {
     syntax: NodeId,
     extends: NodeRef,
     path: NodeRef,
+}
+
+#[derive(AstNode, Default, Debug, Clone)]
+pub struct StructField {
+    syntax: NodeId,
+    type_: NodeRef,
+    name: NodeRef,
+    semicolon: NodeRef,
+}
+
+#[derive(AstNode, Default, Debug, Clone)]
+pub struct Struct {
+    syntax: NodeId,
+    struct_: NodeRef,
+    name: NodeRef,
+    lbrace: NodeRef,
+    rbrace: NodeRef,
+    fields: Vec<NodeId>,
+}
+
+impl Struct {
+    pub fn add_field(&mut self, field: NodeId) {
+        self.fields.push(field);
+    }
+    pub fn get_fields(&self) -> &Vec<NodeId> {
+        &self.fields
+    }
 }
 
 #[derive(AstNode, Default, Debug, Clone)]
