@@ -1,5 +1,5 @@
 use lib_maniascript::{document::DocumentError, parser::{ParseError}};
-use lsp_types::{Diagnostic, Position, Range};
+use lsp_types::{Diagnostic, DiagnosticSeverity, Position, Range};
 use std::convert::TryInto;
 
 pub fn char_range_to_range(span: (usize, usize), text: &str) -> Range {
@@ -63,7 +63,12 @@ pub fn parse_error_to_diagnostic(error: &ParseError) -> Diagnostic {
 pub fn document_error_to_diagnostic(error: &DocumentError, text: &str) -> Diagnostic {
     match error {
         DocumentError::ValidationError(e) => {
-            Diagnostic::new_simple(char_range_to_range(e.span, text), e.msg.to_string())
+            Diagnostic::new(char_range_to_range(e.span, text),
+                            Some(DiagnosticSeverity::Error),
+                            None,
+                            None,
+                            e.msg.to_string(),
+                            None)
         }
         DocumentError::ParseError(e) => parse_error_to_diagnostic(e),
     }
