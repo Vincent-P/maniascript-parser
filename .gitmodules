@@ -1,0 +1,3 @@
+[submodule "lsp-types"]
+	path = lsp-types
+	url = git@github.com:Vincent-P/lsp-types.git
