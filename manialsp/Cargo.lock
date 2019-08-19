@@ -259,7 +259,7 @@ dependencies = [
 
 [[package]]
 name = "manialsp"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "bytes 0.4.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "flexi_logger 0.13.2 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -1,6 +1,6 @@
 [package]
 name = "msfmt"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Vincent Parizet <vincent.parizet@hotmail.fr>"]
 edition = "2018"
 
