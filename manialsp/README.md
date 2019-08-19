@@ -57,3 +57,25 @@ Some extra steps are needed to have syntax highlighting
 - Go to the settings Editor -> TextMate Bundles
   - Click the + button and select the folder containing the textmate bundle
 - Apply, Save and you should have syntax highlighting!
+
+## Sublime Text 3
+
+- Install the plugin LSP made by tomv564
+- Type 'LSP Settings' in the Command Palette to change the settings and paste this:
+```json
+{
+	"clients": {
+	    "manialsp":
+	    {
+	      "command": ["manialsp.exe"],
+  	      // Use: "Show Scope Name" from Sublime's Developer menu
+	      "scopes": ["source.ms"],
+  	      // Run: view.settings().get("syntax") in console
+	      "syntaxes": ["Packages/ManiaScript/ManiaScript.tmLanguage"],
+	      "languageId": "maniascript",
+	    }
+	}
+}
+```
+- Restart sublime
+- To start the server type 'LSP Enable Language Server in Project' in the Command Palette then select manialsp
