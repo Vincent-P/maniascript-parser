@@ -51,7 +51,7 @@ The first step is to download the manialsp binary and add it to the PATH.
 
 Some extra steps are needed to have syntax highlighting
 
-- Download the textmate bundle for maniascript [https://onedrive.live.com/download?cid=2EC0D2E0D9DA402A&resid=2EC0D2E0D9DA402A%2115044&authkey=AM6DM6OsAhaXIO4](here).
+- Download the textmate bundle for maniascript [here](https://onedrive.live.com/download?cid=2EC0D2E0D9DA402A&resid=2EC0D2E0D9DA402A%2115044&authkey=AM6DM6OsAhaXIO4).
 - Extract it in a folder somewhere
 - Go to the settings Editor -> TextMate Bundles
   - Click the + button and select the folder containing the textmate bundle
