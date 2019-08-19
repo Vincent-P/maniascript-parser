@@ -1,4 +1,4 @@
-# ManiLSP
+# ManiaLSP
 
 A language server for ManiaScript.
 
