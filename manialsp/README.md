@@ -62,7 +62,7 @@ Some extra steps are needed to have syntax highlighting
 
 - Install the plugin LSP made by tomv564
 - Type 'LSP Settings' in the Command Palette to change the settings and paste this:
-```json
+```jsonc
 {
 	"clients": {
 	    "manialsp":
