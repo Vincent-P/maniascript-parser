@@ -13,6 +13,7 @@ A language server for ManiaScript.
 - [ ] Semantic Errors
   - [ ] Use of undefined symbol
   - [ ] Type checking
+- [ ] Completion
 
 # Installation
 
