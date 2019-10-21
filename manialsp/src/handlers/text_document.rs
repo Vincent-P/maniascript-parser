@@ -1,5 +1,5 @@
 use crate::{app_state::AppCtx, glue::*};
-use lib_maniascript::{document::*};
+use lib_maniascript::document::*;
 use log::info;
 use lsp_types::{notification::PublishDiagnostics, DidChangeTextDocumentParams, DidOpenTextDocumentParams, DidSaveTextDocumentParams, PublishDiagnosticsParams, Url};
 
@@ -7,7 +7,16 @@ pub fn did_save_handler(_param: DidSaveTextDocumentParams, _app: AppCtx) {}
 
 fn validate_document(app: AppCtx, uri: Url, text: &str) {
     info!("Validating document {}", uri.as_str());
-    let mut document = Document::new(uri.as_str(), text);
+
+    let mut documents = app.state.documents.write().unwrap();
+
+    if !documents.contains_key(&uri) {
+        let file_path = uri.to_file_path().unwrap();
+        documents.insert(uri.clone(), Document::new(file_path, text));
+    }
+
+    let document = documents.get_mut(&uri).unwrap();
+
     document.update(text);
 
     let diagnostics = document

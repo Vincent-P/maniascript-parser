@@ -1,5 +1,4 @@
-use crate::ast::node_kind::NodeKind;
-use crate::ast::{NodeId, Tree};
+use crate::ast::{node_kind::NodeKind, NodeId, Tree};
 use std::io::prelude::*;
 
 fn print_dot_rec<T: Write>(
@@ -23,11 +22,13 @@ fn print_dot_rec<T: Write>(
             buffer.write_all(b"\"];\n")?;
         }
         _ => {
-            let label = format!("    {} [label=\"{:?} {:?}\"];\n", root, node.kind, node.span);
+            let label = format!(
+                "    {} [label=\"{:?} {:?}\"];\n",
+                root, node.kind, node.span
+            );
             buffer.write_all(label.as_bytes())?;
         }
     };
-
 
     for child in &tree.children[root] {
         let link = format!("    {} -> {};\n", root, *child);
@@ -39,9 +40,8 @@ fn print_dot_rec<T: Write>(
     Ok(())
 }
 
-/* Print an AST Tree in DOT format in a Write object.
- * The dot format is used in the graphviz tools.
- */
+// Print an AST Tree in DOT format in a Write object.
+// The dot format is used in the graphviz tools.
 pub fn print_dot<T: Write>(
     buffer: &mut T,
     tree: &Tree,
@@ -55,9 +55,9 @@ pub fn print_dot<T: Write>(
     Ok(())
 }
 
-/* Print an AST Tree as text in a Write object.
- * If the AST is exactly the one parsed from a file, print_ast will write the exact same content as the file.
- */
+// Print an AST Tree as text in a Write object.
+// If the AST is exactly the one parsed from a file, print_ast will write the exact same content as
+// the file.
 pub fn print_ast<T: Write>(
     buffer: &mut T,
     tree: &Tree,

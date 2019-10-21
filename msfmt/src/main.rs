@@ -1,14 +1,8 @@
-use lib_maniascript::ast::printer::{print_ast, print_dot};
-use lib_maniascript::lexer::Lexer;
-use lib_maniascript::parser::Parser;
+use lib_maniascript::{ast::printer::{print_ast, print_dot}, lexer::Lexer, parser::Parser};
 
 use clap::{App, Arg};
 
-use std::fs::File;
-use std::io;
-use std::io::Read;
-use std::path::Path;
-use std::time::Instant;
+use std::{fs::File, io::{self, Read}, path::Path, time::Instant};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("MSfmt - ManiaScript formatter")

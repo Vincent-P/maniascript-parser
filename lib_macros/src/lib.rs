@@ -31,7 +31,6 @@ fn impl_ast_node(ast: &syn::DeriveInput) -> TokenStream {
                 syn::Type::Path(type_path) => {
                     let path = &type_path.path;
                     if !path.segments.is_empty() && path.segments[0].ident == "NodeRef" {
-
                         if let Some(ident) = &field.ident {
                             let getter_str = format!("get_{}", ident);
                             let getter_name = syn::Ident::new(&getter_str, ident.span());
@@ -69,7 +68,7 @@ fn impl_ast_node(ast: &syn::DeriveInput) -> TokenStream {
         let res = gen.into();
         res
     } else {
-        //Nope. This is an Enum. We cannot handle these!
+        // Nope. This is an Enum. We cannot handle these!
         panic!("#[derive(AstNodeDefault)] is only defined for structs, not for enums!");
     }
 }

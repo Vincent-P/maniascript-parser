@@ -1,11 +1,13 @@
 use jsonrpc_core::Metadata;
-use lsp_types::notification::Notification;
-use std::sync::{Arc, RwLock};
+use lib_maniascript::document::Document;
+use lsp_types::{notification::Notification, Url};
+use std::{collections::HashMap, sync::{Arc, RwLock}};
 use tokio::{prelude::{Future, Sink}, sync::mpsc::Sender};
 
 pub struct AppState {
     pub is_initialized: RwLock<bool>,
     pub has_shutdown: RwLock<bool>,
+    pub documents: RwLock<HashMap<Url, Document>>,
 }
 
 #[derive(Clone)]
@@ -19,6 +21,7 @@ impl AppState {
         AppState {
             is_initialized: RwLock::new(false),
             has_shutdown: RwLock::new(false),
+            documents: RwLock::new(HashMap::new()),
         }
     }
 }

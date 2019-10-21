@@ -220,7 +220,7 @@ impl TokenKind {
             | TokenKind::Setting
             | TokenKind::RequireContext
             | TokenKind::Extends => true,
-            | TokenKind::Struct => true,
+            TokenKind::Struct => true,
             _ => false,
         }
     }

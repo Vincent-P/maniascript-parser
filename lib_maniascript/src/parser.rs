@@ -1,11 +1,6 @@
-use crate::ast::*;
-use crate::lexer::token::Token;
-use crate::lexer::token_kind::TokenKind;
-use crate::lexer::Lexer;
+use crate::{ast::*, lexer::{token::Token, token_kind::TokenKind, Lexer}};
 
-use std::error::Error;
-use std::fmt;
-use std::iter::Peekable;
+use std::{error::Error, fmt, iter::Peekable};
 
 pub struct Parser<'a> {
     tokens: Peekable<Lexer<'a>>,
@@ -34,7 +29,7 @@ impl Span {
 pub enum ParseError {
     Token(Token, Option<TokenKind>, Span),
     String(Token, Option<String>, Span),
-    EOF(Span)
+    EOF(Span),
 }
 
 pub type ParseResult<T> = Result<T, ParseError>;
@@ -42,8 +37,12 @@ pub type ParseResult<T> = Result<T, ParseError>;
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ParseError::Token(ref t, Some(e), _) => f.write_str(&format!("Expecting a {:?} but got a {:?}", t.kind, e)),
-            ParseError::String(ref t, Some(ref e), _) => f.write_str(&format!("Expecting a {:?} but got a {}", t.kind, e)),
+            ParseError::Token(ref t, Some(e), _) => {
+                f.write_str(&format!("Expecting a {:?} but got a {:?}", t.kind, e))
+            }
+            ParseError::String(ref t, Some(ref e), _) => {
+                f.write_str(&format!("Expecting a {:?} but got a {}", t.kind, e))
+            }
             ParseError::Token(ref t, None, _) => f.write_str(&format!("Got a {:?}", t.kind)),
             ParseError::String(ref t, None, _) => f.write_str(&format!("Got a {:?}", t.kind)),
             ParseError::EOF(_) => f.write_str("Expecting got EOF"),
@@ -54,8 +53,12 @@ impl fmt::Display for ParseError {
 impl fmt::Debug for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            ParseError::Token(ref t, Some(e), _) => f.write_str(&format!("Expecting a {:?} but got a {:?}", t.kind, e)),
-            ParseError::String(ref t, Some(ref e), _) => f.write_str(&format!("Expecting a {:?} but got a {}", t.kind, e)),
+            ParseError::Token(ref t, Some(e), _) => {
+                f.write_str(&format!("Expecting a {:?} but got a {:?}", t.kind, e))
+            }
+            ParseError::String(ref t, Some(ref e), _) => {
+                f.write_str(&format!("Expecting a {:?} but got a {}", t.kind, e))
+            }
             ParseError::Token(ref t, None, _) => f.write_str(&format!("Got a {:?}", t.kind)),
             ParseError::String(ref t, None, _) => f.write_str(&format!("Got a {:?}", t.kind)),
             ParseError::EOF(_) => f.write_str("Expecting got EOF"),
@@ -65,23 +68,48 @@ impl fmt::Debug for ParseError {
 
 impl Error for ParseError {}
 
-
 macro_rules! optionnal_field {
-    ($parser:expr, $field:ident, $method:ident, $kind:expr) => {
-        {
-            if $parser.next_token_is($kind) {
-                $field.$method($parser.next_token_node());
-            }
+    ($parser:expr, $field:ident, $method:ident, $kind:expr) => {{
+        if $parser.next_token_is($kind) {
+            $field.$method($parser.next_token_node());
         }
-    };
+    }};
 }
-
 
 impl Token {
     // Nud is called when the token is the first of an expression
     fn nud(self, parser: &mut Parser) -> ParseResult<NodeId> {
         match self.kind {
             TokenKind::Identifier => {
+                // Struct initialization
+                if parser.next_token_is(TokenKind::OpenBrace) {
+                    let mut struct_init = StructInitialization::new(parser.tree.start_node());
+                    struct_init.set_lbrace(parser.next_token_node());
+
+                    // Empty struct init
+                    if parser.next_token_is(TokenKind::CloseBrace) {
+                        struct_init.set_rbrace(parser.next_token_node());
+                        return Ok(parser.tree.end_node(NodeKind::StructInitialization(struct_init)));
+                    }
+
+                    // There is a member assignment
+                    let mut expr_id = parser.parse_assignment()?;
+
+                    while parser.next_token_is(TokenKind::Comma) {
+                        let comma = parser.next_token_node();
+                        struct_init.add_member(expr_id, Some(comma));
+
+                        expr_id = parser.parse_assignment()?;
+                    }
+
+                    struct_init.add_member(expr_id, None);
+
+                    optionnal_field!(parser, struct_init, set_rbrace, TokenKind::CloseBrace);
+
+                    return Ok(parser.tree.end_node(NodeKind::StructInitialization(struct_init)));
+                }
+
+                // Variable
                 parser.tree.start_node();
                 parser.tree.add_node(Node::from(self));
                 Ok(parser.tree.end_node(NodeKind::Identifier))
@@ -158,7 +186,11 @@ impl Token {
 
             _ => {
                 let (l, c) = (self.line, self.col);
-                Err(ParseError::String(self, Some("expression".to_string()), Span::new(l, c)))
+                Err(ParseError::String(
+                    self,
+                    Some("expression".to_string()),
+                    Span::new(l, c),
+                ))
             }
         }
     }
@@ -222,12 +254,15 @@ impl Token {
 
             _ => {
                 let (l, c) = (self.line, self.col);
-                Err(ParseError::String(self, Some("operator".to_string()), Span::new(l, c)))
+                Err(ParseError::String(
+                    self,
+                    Some("operator".to_string()),
+                    Span::new(l, c),
+                ))
             }
         }
     }
 }
-
 
 impl<'a> Parser<'a> {
     pub fn new(lexer: Lexer) -> Parser {
@@ -236,11 +271,11 @@ impl<'a> Parser<'a> {
         let last_token = Token {
             kind: TokenKind::EOF,
             position: 0,
-            len:  0,
+            len: 0,
             line: 0,
             col: 0,
             leading_trivia: Box::new([]),
-            trailing_trivia: Box::new([])
+            trailing_trivia: Box::new([]),
         };
         let tree = Tree::new();
         Parser {
@@ -308,7 +343,7 @@ impl<'a> Parser<'a> {
             _ => {
                 let (l, c) = (self.last_token.line, self.last_token.col);
                 Err(ParseError::EOF(Span::new(l, c)))
-            },
+            }
         }
     }
 
@@ -318,7 +353,7 @@ impl<'a> Parser<'a> {
             _ => {
                 let (l, c) = (self.last_token.line, self.last_token.col);
                 Err(ParseError::EOF(Span::new(l, c)))
-            },
+            }
         }
     }
 
@@ -340,6 +375,7 @@ impl<'a> Parser<'a> {
     pub fn parse_expr(&mut self) -> ParseResult<NodeId> {
         self.expression(1)
     }
+
     // EXPRESSIONS PARSING END
 
     pub fn parse_file(&mut self) -> ParseResult<NodeId> {
@@ -669,6 +705,32 @@ impl<'a> Parser<'a> {
         }
 
         Ok(self.tree.end_node(NodeKind::If(if_)))
+    }
+
+    pub fn parse_assignment(&mut self) -> ParseResult<NodeId> {
+        let expr_id = self.parse_expr()?;
+
+        let mut assignment = Assignment::new(self.tree.start_node());
+
+        assignment.set_lvalue(expr_id);
+        let assign_node = match self.tokens.peek() {
+            Some(ref t) if t.kind.is_assign_op() => self.next_token_node(),
+
+            Some(_) => {
+                let t = self.tokens.next().unwrap();
+                let (l, c) = (t.line, t.col);
+                return Err(ParseError::Token(t, Some(TokenKind::Equal), Span::new(l, c)));
+            }
+
+            None => {
+                let (l, c) = (self.last_token.line, self.last_token.col);
+                return Err(ParseError::EOF(Span::new(l, c)));
+            }
+        };
+
+        assignment.set_operator(assign_node);
+        assignment.set_rvalue(self.parse_expr()?);
+        Ok(self.tree.end_node(NodeKind::Assignment(assignment)))
     }
 
     pub fn parse_statement(&mut self) -> ParseResult<NodeId> {

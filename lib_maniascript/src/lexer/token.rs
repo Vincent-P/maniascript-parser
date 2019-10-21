@@ -1,5 +1,4 @@
-pub use super::token_kind::TokenKind;
-pub use super::trivia_kind::TriviaKind;
+pub use super::{token_kind::TokenKind, trivia_kind::TriviaKind};
 
 #[derive(Debug, Clone)]
 pub struct Token {

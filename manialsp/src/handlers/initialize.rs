@@ -15,11 +15,20 @@ pub fn initialize_handler(
         info!("Received an initialize request more than once!");
     }
 
+    if let Some(tdc) = _param.capabilities.text_document {
+        if let Some(dsc) = tdc.document_symbol {
+            if let Some(support_hierarchical) = dsc.hierarchical_document_symbol_support {
+                if support_hierarchical {
+                    info!("!!! LSP CLIENT SUPPORT HIERARCHICAL DOCUMENT SYMBOLS !!!");
+                }
+            }
+        }
+    }
+
     let mut result = InitializeResult::default();
 
     // for now we take the entire content of a file
-    result.capabilities.text_document_sync =
-        Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::Full));
+    result.capabilities.text_document_sync = Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::Full));
 
     ok(result)
 }

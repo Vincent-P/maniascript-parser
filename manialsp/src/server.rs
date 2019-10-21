@@ -1,6 +1,5 @@
 use crate::{app_state::{AppCtx, AppState}, codecs::LspRequestCodec};
 use jsonrpc_core::MetaIoHandler;
-use log::info;
 use std::sync::Arc;
 use tokio::{self, prelude::{future::lazy, Future, Sink, Stream}, sync::mpsc};
 
@@ -39,8 +38,6 @@ impl ServerBuilder {
             tokio::spawn(lazy(move || {
                 stdin
                     .and_then(move |request| {
-                        info!("Received request {}", &request);
-
                         handler
                             .handle_request(&request, app_ctx.clone())
                             .map(|response| match response {
@@ -58,10 +55,7 @@ impl ServerBuilder {
             }));
 
             rx.map_err(|_| ())
-                .fold(stdout, |out, response| {
-                    info!("Sending response: {}", &response);
-                    out.send(response).map_err(|_| ())
-                })
+                .fold(stdout, |out, response| out.send(response).map_err(|_| ()))
                 .map(|_| ())
         }));
     }

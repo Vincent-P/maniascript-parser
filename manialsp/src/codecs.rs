@@ -1,5 +1,4 @@
 use bytes::{BufMut, BytesMut};
-use log::info;
 use std::{io, str};
 use tokio_codec::{Decoder, Encoder};
 
@@ -46,8 +45,6 @@ impl Decoder for LspRequestCodec {
 
     fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<String>, io::Error> {
         let bufstr = str::from_utf8(&buf).expect("invalid utf8 data");
-
-        info!("Decoding buffer:\n{}", &bufstr);
 
         if let Some(content_length) = self.len {
             let res = decode_request(buf, content_length, self.start_index);
@@ -98,10 +95,6 @@ impl Encoder for LspRequestCodec {
             buf.reserve(content_length.len() + response.len());
             buf.put(content_length);
             buf.put(response);
-            info!(
-                "Encoding response to:\n'{}'",
-                str::from_utf8(&buf).expect("invalid utf8 data")
-            );
         }
         Ok(())
     }

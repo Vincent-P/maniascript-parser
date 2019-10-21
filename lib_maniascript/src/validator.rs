@@ -1,5 +1,4 @@
-use crate::ast::node_kind::*;
-use crate::ast::*;
+use crate::ast::{node_kind::*, *};
 
 #[derive(Debug, Clone, Copy)]
 pub struct ValidationError {
@@ -8,27 +7,28 @@ pub struct ValidationError {
 }
 
 macro_rules! not_present {
-    ($msg:expr, $errors:expr, $n: expr, $nodes:expr) => {
-        {
-            $errors.push(ValidationError {
-                span: $nodes[$n].span,
-                msg: $msg
-            });
-        }
-    };
+    ($msg:expr, $errors:expr, $n: expr, $nodes:expr) => {{
+        $errors.push(ValidationError {
+            span: $nodes[$n].span,
+            msg: $msg,
+        });
+    }};
 }
 
 macro_rules! check_present {
-    ($e:expr, $msg:expr, $errors:expr, $n: expr, $nodes:expr) => {
-        {
-            if let None = $e {
-                not_present!($msg, $errors, $n, $nodes);
-            }
+    ($e:expr, $msg:expr, $errors:expr, $n: expr, $nodes:expr) => {{
+        if let None = $e {
+            not_present!($msg, $errors, $n, $nodes);
         }
-    };
+    }};
 }
 
-fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &mut Vec<ValidationError>) {
+fn validate_rec(
+    children: &[Vec<NodeId>],
+    nodes: &Vec<Node>,
+    n: usize,
+    errors: &mut Vec<ValidationError>,
+) {
     let node_kind = nodes[n].kind.clone();
 
     match node_kind {
@@ -60,8 +60,20 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
         }
 
         NodeKind::StructField(i) => {
-            check_present!(i.get_name(), "Missing struct's field name", errors, n, nodes);
-            check_present!(i.get_semicolon(), "Missing struct's field semicolon", errors, n, nodes);
+            check_present!(
+                i.get_name(),
+                "Missing struct's field name",
+                errors,
+                n,
+                nodes
+            );
+            check_present!(
+                i.get_semicolon(),
+                "Missing struct's field semicolon",
+                errors,
+                n,
+                nodes
+            );
         }
 
         NodeKind::Struct(i) => {
@@ -97,7 +109,13 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
             check_present!(i.get_type_(), "Missing return type", errors, n, nodes);
             check_present!(i.get_name(), "Missing name", errors, n, nodes);
             check_present!(i.get_lparen(), "Missing left parenthesis", errors, n, nodes);
-            check_present!(i.get_rparen(), "Missing right parenthesis", errors, n, nodes);
+            check_present!(
+                i.get_rparen(),
+                "Missing right parenthesis",
+                errors,
+                n,
+                nodes
+            );
             check_present!(i.get_body(), "Missing body", errors, n, nodes);
         }
 
@@ -112,22 +130,37 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
 
         NodeKind::If(i) => {
             check_present!(i.get_lparen(), "Missing left parenthesis", errors, n, nodes);
-            check_present!(i.get_rparen(), "Missing right parenthesis", errors, n, nodes);
+            check_present!(
+                i.get_rparen(),
+                "Missing right parenthesis",
+                errors,
+                n,
+                nodes
+            );
             check_present!(i.get_condition(), "Missing condition", errors, n, nodes);
             check_present!(i.get_body(), "Missing body", errors, n, nodes);
         }
 
-        NodeKind::Else(i) => {
-            match (i.get_if_(), i.get_body()) {
-                (Some(_), None) => {}
-                (None, Some(_)) => {}
-                _ => not_present!("A else can have either an if or an else body, not both.", errors, n, nodes)
-            }
-        }
+        NodeKind::Else(i) => match (i.get_if_(), i.get_body()) {
+            (Some(_), None) => {}
+            (None, Some(_)) => {}
+            _ => not_present!(
+                "A else can have either an if or an else body, not both.",
+                errors,
+                n,
+                nodes
+            ),
+        },
 
         NodeKind::Switch(i) => {
             check_present!(i.get_lparen(), "Missing left parenthesis", errors, n, nodes);
-            check_present!(i.get_rparen(), "Missing right parenthesis", errors, n, nodes);
+            check_present!(
+                i.get_rparen(),
+                "Missing right parenthesis",
+                errors,
+                n,
+                nodes
+            );
             check_present!(i.get_lbrace(), "Missing left brace", errors, n, nodes);
             check_present!(i.get_rbrace(), "Missing right brace", errors, n, nodes);
 
@@ -147,7 +180,13 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
 
         NodeKind::For(i) => {
             check_present!(i.get_lparen(), "Missing left parenthesis", errors, n, nodes);
-            check_present!(i.get_rparen(), "Missing right parenthesis", errors, n, nodes);
+            check_present!(
+                i.get_rparen(),
+                "Missing right parenthesis",
+                errors,
+                n,
+                nodes
+            );
             check_present!(i.get_comma1(), "Missing first comma", errors, n, nodes);
             check_present!(i.get_comma2(), "Missing second comma", errors, n, nodes);
 
@@ -160,13 +199,20 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
 
         NodeKind::Foreach(i) => {
             check_present!(i.get_lparen(), "Missing left parenthesis", errors, n, nodes);
-            check_present!(i.get_rparen(), "Missing right parenthesis", errors, n, nodes);
+            check_present!(
+                i.get_rparen(),
+                "Missing right parenthesis",
+                errors,
+                n,
+                nodes
+            );
             check_present!(i.get_name1(), "Missing first name", errors, n, nodes);
-
 
             match (i.get_arrow(), i.get_name2()) {
                 (Some(_), None) => not_present!("Missing secondary name", errors, n, nodes),
-                (None, Some(_)) => not_present!("Missing arrow between the two names", errors, n, nodes),
+                (None, Some(_)) => {
+                    not_present!("Missing arrow between the two names", errors, n, nodes)
+                }
                 _ => {}
             }
 
@@ -178,7 +224,13 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
 
         NodeKind::While(i) => {
             check_present!(i.get_lparen(), "Missing left parenthesis", errors, n, nodes);
-            check_present!(i.get_rparen(), "Missing right parenthesis", errors, n, nodes);
+            check_present!(
+                i.get_rparen(),
+                "Missing right parenthesis",
+                errors,
+                n,
+                nodes
+            );
             check_present!(i.get_condition(), "Missing condition", errors, n, nodes);
             check_present!(i.get_body(), "Missing body", errors, n, nodes);
         }
@@ -191,7 +243,13 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
         NodeKind::Parenthesised(i) => {
             check_present!(i.get_lparen(), "Missing left parenthesis", errors, n, nodes);
             check_present!(i.get_expr(), "Missing expression", errors, n, nodes);
-            check_present!(i.get_rparen(), "Missing right parenthesis", errors, n, nodes);
+            check_present!(
+                i.get_rparen(),
+                "Missing right parenthesis",
+                errors,
+                n,
+                nodes
+            );
         }
 
         NodeKind::Statement(i) => {
@@ -209,13 +267,37 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
         }
 
         NodeKind::Vector(i) => {
-            check_present!(i.get_langle(), "Missing left angled bracket", errors, n, nodes);
-            check_present!(i.get_rangle(), "Missing right angled bracket", errors, n, nodes);
+            check_present!(
+                i.get_langle(),
+                "Missing left angled bracket",
+                errors,
+                n,
+                nodes
+            );
+            check_present!(
+                i.get_rangle(),
+                "Missing right angled bracket",
+                errors,
+                n,
+                nodes
+            );
         }
 
         NodeKind::Array(i) => {
-            check_present!(i.get_lsquare(), "Missing left squared bracket", errors, n, nodes);
-            check_present!(i.get_rsquare(), "Missing right squared bracket", errors, n, nodes);
+            check_present!(
+                i.get_lsquare(),
+                "Missing left squared bracket",
+                errors,
+                n,
+                nodes
+            );
+            check_present!(
+                i.get_rsquare(),
+                "Missing right squared bracket",
+                errors,
+                n,
+                nodes
+            );
         }
 
         NodeKind::UnOp(i) => {
@@ -231,21 +313,39 @@ fn validate_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, errors: &
 
         NodeKind::ArrayAccess(i) => {
             check_present!(i.get_lhs(), "Missing lhs", errors, n, nodes);
-            check_present!(i.get_lsquare(), "Missing left squared bracket", errors, n, nodes);
-            check_present!(i.get_rsquare(), "Missing right squared bracket", errors, n, nodes);
+            check_present!(
+                i.get_lsquare(),
+                "Missing left squared bracket",
+                errors,
+                n,
+                nodes
+            );
+            check_present!(
+                i.get_rsquare(),
+                "Missing right squared bracket",
+                errors,
+                n,
+                nodes
+            );
             check_present!(i.get_index(), "Missing index", errors, n, nodes);
         }
 
         NodeKind::FunctionCall(i) => {
             check_present!(i.get_lhs(), "Missing lhs", errors, n, nodes);
             check_present!(i.get_lparen(), "Missing left parenthesis", errors, n, nodes);
-            check_present!(i.get_rparen(), "Missing right parenthesis", errors, n, nodes);
+            check_present!(
+                i.get_rparen(),
+                "Missing right parenthesis",
+                errors,
+                n,
+                nodes
+            );
         }
 
         _ => {}
     }
 
-        // Recursive calls to children
+    // Recursive calls to children
     for child_id in &children[n] {
         validate_rec(children, nodes, *child_id, errors);
     }

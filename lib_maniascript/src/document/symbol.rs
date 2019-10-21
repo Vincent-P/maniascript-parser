@@ -1,20 +1,15 @@
-use crate::ast::node_kind::*;
-use crate::ast::*;
 use super::r#type::Type;
+use crate::ast::{node_kind::*, *};
 
 #[derive(Debug)]
 pub struct Symbol {
     name: String,
-    type_: Type
+    type_: Type,
 }
-
 
 impl Symbol {
     pub fn new(name: String, type_: Type) -> Self {
-        Symbol {
-            name,
-            type_
-        }
+        Symbol { name, type_ }
     }
 
     pub fn dummy(name: String) -> Self {
@@ -22,7 +17,13 @@ impl Symbol {
     }
 }
 
-fn unchecked_find_symbols_rec(children: &[Vec<NodeId>], nodes: &Vec<Node>, n: usize, text: &str, symbols: &mut Vec<Symbol>) {
+fn unchecked_find_symbols_rec(
+    children: &[Vec<NodeId>],
+    nodes: &Vec<Node>,
+    n: usize,
+    text: &str,
+    symbols: &mut Vec<Symbol>,
+) {
     let node_kind = nodes[n].kind.clone();
 
     match node_kind {

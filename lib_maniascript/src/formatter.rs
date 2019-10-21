@@ -1,7 +1,4 @@
-use crate::ast::node_kind::*;
-use crate::ast::*;
-use crate::lexer::token_kind::*;
-use crate::lexer::trivia_kind::*;
+use crate::{ast::{node_kind::*, *}, lexer::{token_kind::*, trivia_kind::*}};
 
 #[derive(Debug, Copy, Clone)]
 struct FormatContext {
