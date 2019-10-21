@@ -1,0 +1,11 @@
+[workspace]
+
+members = [
+    "lib_macros",
+    "lib_maniascript",
+    "manialsp",
+    "msfmt",
+]
+
+[profile.release]
+debug = true
