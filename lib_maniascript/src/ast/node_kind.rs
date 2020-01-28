@@ -520,7 +520,7 @@ pub struct StructInitialization {
 }
 
 impl StructInitialization {
-    pub fn add_member(&mut self, assignment : NodeId, comma: NodeRef) {
+    pub fn add_member(&mut self, assignment: NodeId, comma: NodeRef) {
         self.members.push((assignment, comma));
     }
 

@@ -35,7 +35,7 @@ impl TriviaKind {
             TriviaKind::Tab(c) => String::from("\x09").repeat(*c),
             TriviaKind::LineComment(s) => s.clone(),
             TriviaKind::BlockComment(s) => s.clone(),
-            _ => {unreachable!()}
+            _ => unreachable!(),
         }
     }
 }

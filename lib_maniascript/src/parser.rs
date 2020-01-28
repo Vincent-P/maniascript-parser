@@ -1,3 +1,9 @@
+mod syntax_kind;
+mod tokenizer;
+
+// export SyntaxKind to tokenizer
+use syntax_kind::SyntaxKind;
+
 use crate::{ast::*, lexer::{token::Token, token_kind::TokenKind, Lexer}};
 
 use std::{error::Error, fmt, iter::Peekable};
@@ -89,7 +95,9 @@ impl Token {
                     // Empty struct init
                     if parser.next_token_is(TokenKind::CloseBrace) {
                         struct_init.set_rbrace(parser.next_token_node());
-                        return Ok(parser.tree.end_node(NodeKind::StructInitialization(struct_init)));
+                        return Ok(parser
+                            .tree
+                            .end_node(NodeKind::StructInitialization(struct_init)));
                     }
 
                     // There is a member assignment
@@ -106,7 +114,9 @@ impl Token {
 
                     optionnal_field!(parser, struct_init, set_rbrace, TokenKind::CloseBrace);
 
-                    return Ok(parser.tree.end_node(NodeKind::StructInitialization(struct_init)));
+                    return Ok(parser
+                        .tree
+                        .end_node(NodeKind::StructInitialization(struct_init)));
                 }
 
                 // Variable
@@ -719,7 +729,11 @@ impl<'a> Parser<'a> {
             Some(_) => {
                 let t = self.tokens.next().unwrap();
                 let (l, c) = (t.line, t.col);
-                return Err(ParseError::Token(t, Some(TokenKind::Equal), Span::new(l, c)));
+                return Err(ParseError::Token(
+                    t,
+                    Some(TokenKind::Equal),
+                    Span::new(l, c),
+                ));
             }
 
             None => {
