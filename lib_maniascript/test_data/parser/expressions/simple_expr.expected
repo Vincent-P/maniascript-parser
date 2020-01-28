@@ -1,0 +1,58 @@
+NODE_ROOT 0..42 {
+  NODE_FUNC_DECL 0..42 {
+    NODE_IDENTIFIER 0..4 {
+      TOKEN_IDENT("main") 0..4
+    }
+    TOKEN_OPEN_PAREN("(") 4..5
+    TOKEN_CLOSE_PAREN(")") 5..6
+    TOKEN_WHITESPACE("\n") 6..7
+    NODE_BLOCK 7..42 {
+      TOKEN_OPEN_BRACE("{") 7..8
+      TOKEN_WHITESPACE("\n    ") 8..13
+      NODE_VAR_DECL 13..40 {
+        TOKEN_DECLARE("declare") 13..20
+        TOKEN_WHITESPACE(" ") 20..21
+        NODE_IDENTIFIER 21..25 {
+          TOKEN_IDENT("Math") 21..25
+        }
+        TOKEN_WHITESPACE(" ") 25..26
+        TOKEN_EQUAL("=") 26..27
+        TOKEN_WHITESPACE(" ") 27..28
+        NODE_BINARY_OP 28..39 {
+          NODE_BINARY_OP 28..31 {
+            NODE_LITERAL 28..29 {
+              TOKEN_INTEGER("2") 28..29
+            }
+            TOKEN_MULT("*") 29..30
+            NODE_LITERAL 30..31 {
+              TOKEN_INTEGER("2") 30..31
+            }
+          }
+          TOKEN_PLUS("+") 31..32
+          NODE_BINARY_OP 32..39 {
+            NODE_LITERAL 32..33 {
+              TOKEN_INTEGER("3") 32..33
+            }
+            TOKEN_MULT("*") 33..34
+            NODE_PARENTHESISED 34..39 {
+              TOKEN_OPEN_PAREN("(") 34..35
+              NODE_BINARY_OP 35..38 {
+                NODE_LITERAL 35..36 {
+                  TOKEN_INTEGER("1") 35..36
+                }
+                TOKEN_PLUS("+") 36..37
+                NODE_LITERAL 37..38 {
+                  TOKEN_INTEGER("2") 37..38
+                }
+              }
+              TOKEN_CLOSE_PAREN(")") 38..39
+            }
+          }
+        }
+        TOKEN_SEMICOLON(";") 39..40
+      }
+      TOKEN_WHITESPACE("\n") 40..41
+      TOKEN_CLOSE_BRACE("}") 41..42
+    }
+  }
+}
