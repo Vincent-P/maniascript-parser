@@ -281,6 +281,7 @@ impl<'a> Iterator for Tokenizer<'a> {
                 self.consume(|c| c >= '0' && c <= '9');
                 if self.peek() == Some('.') {
                     self.next().unwrap();
+                    self.consume(|c| c >= '0' && c <= '9');
                     Some((TOKEN_REAL, self.string_since(start)))
                 } else {
                     Some((TOKEN_INTEGER, self.string_since(start)))
@@ -665,6 +666,16 @@ string!"#
                 (TOKEN_SEMICOLON, ";"),
                 (TOKEN_WHITESPACE, "\n"),
                 (TOKEN_CLOSE_BRACE, "}")
+            ]
+        );
+    }
+
+    #[test]
+    fn real() {
+        assert_eq!(
+            tokenize("0.7"),
+            tokens![
+                (TOKEN_REAL, "0.7")
             ]
         );
     }
