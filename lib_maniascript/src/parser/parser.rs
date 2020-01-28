@@ -515,14 +515,17 @@ where
             Some(TOKEN_CONTINUE) => {
                 self.start_node(NODE_CONTINUE);
                 self.bump();
+                self.finish_node();
             }
             Some(TOKEN_BREAK) => {
                 self.start_node(NODE_BREAK);
                 self.bump();
+                self.finish_node();
             }
             Some(TOKEN_YIELD) => {
                 self.start_node(NODE_YIELD);
                 self.bump();
+                self.finish_node();
             }
             _ => {
                 let maybe_assignment_cp = self.checkpoint();
