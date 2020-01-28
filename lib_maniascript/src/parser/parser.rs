@@ -199,6 +199,15 @@ where
         next
     }
 
+    fn peek_any(&mut self, allowed_slice: &[SyntaxKind]) -> Option<SyntaxKind> {
+        let allowed: BitSet256 = allowed_slice.iter().map(|&k| k as u16).collect();
+
+        match self.peek() {
+            Some(kind) if allowed.contains(kind as usize) => Some(kind),
+            _ => None
+        }
+    }
+
     // eat next token if matches expected kind
     fn expect(&mut self, expected: SyntaxKind) {
         if self.expect_peek_any(&[expected]).is_some() {
@@ -323,8 +332,9 @@ where
         self.expect(TOKEN_OPEN_PAREN);
 
         loop {
-            if let Some(TOKEN_CLOSE_PAREN) = self.peek() {
-                break;
+            match self.peek() {
+                Some(TOKEN_CLOSE_PAREN) | None => break,
+                _ => ()
             }
 
             self.start_node(NODE_FORMAL_ARG);
@@ -363,8 +373,9 @@ where
         self.expect(TOKEN_LABEL_STAR);
 
         loop {
-            if let Some(TOKEN_LABEL_STAR) = self.peek() {
-                break;
+            match self.peek() {
+                Some(TOKEN_LABEL_STAR) | None => break,
+                _ => ()
             }
             self.parse_statement();
         }
@@ -378,7 +389,7 @@ where
         self.start_node(NODE_VAR_DECL);
         self.expect(TOKEN_DECLARE);
 
-        while let Some(_) = self.expect_peek_any(&[
+        while let Some(_) = self.peek_any(&[
             TOKEN_NETREAD,
             TOKEN_NETWRITE,
             TOKEN_PERSISTENT,
@@ -397,7 +408,7 @@ where
         // there is name after the type
         // or a [ indicating an array type
         // the previous ident was surely a type!
-        if self.expect_peek_any(&[TOKEN_IDENT, TOKEN_OPEN_SQUARE]).is_some() {
+        if self.peek_any(&[TOKEN_IDENT, TOKEN_OPEN_SQUARE]).is_some() {
             self.parse_type(Some(maybe_type_checkpoint));
 
             // this one should be the name
@@ -449,8 +460,9 @@ where
         self.start_node(NODE_BLOCK);
         self.expect(TOKEN_OPEN_BRACE);
         loop {
-            if let Some(TOKEN_LABEL_STAR) = self.peek() {
-                break;
+            match self.peek() {
+                Some(TOKEN_CLOSE_BRACE) | None => break,
+                _ => ()
             }
             self.parse_statement();
         }
@@ -806,7 +818,7 @@ where
                     self.parse_expr_until(expect.unwrap().rbp());
                 }
 
-                self.expect(TOKEN_CLOSE_SQUARE);
+                self.expect(TOKEN_CLOSE_PAREN);
                 self.finish_node();
             }
 

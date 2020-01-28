@@ -227,28 +227,22 @@ impl SyntaxKind {
     // TODO: use binding powers from c (https://en.cppreference.com/w/c/language/operator_precedence)
     pub fn lbp(self) -> i32 {
         match self {
-            TOKEN_ARROW => 5,
+            TOKEN_ARROW => 9, // ??
+            TOKEN_DOT | TOKEN_COLON_COLON | TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 9,
 
-            TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 51,
+            TOKEN_CONCAT => 7, // ??
 
-            TOKEN_CONCAT => 100,
+            TOKEN_MULT | TOKEN_DIV | TOKEN_MOD => 6,
+            TOKEN_PLUS | TOKEN_MINUS => 5,
 
-            TOKEN_AND => 200,
-            TOKEN_OR => 300,
+            TOKEN_LESS| TOKEN_LESS_OR_EQ| TOKEN_MORE| TOKEN_MORE_OR_EQ => 4,
+            TOKEN_EQ_EQ | TOKEN_NOT_EQ => 3,
 
-            TOKEN_EQ_EQ
-            | TOKEN_NOT_EQ
-            | TOKEN_LESS
-            | TOKEN_LESS_OR_EQ
-            | TOKEN_MORE
-            | TOKEN_MORE_OR_EQ => 400,
+            TOKEN_AND => 2,
+            TOKEN_OR => 1,
+            TOKEN_IS | TOKEN_AS => 1, // ??
 
-            TOKEN_PLUS | TOKEN_MINUS => 500,
-            TOKEN_MULT | TOKEN_DIV | TOKEN_MOD => 600,
 
-            TOKEN_IS | TOKEN_AS => 650,
-
-            TOKEN_DOT | TOKEN_COLON_COLON => 800,
 
             _ => -1,
         }
@@ -256,10 +250,8 @@ impl SyntaxKind {
 
     pub fn rbp(self) -> i32 {
         match self {
-            TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 1,
-
-            TOKEN_LESS => 450,
-            TOKEN_MINUS | TOKEN_NOT => 700,
+            TOKEN_MINUS | TOKEN_NOT => 8,
+            TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE | TOKEN_LESS => 1, // ??
             _ => -1,
         }
     }
