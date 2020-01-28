@@ -1,0 +1,4 @@
+main()
+{
+    declare CSmScore[] Unranked = [];
+}

@@ -669,7 +669,9 @@ where
 
         while let Some(TOKEN_OPEN_SQUARE) = self.peek() {
             self.bump();
-            self.expect_ident();
+            if let Some(TOKEN_IDENT) = self.peek() {
+                self.bump();
+            }
             self.expect(TOKEN_CLOSE_SQUARE);
         }
 
@@ -954,5 +956,6 @@ mod tests {
         use super::test_dir;
         #[test] fn directives() { test_dir("parser/directives"); }
         #[test] fn expressions() { test_dir("parser/expressions"); }
+        //#[test] fn general() { test_dir("general"); }
     }
 }

@@ -1,0 +1,39 @@
+NODE_ROOT 0..48 {
+  NODE_FUNC_DECL 0..48 {
+    NODE_IDENTIFIER 0..4 {
+      TOKEN_IDENT("main") 0..4
+    }
+    TOKEN_OPEN_PAREN("(") 4..5
+    TOKEN_CLOSE_PAREN(")") 5..6
+    TOKEN_WHITESPACE("\n") 6..7
+    NODE_BLOCK 7..48 {
+      TOKEN_OPEN_BRACE("{") 7..8
+      TOKEN_WHITESPACE("\n    ") 8..13
+      NODE_VAR_DECL 13..46 {
+        TOKEN_DECLARE("declare") 13..20
+        TOKEN_WHITESPACE(" ") 20..21
+        NODE_TYPE 21..31 {
+          NODE_IDENTIFIER 21..29 {
+            TOKEN_IDENT("CSmScore") 21..29
+          }
+          TOKEN_OPEN_SQUARE("[") 29..30
+          TOKEN_CLOSE_SQUARE("]") 30..31
+        }
+        TOKEN_WHITESPACE(" ") 31..32
+        NODE_IDENTIFIER 32..40 {
+          TOKEN_IDENT("Unranked") 32..40
+        }
+        TOKEN_WHITESPACE(" ") 40..41
+        TOKEN_EQUAL("=") 41..42
+        TOKEN_WHITESPACE(" ") 42..43
+        NODE_ARRAY 43..45 {
+          TOKEN_OPEN_SQUARE("[") 43..44
+          TOKEN_CLOSE_SQUARE("]") 44..45
+        }
+        TOKEN_SEMICOLON(";") 45..46
+      }
+      TOKEN_WHITESPACE("\n") 46..47
+      TOKEN_CLOSE_BRACE("}") 47..48
+    }
+  }
+}
