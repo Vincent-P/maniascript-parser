@@ -1,8 +1,18 @@
+mod language;
 mod syntax_kind;
 mod tokenizer;
+mod typed_node;
+mod parser;
 
 // export SyntaxKind to tokenizer
 use syntax_kind::SyntaxKind;
+use tokenizer::Tokenizer;
+use parser::AST;
+
+/// A convenience function for first tokenizing and then parsing given input
+pub fn parse(input: &str) -> AST {
+    parser::parse(Tokenizer::new(input))
+}
 
 use crate::{ast::*, lexer::{token::Token, token_kind::TokenKind, Lexer}};
 
@@ -390,6 +400,12 @@ impl<'a> Parser<'a> {
 
     pub fn parse_file(&mut self) -> ParseResult<NodeId> {
         let mut file = File::new(self.tree.start_node());
+
+        // directive
+        // declare
+        // eof
+        // ident -> function declaration
+        // labelstart labelplus -> label impl
 
         while let Some(next) = self.tokens.peek() {
             if !next.kind.is_hash() {

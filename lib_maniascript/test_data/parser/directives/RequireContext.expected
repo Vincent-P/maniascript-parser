@@ -1,0 +1,9 @@
+NODE_ROOT 0..23 {
+  NODE_REQUIRE_CONTEXT 0..23 {
+    TOKEN_REQUIRE_CONTEXT("#RequireContext") 0..15
+    TOKEN_WHITESPACE(" ") 15..16
+    NODE_IDENTIFIER 16..23 {
+      TOKEN_IDENT("CSmMode") 16..23
+    }
+  }
+}

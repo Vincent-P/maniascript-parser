@@ -1,0 +1,17 @@
+NODE_ROOT 0..24 {
+  NODE_INCLUDE 0..24 {
+    TOKEN_INCLUDE("#Include") 0..8
+    TOKEN_WHITESPACE(" ") 8..9
+    NODE_STRING 9..18 {
+      TOKEN_STRING_START("\"") 9..10
+      TOKEN_STRING_CONTENT("TextLib") 10..17
+      TOKEN_STRING_END("\"") 17..18
+    }
+    TOKEN_WHITESPACE(" ") 18..19
+    TOKEN_AS("as") 19..21
+    TOKEN_WHITESPACE(" ") 21..22
+    NODE_IDENTIFIER 22..24 {
+      TOKEN_IDENT("TL") 22..24
+    }
+  }
+}

@@ -104,11 +104,12 @@ pub enum SyntaxKind {
     NODE_REQUIRE_CONTEXT,
     NODE_EXTENDS,
     NODE_STRUCT,
+
     NODE_STRUCT_FIELD,
     NODE_VAR_DECL,
     NODE_FUNC_DECL,
     NODE_FORMAL_ARG, // need formal arg??
-    NODE_LABEL_IMPL,
+    NODE_LABEL_DECL,
 
     // Control flow
     NODE_IF_ELSE,
@@ -120,6 +121,7 @@ pub enum SyntaxKind {
     NODE_WHILE,
 
     // Statements
+    NODE_STATEMENT,
     NODE_CONTINUE,
     NODE_BREAK,
     NODE_RETURN,
@@ -132,6 +134,8 @@ pub enum SyntaxKind {
     NODE_PARENTHESISED,
 
     NODE_IDENTIFIER,
+    NODE_STRING,
+    NODE_STRING_INTERPOL,
     NODE_LITERAL,
     NODE_VECTOR,
     NODE_ARRAY,
@@ -189,6 +193,20 @@ impl SyntaxKind {
         }
     }
 
+    /// Returns true if this token is a binary operation
+    /// the parser will create a BINARY_OP node from them
+    pub fn is_binary_operator(self) -> bool {
+        match self {
+            TOKEN_MINUS | TOKEN_PLUS | TOKEN_MULT | TOKEN_DIV | TOKEN_MOD
+            | TOKEN_CONCAT | TOKEN_EQ_EQ | TOKEN_NOT_EQ | TOKEN_LESS | TOKEN_LESS_OR_EQ
+                | TOKEN_MORE | TOKEN_MORE_OR_EQ | TOKEN_AND | TOKEN_OR | TOKEN_AS | TOKEN_IN
+                | TOKEN_ARROW | TOKEN_DOT | TOKEN_COLON_COLON | TOKEN_IS  => true,
+            _ => false,
+        }
+    }
+
+    pub const ASSIGNMENT_OPERATORS: &'static[Self] = &[TOKEN_EQUAL , TOKEN_ALIAS , TOKEN_PLUS_EQ , TOKEN_MINUS_EQ , TOKEN_MULT_EQ, TOKEN_DIV_EQ , TOKEN_CONCAT_EQ , TOKEN_AND_EQ , TOKEN_OR_EQ , TOKEN_MOD_EQ];
+
     pub fn is_assignment_operator(self) -> bool {
         match self {
             TOKEN_EQUAL | TOKEN_ALIAS | TOKEN_PLUS_EQ | TOKEN_MINUS_EQ | TOKEN_MULT_EQ
@@ -203,6 +221,46 @@ impl SyntaxKind {
         match self {
             TOKEN_COMMENT | TOKEN_ERROR | TOKEN_WHITESPACE => true,
             _ => false,
+        }
+    }
+
+    // TODO: use binding powers from c (https://en.cppreference.com/w/c/language/operator_precedence)
+    pub fn lbp(self) -> i32 {
+        match self {
+            TOKEN_ARROW => 5,
+
+            TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 51,
+
+            TOKEN_CONCAT => 100,
+
+            TOKEN_AND => 200,
+            TOKEN_OR => 300,
+
+            TOKEN_EQ_EQ
+            | TOKEN_NOT_EQ
+            | TOKEN_LESS
+            | TOKEN_LESS_OR_EQ
+            | TOKEN_MORE
+            | TOKEN_MORE_OR_EQ => 400,
+
+            TOKEN_PLUS | TOKEN_MINUS => 500,
+            TOKEN_MULT | TOKEN_DIV | TOKEN_MOD => 600,
+
+            TOKEN_IS | TOKEN_AS => 650,
+
+            TOKEN_DOT | TOKEN_COLON_COLON => 800,
+
+            _ => -1,
+        }
+    }
+
+    pub fn rbp(self) -> i32 {
+        match self {
+            TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 1,
+
+            TOKEN_LESS => 450,
+            TOKEN_MINUS | TOKEN_NOT => 700,
+            _ => -1,
         }
     }
 }

@@ -33,13 +33,13 @@ impl PartialEq for State<'_> {
 
 impl Eq for State<'_> {}
 
-struct Tokenizer<'a> {
+pub struct Tokenizer<'a> {
     ctx: Vec<Context>,
     state: State<'a>,
 }
 
 impl<'a> Tokenizer<'a> {
-    fn new(input: &'a str) -> Self {
+    pub fn new(input: &'a str) -> Self {
         Self {
             ctx: vec![Context::default()],
             state: State { input, offset: 0 },
@@ -118,7 +118,6 @@ impl<'a> Tokenizer<'a> {
                     }
                 }
 
-                // interp for later
                 Some('{') => {
                     let peeked = self.peek();
                     let peeked2 = self.peek2();
@@ -177,7 +176,7 @@ impl<'a> Iterator for Tokenizer<'a> {
                                     self.next().unwrap();
                                     true
                                 }
-                                (_, Some('"')) => false, // ???
+                                (_, Some('"')) => false, // TODO: is it necessary ???
                                 _ => true,
                             }
                         }
@@ -456,14 +455,16 @@ impl<'a> Iterator for Tokenizer<'a> {
     }
 }
 
-pub fn tokenize(input: &str) -> Vec<(SyntaxKind, SmolStr)> {
-    Tokenizer::new(input).collect()
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{tokenize, SyntaxKind::{self, *}, Tokenizer};
+    use super::{SyntaxKind::{self, *}, Tokenizer};
     use rowan::SmolStr;
+
+
+    fn tokenize(input: &str) -> Vec<(SyntaxKind, SmolStr)> {
+        Tokenizer::new(input).collect()
+    }
+
 
     macro_rules! tokens {
         ($(($token:expr, $str:expr)),*) => {
@@ -667,4 +668,6 @@ string!"#
             ]
         );
     }
+
+    // TODO: more tests...
 }
