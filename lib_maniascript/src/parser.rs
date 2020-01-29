@@ -408,27 +408,18 @@ impl<'a> Parser<'a> {
         // labelstart labelplus -> label impl
 
         while let Some(next) = self.tokens.peek() {
-            if !next.kind.is_hash() {
-                break;
-            }
-            file.add_hash(self.parse_hash()?);
-        }
-
-        while self.next_token_is(TokenKind::Declare) {
-            file.add_global(self.parse_vardec()?);
-        }
-
-        while let Some(next) = self.tokens.peek() {
             match next.kind {
-                TokenKind::EOF => {
-                    file.set_eof(self.next_token_node());
-                    break;
+                k if k.is_hash() => {
+                    file.add_hash(self.parse_hash()?);
                 }
 
                 TokenKind::Declare => {
-                    let t = self.tokens.next().unwrap();
-                    let span = Span::new(t.line, t.col);
-                    return Err(ParseError::String(t, Some("global".to_string()), span));
+                    file.add_global(self.parse_vardec()?);
+                }
+
+                TokenKind::EOF => {
+                    file.set_eof(self.next_token_node());
+                    break;
                 }
 
                 TokenKind::Identifier => {
