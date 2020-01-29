@@ -2,11 +2,13 @@
 
 A language server for ManiaScript.
 
+/!\ Currently all features are disabled /!\
+
 # Features
 
-- [x] Lexical errors
-  - [x] Invalid token
-  - [x] Missing tokens
+- [ ] Lexical errors
+  - [ ] Invalid token
+  - [ ] Missing tokens
 - [ ] Symbols list
   - [ ] Document symbol list
   - [ ] Workspace symbol list

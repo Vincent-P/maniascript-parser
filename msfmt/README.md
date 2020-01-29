@@ -1,5 +1,7 @@
 # MSfmt - ManiaScript formatter
 
+/!\ Currently all features are disabled /!\
+
 # Usage
 
 ```
