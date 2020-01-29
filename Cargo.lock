@@ -299,7 +299,7 @@ name = "lib-mswasm"
 version = "0.1.0"
 dependencies = [
  "console_error_panic_hook 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "lib_maniascript 0.1.0",
+ "lib_maniascript 0.1.1",
  "wasm-bindgen 0.2.58 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasm-bindgen-test 0.2.50 (registry+https://github.com/rust-lang/crates.io-index)",
  "wee_alloc 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -307,7 +307,7 @@ dependencies = [
 
 [[package]]
 name = "lib_maniascript"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "cbitset 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "criterion 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -356,7 +356,7 @@ name = "manialsp"
 version = "0.3.0"
 dependencies = [
  "flexi_logger 0.14.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "lib_maniascript 0.1.0",
+ "lib_maniascript 0.1.1",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "lsp-server 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "lsp-types 0.70.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -395,7 +395,7 @@ name = "msfmt"
 version = "0.2.0"
 dependencies = [
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "lib_maniascript 0.1.0",
+ "lib_maniascript 0.1.1",
 ]
 
 [[package]]

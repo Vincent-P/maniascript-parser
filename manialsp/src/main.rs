@@ -19,8 +19,9 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
                 open_close: Some(true),
                 change: Some(TextDocumentSyncKind::Full),
                 ..TextDocumentSyncOptions::default()
-            }
+            },
         )),
+        document_symbol_provider: Some(true),
         definition_provider: Some(true),
         ..ServerCapabilities::default()
     })

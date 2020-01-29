@@ -7,7 +7,7 @@ use crate::parser::{language::{SyntaxElement, SyntaxNode, SyntaxToken}, SyntaxKi
 macro_rules! typed {
     ($($kind:expr => $name:ident$(: $trait:ident)*$(: { $($block:tt)* })*),*) => {
         $(
-            #[derive(Clone)]
+            #[derive(Clone, Debug)]
             pub struct $name(SyntaxNode);
 
             impl TypedNode for $name {
@@ -36,6 +36,7 @@ macro_rules! nth {
         nth!($self; $index).and_then($kind::cast)
     };
 }
+
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum BinOpKind {
@@ -220,8 +221,18 @@ pub trait Wrapper: TypedNode {
     }
 }
 
+/// Provides the function `.name()` for nodes whose first identifier is a name
+pub trait NamedNode: TypedNode {
+    /// Return the name of the node
+    fn name(&self) -> Option<Identifier> {
+        self.node().children().find(|child| child.kind() == NODE_IDENTIFIER).and_then(Identifier::cast)
+    }
+}
+
+#[derive(Debug)]
 pub struct ParsedTypeError(pub SyntaxKind);
 
+#[derive(Debug)]
 pub enum ParsedType {
     Root(Root),
 
@@ -257,7 +268,7 @@ pub enum ParsedType {
     Parenthesised(Parenthesised),
 
     Identifier(Identifier),
-    String(String),
+    Str(Str),
     Literal(Literal),
     Vector(Vector),
     Array(Array),
@@ -309,7 +320,7 @@ impl core::convert::TryFrom<SyntaxNode> for ParsedType {
             NODE_PARENTHESISED => Ok(ParsedType::Parenthesised(Parenthesised::cast(node).unwrap())),
 
             NODE_IDENTIFIER => Ok(ParsedType::Identifier(Identifier::cast(node).unwrap())),
-            NODE_STRING => Ok(ParsedType::String(String::cast(node).unwrap())),
+            NODE_STRING => Ok(ParsedType::Str(Str::cast(node).unwrap())),
             NODE_LITERAL => Ok(ParsedType::Literal(Literal::cast(node).unwrap())),
             NODE_VECTOR => Ok(ParsedType::Vector(Vector::cast(node).unwrap())),
             NODE_ARRAY => Ok(ParsedType::Array(Array::cast(node).unwrap())),
@@ -327,20 +338,48 @@ impl core::convert::TryFrom<SyntaxNode> for ParsedType {
 
 // TODO: implems
 typed![
-    NODE_ROOT => Root,
+    NODE_ROOT => Root: {
+        /// Return all the global functions of the file
+        pub fn functions(&self) -> impl Iterator<Item = FuncDecl> {
+            self.node().children().filter_map(FuncDecl::cast)
+        }
+
+        /// Return all the label implementations of the file
+        pub fn labels(&self) -> impl Iterator<Item = LabelDecl> {
+            self.node().children().filter_map(LabelDecl::cast)
+        }
+
+        /// Return all the consts of the file
+        pub fn consts(&self) -> impl Iterator<Item = Const> {
+            self.node().children().filter_map(Const::cast)
+        }
+
+        /// Return all the globals of the file
+        pub fn globals(&self) -> impl Iterator<Item = VarDecl> {
+            self.node().children().filter_map(VarDecl::cast)
+        }
+
+        /// Return all the globals of the file
+        pub fn structs(&self) -> impl Iterator<Item = Struct> {
+            self.node().children().filter_map(Struct::cast)
+        }
+    },
 
     NODE_INCLUDE => Include,
-    NODE_CONST => Const,
+    NODE_CONST => Const: NamedNode,
     NODE_SETTING => Setting,
     NODE_REQUIRE_CONTEXT => RequireContext,
     NODE_EXTENDS => Extends,
-    NODE_STRUCT => Struct,
+    NODE_STRUCT => Struct: NamedNode,
 
     NODE_STRUCT_FIELD => StructField,
-    NODE_VAR_DECL => VarDecl,
-    NODE_FUNC_DECL => FuncDecl,
+    NODE_VAR_DECL => VarDecl: NamedNode,
+
+    NODE_FUNC_DECL => FuncDecl: NamedNode: {
+    },
+
     NODE_FORMAL_ARG => FormalArg,
-    NODE_LABEL_DECL => LabelDecl,
+    NODE_LABEL_DECL => LabelDecl: NamedNode,
 
     NODE_IF_ELSE => IfElse,
     NODE_SWITCH => Switch,
@@ -360,8 +399,8 @@ typed![
     NODE_BLOCK => Block,
     NODE_PARENTHESISED => Parenthesised,
 
-    NODE_IDENTIFIER => Identifier,
-    NODE_STRING => String,
+    NODE_IDENTIFIER => Identifier: TokenWrapper,
+    NODE_STRING => Str,
     NODE_LITERAL => Literal,
     NODE_VECTOR => Vector,
     NODE_ARRAY => Array,

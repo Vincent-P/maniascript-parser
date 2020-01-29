@@ -54,6 +54,11 @@ impl App {
                             self.go_to_definition(id, params);
                         }
 
+                        DocumentSymbolRequest::METHOD => {
+                            let (id, params) = cast::<DocumentSymbolRequest>(req).unwrap();
+                            self.document_symbol(id, params);
+                        }
+
                         _ => ()
                     }
                 }
