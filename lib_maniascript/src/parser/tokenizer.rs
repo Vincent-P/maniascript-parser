@@ -278,13 +278,23 @@ impl<'a> Iterator for Tokenizer<'a> {
 
             // numbers
             '0'..='9' => {
-                self.consume(|c| c >= '0' && c <= '9');
+                self.consume(|c| '0' <= c && c <= '9');
                 if self.peek() == Some('.') {
                     self.next().unwrap();
-                    self.consume(|c| c >= '0' && c <= '9');
+                    self.consume(|c| '0' <= c && c <= '9');
                     Some((TOKEN_REAL, self.string_since(start)))
                 } else {
                     Some((TOKEN_INTEGER, self.string_since(start)))
+                }
+            }
+
+            '.' => {
+                match peeked {
+                    Some(p) if '0' <= p && p <= '9' => {
+                        self.consume(|c| '0' <= c && c <= '9');
+                        Some((TOKEN_REAL, self.string_since(start)))
+                    }
+                    _ => Some((TOKEN_DOT, self.string_since(start)))
                 }
             }
 
@@ -416,7 +426,6 @@ impl<'a> Iterator for Tokenizer<'a> {
             }
 
             // single character tokens
-            '.' => Some((TOKEN_DOT, self.string_since(start))),
             ',' => Some((TOKEN_COMMA, self.string_since(start))),
             ';' => Some((TOKEN_SEMICOLON, self.string_since(start))),
             ':' => Some((TOKEN_COLON, self.string_since(start))),
@@ -472,6 +481,11 @@ mod tests {
             vec![$(($token, $str.into())),*]
         }
     }
+
+    fn single_token_test(token: &str, kind: SyntaxKind) {
+        assert_eq!(tokenize(token), tokens![(kind, token)]);
+    }
+
 
     #[test]
     fn single_line_comment() {
@@ -671,14 +685,126 @@ string!"#
     }
 
     #[test]
-    fn real() {
+    fn keywords() {
         assert_eq!(
-            tokenize("0.7"),
+            tokenize("break yield continue return declare as for if else switch switchtype case default while foreach in is netwrite netread persistent metadata"),
             tokens![
-                (TOKEN_REAL, "0.7")
+                (TOKEN_BREAK, "break"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_YIELD, "yield"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_CONTINUE, "continue"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_RETURN, "return"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_DECLARE, "declare"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_AS, "as"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_FOR, "for"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_IF, "if"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_ELSE, "else"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_SWITCH, "switch"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_SWITCHTYPE, "switchtype"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_CASE, "case"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_DEFAULT, "default"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_WHILE, "while"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_FOREACH, "foreach"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_IN, "in"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_IS, "is"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_NETWRITE, "netwrite"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_NETREAD, "netread"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_PERSISTENT, "persistent"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_METADATA, "metadata")
             ]
         );
     }
 
+    #[test]
+    fn symbols() {
+        single_token_test("***", TOKEN_LABEL_STAR);
+        single_token_test("+++", TOKEN_LABEL_PLUS);
+        single_token_test(".", TOKEN_DOT);
+        single_token_test(",", TOKEN_COMMA);
+        single_token_test(";", TOKEN_SEMICOLON);
+        single_token_test(":", TOKEN_COLON);
+        single_token_test("::", TOKEN_COLON_COLON);
+        single_token_test("(", TOKEN_OPEN_PAREN);
+        single_token_test(")", TOKEN_CLOSE_PAREN);
+        single_token_test("[", TOKEN_OPEN_SQUARE);
+        single_token_test("]", TOKEN_CLOSE_SQUARE);
+        single_token_test("{", TOKEN_OPEN_BRACE);
+        single_token_test("}", TOKEN_CLOSE_BRACE);
+        single_token_test("=>", TOKEN_ARROW);
+    }
+
+    #[test]
+    fn operators() {
+        single_token_test("!", TOKEN_NOT);
+        single_token_test("-", TOKEN_MINUS);
+        single_token_test("+", TOKEN_PLUS);
+        single_token_test("*", TOKEN_MULT);
+        single_token_test("/", TOKEN_DIV);
+        single_token_test("%", TOKEN_MOD);
+        single_token_test("^", TOKEN_CONCAT);
+        single_token_test("==", TOKEN_EQ_EQ);
+        single_token_test("!=", TOKEN_NOT_EQ);
+        single_token_test("<", TOKEN_LESS);
+        single_token_test("<=", TOKEN_LESS_OR_EQ);
+        single_token_test(">", TOKEN_MORE);
+        single_token_test(">=", TOKEN_MORE_OR_EQ);
+        single_token_test("&&", TOKEN_AND);
+        single_token_test("||", TOKEN_OR);
+    }
+
+    #[test]
+    fn assignment() {
+        single_token_test("=", TOKEN_EQUAL);
+        single_token_test("<=>", TOKEN_ALIAS);
+        single_token_test("+=", TOKEN_PLUS_EQ);
+        single_token_test("-=", TOKEN_MINUS_EQ);
+        single_token_test("*=", TOKEN_MULT_EQ);
+        single_token_test("/=", TOKEN_DIV_EQ);
+        single_token_test("^=", TOKEN_CONCAT_EQ);
+        single_token_test("&=", TOKEN_AND_EQ);
+        single_token_test("|=", TOKEN_OR_EQ);
+        single_token_test("%=", TOKEN_MOD_EQ);
+    }
+
+    #[test]
+    fn identifiers() {
+        single_token_test("asif", TOKEN_IDENT);
+        single_token_test("MyIdent", TOKEN_IDENT);
+        single_token_test("_MyIdent", TOKEN_IDENT);
+        single_token_test("_MyIdent2", TOKEN_IDENT);
+        single_token_test("_My_Ident2", TOKEN_IDENT);
+    }
+
+    #[test]
+    fn numbers() {
+        single_token_test("07", TOKEN_INTEGER);
+        single_token_test("12", TOKEN_INTEGER);
+        single_token_test("1200000", TOKEN_INTEGER);
+        single_token_test("1", TOKEN_INTEGER);
+
+        single_token_test("0.7", TOKEN_REAL);
+        single_token_test("0.", TOKEN_REAL);
+        single_token_test("0.0", TOKEN_REAL);
+        single_token_test(".01", TOKEN_REAL);
+    }
     // TODO: more tests...
 }
