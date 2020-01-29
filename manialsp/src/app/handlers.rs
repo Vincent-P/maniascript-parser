@@ -81,26 +81,23 @@ impl App {
         if let Some((uri, (ast, text))) = self.files.get_key_value(&params.text_document.uri) {
 
             let root = ast.node();
-            let root = ParsedType::try_from(root).unwrap();
+            let root = Root::cast(root).unwrap();
 
-            if let ParsedType::Root(r) = root {
-                for n in r.functions() {
-                    add_named_symbol(&mut symbols, n, SymbolKind::Function, &text, uri.clone());
-                }
-                for n in r.labels() {
-                    add_named_symbol(&mut symbols, n, SymbolKind::Function, &text, uri.clone());
-                }
-                for n in r.consts() {
-                    add_named_symbol(&mut symbols, n, SymbolKind::Constant, &text, uri.clone());
-                }
-                for n in r.globals() {
-                    add_named_symbol(&mut symbols, n, SymbolKind::Variable, &text, uri.clone());
-                }
-                for n in r.structs() {
-                    add_named_symbol(&mut symbols, n, SymbolKind::Struct, &text, uri.clone());
-                }
+            for n in root.functions() {
+                add_named_symbol(&mut symbols, n, SymbolKind::Function, &text, uri.clone());
             }
-
+            for n in root.labels() {
+                add_named_symbol(&mut symbols, n, SymbolKind::Function, &text, uri.clone());
+            }
+            for n in root.consts() {
+                add_named_symbol(&mut symbols, n, SymbolKind::Constant, &text, uri.clone());
+            }
+            for n in root.globals() {
+                add_named_symbol(&mut symbols, n, SymbolKind::Variable, &text, uri.clone());
+            }
+            for n in root.structs() {
+                add_named_symbol(&mut symbols, n, SymbolKind::Struct, &text, uri.clone());
+            }
         }
 
         let result = serde_json::to_value(symbols).unwrap();
