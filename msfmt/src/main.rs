@@ -1,4 +1,4 @@
-use lib_maniascript::{ast::printer::{print_ast, print_dot}, lexer::Lexer, parser::Parser};
+//use lib_maniascript::{ast::printer::{print_ast, print_dot}, lexer::Lexer, parser::Parser};
 
 use clap::{App, Arg};
 
@@ -44,6 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let file_start = Instant::now();
 
         // parse the file
+        /*
         let lexer = Lexer::new(&input);
 
         let mut tree = Parser::new(lexer).parse()?;
@@ -62,6 +63,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else {
             print_ast(&mut io::stdout(), &tree, 0, &input)?;
         }
+        */
 
         // print(file_stem.to_str().unwrap(), &tree, 0, &input)?;
         println!(
