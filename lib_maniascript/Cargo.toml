@@ -1,8 +1,8 @@
 [package]
 name = "lib_maniascript"
 description = "A library to manipulate ManiaScript code"
-repository = "https://github.com/Vincent-P/maniascript-rust/lib_maniascript"
-version = "0.1.0"
+repository = "https://github.com/Vincent-P/maniascript-rust"
+version = "0.1.1"
 authors = ["Vincent Parizet <vincent.parizet@hotmail.fr>"]
 edition = "2018"
 license = "MIT"
