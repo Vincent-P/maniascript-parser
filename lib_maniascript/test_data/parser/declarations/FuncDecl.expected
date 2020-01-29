@@ -1,0 +1,78 @@
+NODE_ROOT 0..74 {
+  NODE_FUNC_DECL 0..9 {
+    NODE_IDENTIFIER 0..4 {
+      TOKEN_IDENT("main") 0..4
+    }
+    TOKEN_OPEN_PAREN("(") 4..5
+    TOKEN_CLOSE_PAREN(")") 5..6
+    TOKEN_WHITESPACE(" ") 6..7
+    NODE_BLOCK 7..9 {
+      TOKEN_OPEN_BRACE("{") 7..8
+      TOKEN_CLOSE_BRACE("}") 8..9
+    }
+  }
+  TOKEN_WHITESPACE("\n") 9..10
+  NODE_FUNC_DECL 10..74 {
+    NODE_TYPE 10..14 {
+      NODE_IDENTIFIER 10..14 {
+        TOKEN_IDENT("Void") 10..14
+      }
+    }
+    TOKEN_WHITESPACE(" ") 14..15
+    NODE_IDENTIFIER 15..24 {
+      TOKEN_IDENT("OtherFunc") 15..24
+    }
+    TOKEN_OPEN_PAREN("(") 24..25
+    NODE_FORMAL_ARG 25..35 {
+      NODE_TYPE 25..32 {
+        NODE_IDENTIFIER 25..32 {
+          TOKEN_IDENT("Integer") 25..32
+        }
+      }
+      TOKEN_WHITESPACE(" ") 32..33
+      NODE_IDENTIFIER 33..34 {
+        TOKEN_IDENT("A") 33..34
+      }
+      TOKEN_COMMA(",") 34..35
+    }
+    TOKEN_WHITESPACE(" ") 35..36
+    NODE_FORMAL_ARG 36..43 {
+      NODE_TYPE 36..40 {
+        NODE_IDENTIFIER 36..40 {
+          TOKEN_IDENT("Real") 36..40
+        }
+      }
+      TOKEN_WHITESPACE(" ") 40..41
+      NODE_IDENTIFIER 41..42 {
+        TOKEN_IDENT("B") 41..42
+      }
+      TOKEN_COMMA(",") 42..43
+    }
+    TOKEN_WHITESPACE(" ") 43..44
+    NODE_FORMAL_ARG 44..70 {
+      NODE_TYPE 44..68 {
+        NODE_IDENTIFIER 44..51 {
+          TOKEN_IDENT("Integer") 44..51
+        }
+        TOKEN_OPEN_SQUARE("[") 51..52
+        TOKEN_IDENT("Integer") 52..59
+        TOKEN_CLOSE_SQUARE("]") 59..60
+        TOKEN_OPEN_SQUARE("[") 60..61
+        TOKEN_CLOSE_SQUARE("]") 61..62
+        TOKEN_OPEN_SQUARE("[") 62..63
+        TOKEN_IDENT("Text") 63..67
+        TOKEN_CLOSE_SQUARE("]") 67..68
+      }
+      TOKEN_WHITESPACE(" ") 68..69
+      NODE_IDENTIFIER 69..70 {
+        TOKEN_IDENT("C") 69..70
+      }
+    }
+    TOKEN_CLOSE_PAREN(")") 70..71
+    TOKEN_WHITESPACE(" ") 71..72
+    NODE_BLOCK 72..74 {
+      TOKEN_OPEN_BRACE("{") 72..73
+      TOKEN_CLOSE_BRACE("}") 73..74
+    }
+  }
+}

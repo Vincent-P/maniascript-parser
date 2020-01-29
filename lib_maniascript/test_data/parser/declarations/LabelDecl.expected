@@ -1,0 +1,38 @@
+NODE_ROOT 0..73 {
+  NODE_LABEL_DECL 0..73 {
+    TOKEN_LABEL_STAR("***") 0..3
+    NODE_IDENTIFIER 3..20 {
+      TOKEN_IDENT("Match_LogVersions") 3..20
+    }
+    TOKEN_LABEL_STAR("***") 20..23
+    TOKEN_WHITESPACE("\n") 23..24
+    TOKEN_LABEL_STAR("***") 24..27
+    TOKEN_WHITESPACE("\n") 27..28
+    NODE_STATEMENT 28..69 {
+      NODE_BINARY_OP 28..68 {
+        NODE_IDENTIFIER 28..31 {
+          TOKEN_IDENT("Log") 28..31
+        }
+        TOKEN_COLON_COLON("::") 31..33
+        NODE_FUNCTION_CALL 33..68 {
+          NODE_IDENTIFIER 33..47 {
+            TOKEN_IDENT("RegisterScript") 33..47
+          }
+          TOKEN_OPEN_PAREN("(") 47..48
+          NODE_IDENTIFIER 48..58 {
+            TOKEN_IDENT("ScriptName") 48..58
+          }
+          TOKEN_COMMA(",") 58..59
+          TOKEN_WHITESPACE(" ") 59..60
+          NODE_IDENTIFIER 60..67 {
+            TOKEN_IDENT("Version") 60..67
+          }
+          TOKEN_CLOSE_PAREN(")") 67..68
+        }
+      }
+      TOKEN_SEMICOLON(";") 68..69
+    }
+    TOKEN_WHITESPACE("\n") 69..70
+    TOKEN_LABEL_STAR("***") 70..73
+  }
+}

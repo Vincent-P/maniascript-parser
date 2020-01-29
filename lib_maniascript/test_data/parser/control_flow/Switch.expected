@@ -1,0 +1,77 @@
+NODE_ROOT 0..113 {
+  NODE_FUNC_DECL 0..113 {
+    NODE_IDENTIFIER 0..4 {
+      TOKEN_IDENT("main") 0..4
+    }
+    TOKEN_OPEN_PAREN("(") 4..5
+    TOKEN_CLOSE_PAREN(")") 5..6
+    TOKEN_WHITESPACE("\n") 6..7
+    NODE_BLOCK 7..113 {
+      TOKEN_OPEN_BRACE("{") 7..8
+      TOKEN_WHITESPACE("\n    ") 8..13
+      NODE_SWITCH 13..111 {
+        TOKEN_SWITCH("switch") 13..19
+        TOKEN_WHITESPACE(" ") 19..20
+        TOKEN_OPEN_PAREN("(") 20..21
+        NODE_IDENTIFIER 21..26 {
+          TOKEN_IDENT("Thing") 21..26
+        }
+        TOKEN_CLOSE_PAREN(")") 26..27
+        TOKEN_WHITESPACE("\n    ") 27..32
+        TOKEN_OPEN_BRACE("{") 32..33
+        TOKEN_WHITESPACE("\n        ") 33..42
+        NODE_CASE 42..56 {
+          TOKEN_CASE("case") 42..46
+          TOKEN_WHITESPACE(" ") 46..47
+          NODE_LITERAL 47..48 {
+            TOKEN_INTEGER("0") 47..48
+          }
+          TOKEN_COLON(":") 48..49
+          TOKEN_WHITESPACE(" ") 49..50
+          NODE_STATEMENT 50..56 {
+            NODE_BREAK 50..55 {
+              TOKEN_BREAK("break") 50..55
+            }
+            TOKEN_SEMICOLON(";") 55..56
+          }
+        }
+        TOKEN_WHITESPACE("\n        ") 56..65
+        NODE_CASE 65..79 {
+          TOKEN_CASE("case") 65..69
+          TOKEN_WHITESPACE(" ") 69..70
+          NODE_LITERAL 70..71 {
+            TOKEN_INTEGER("1") 70..71
+          }
+          TOKEN_COLON(":") 71..72
+          TOKEN_WHITESPACE(" ") 72..73
+          NODE_STATEMENT 73..79 {
+            NODE_BREAK 73..78 {
+              TOKEN_BREAK("break") 73..78
+            }
+            TOKEN_SEMICOLON(";") 78..79
+          }
+        }
+        TOKEN_WHITESPACE("\n        ") 79..88
+        NODE_DEFAULT 88..105 {
+          TOKEN_DEFAULT("default") 88..95
+          TOKEN_COLON(":") 95..96
+          TOKEN_WHITESPACE(" ") 96..97
+          NODE_BLOCK 97..105 {
+            TOKEN_OPEN_BRACE("{") 97..98
+            NODE_STATEMENT 98..104 {
+              NODE_BREAK 98..103 {
+                TOKEN_BREAK("break") 98..103
+              }
+              TOKEN_SEMICOLON(";") 103..104
+            }
+            TOKEN_CLOSE_BRACE("}") 104..105
+          }
+        }
+        TOKEN_WHITESPACE("\n    ") 105..110
+        TOKEN_CLOSE_BRACE("}") 110..111
+      }
+      TOKEN_WHITESPACE("\n") 111..112
+      TOKEN_CLOSE_BRACE("}") 112..113
+    }
+  }
+}

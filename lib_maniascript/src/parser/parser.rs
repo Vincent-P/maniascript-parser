@@ -294,11 +294,14 @@ where
             TOKEN_STRUCT => {
                 self.start_node(NODE_STRUCT);
                 self.bump();
+                self.expect_ident();
                 self.expect(TOKEN_OPEN_BRACE);
                 while let Some(TOKEN_IDENT) = self.peek() {
+                    self.start_node(NODE_STRUCT_FIELD);
                     self.parse_type(None);
                     self.expect_ident();
                     self.expect(TOKEN_SEMICOLON);
+                    self.finish_node();
                 }
                 self.expect(TOKEN_CLOSE_BRACE);
                 self.finish_node();
@@ -341,7 +344,7 @@ where
             self.parse_type(None);
             self.expect_ident();
 
-            let is_last = if let Some(TOKEN_COMMA) = self.peek() { true } else { false };
+            let is_last = if let Some(TOKEN_COMMA) = self.peek() { false } else { true };
 
             if !is_last {
                 self.bump();
@@ -956,6 +959,7 @@ mod tests {
         use super::test_dir;
         #[test] fn directives() { test_dir("parser/directives"); }
         #[test] fn expressions() { test_dir("parser/expressions"); }
-        //#[test] fn general() { test_dir("general"); }
+        #[test] fn declarations() { test_dir("parser/declarations"); }
+        #[test] fn control_flow() { test_dir("parser/control_flow"); }
     }
 }

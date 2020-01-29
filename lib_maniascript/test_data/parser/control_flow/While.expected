@@ -1,0 +1,47 @@
+NODE_ROOT 0..46 {
+  NODE_FUNC_DECL 0..46 {
+    NODE_IDENTIFIER 0..4 {
+      TOKEN_IDENT("main") 0..4
+    }
+    TOKEN_OPEN_PAREN("(") 4..5
+    TOKEN_CLOSE_PAREN(")") 5..6
+    TOKEN_WHITESPACE("\n") 6..7
+    NODE_BLOCK 7..46 {
+      TOKEN_OPEN_BRACE("{") 7..8
+      TOKEN_WHITESPACE("\n   ") 8..12
+      NODE_WHILE 12..44 {
+        TOKEN_WHILE("while") 12..17
+        TOKEN_WHITESPACE(" ") 17..18
+        TOKEN_OPEN_PAREN("(") 18..19
+        NODE_IDENTIFIER 19..23 {
+          TOKEN_IDENT("True") 19..23
+        }
+        TOKEN_CLOSE_PAREN(")") 23..24
+        TOKEN_WHITESPACE(" ") 24..25
+        NODE_BLOCK 25..44 {
+          TOKEN_OPEN_BRACE("{") 25..26
+          TOKEN_WHITESPACE(" ") 26..27
+          NODE_STATEMENT 27..42 {
+            NODE_FUNCTION_CALL 27..41 {
+              NODE_IDENTIFIER 27..30 {
+                TOKEN_IDENT("log") 27..30
+              }
+              TOKEN_OPEN_PAREN("(") 30..31
+              NODE_STRING 31..40 {
+                TOKEN_STRING_START("\"") 31..32
+                TOKEN_STRING_CONTENT("Got you") 32..39
+                TOKEN_STRING_END("\"") 39..40
+              }
+              TOKEN_CLOSE_PAREN(")") 40..41
+            }
+            TOKEN_SEMICOLON(";") 41..42
+          }
+          TOKEN_WHITESPACE(" ") 42..43
+          TOKEN_CLOSE_BRACE("}") 43..44
+        }
+      }
+      TOKEN_WHITESPACE("\n") 44..45
+      TOKEN_CLOSE_BRACE("}") 45..46
+    }
+  }
+}

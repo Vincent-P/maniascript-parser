@@ -1,0 +1,39 @@
+NODE_ROOT 0..53 {
+  NODE_STRUCT 0..53 {
+    TOKEN_STRUCT("#Struct") 0..7
+    TOKEN_WHITESPACE(" ") 7..8
+    NODE_IDENTIFIER 8..20 {
+      TOKEN_IDENT("SRequestData") 8..20
+    }
+    TOKEN_WHITESPACE(" ") 20..21
+    TOKEN_OPEN_BRACE("{") 21..22
+    TOKEN_WHITESPACE("\n    ") 22..27
+    NODE_STRUCT_FIELD 27..36 {
+      NODE_TYPE 27..31 {
+        NODE_IDENTIFIER 27..31 {
+          TOKEN_IDENT("Text") 27..31
+        }
+      }
+      TOKEN_WHITESPACE(" ") 31..32
+      NODE_IDENTIFIER 32..35 {
+        TOKEN_IDENT("Url") 32..35
+      }
+      TOKEN_SEMICOLON(";") 35..36
+    }
+    TOKEN_WHITESPACE("\n    ") 36..41
+    NODE_STRUCT_FIELD 41..51 {
+      NODE_TYPE 41..45 {
+        NODE_IDENTIFIER 41..45 {
+          TOKEN_IDENT("Text") 41..45
+        }
+      }
+      TOKEN_WHITESPACE(" ") 45..46
+      NODE_IDENTIFIER 46..50 {
+        TOKEN_IDENT("Data") 46..50
+      }
+      TOKEN_SEMICOLON(";") 50..51
+    }
+    TOKEN_WHITESPACE("\n") 51..52
+    TOKEN_CLOSE_BRACE("}") 52..53
+  }
+}

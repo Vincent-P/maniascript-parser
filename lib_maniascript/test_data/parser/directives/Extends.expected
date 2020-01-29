@@ -1,0 +1,11 @@
+NODE_ROOT 0..58 {
+  NODE_EXTENDS 0..58 {
+    TOKEN_EXTENDS("#Extends") 0..8
+    TOKEN_WHITESPACE(" ") 8..9
+    NODE_STRING 9..58 {
+      TOKEN_STRING_START("\"") 9..10
+      TOKEN_STRING_CONTENT("Modes/ShootMania/Base/ModeShootMania.Script.txt") 10..57
+      TOKEN_STRING_END("\"") 57..58
+    }
+  }
+}

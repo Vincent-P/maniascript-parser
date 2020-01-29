@@ -1,0 +1,95 @@
+NODE_ROOT 0..120 {
+  NODE_FUNC_DECL 0..120 {
+    NODE_IDENTIFIER 0..4 {
+      TOKEN_IDENT("main") 0..4
+    }
+    TOKEN_OPEN_PAREN("(") 4..5
+    TOKEN_CLOSE_PAREN(")") 5..6
+    TOKEN_WHITESPACE("\n") 6..7
+    NODE_BLOCK 7..120 {
+      TOKEN_OPEN_BRACE("{") 7..8
+      TOKEN_WHITESPACE("\n    ") 8..13
+      NODE_FOREACH 13..57 {
+        TOKEN_FOREACH("foreach") 13..20
+        TOKEN_WHITESPACE(" ") 20..21
+        TOKEN_OPEN_PAREN("(") 21..22
+        NODE_IDENTIFIER 22..28 {
+          TOKEN_IDENT("Player") 22..28
+        }
+        TOKEN_WHITESPACE(" ") 28..29
+        TOKEN_IN("in") 29..31
+        TOKEN_WHITESPACE(" ") 31..32
+        NODE_IDENTIFIER 32..39 {
+          TOKEN_IDENT("Players") 32..39
+        }
+        TOKEN_CLOSE_PAREN(")") 39..40
+        TOKEN_WHITESPACE(" ") 40..41
+        NODE_BLOCK 41..57 {
+          TOKEN_OPEN_BRACE("{") 41..42
+          TOKEN_WHITESPACE(" ") 42..43
+          NODE_STATEMENT 43..55 {
+            NODE_FUNCTION_CALL 43..54 {
+              NODE_IDENTIFIER 43..46 {
+                TOKEN_IDENT("log") 43..46
+              }
+              TOKEN_OPEN_PAREN("(") 46..47
+              NODE_IDENTIFIER 47..53 {
+                TOKEN_IDENT("Player") 47..53
+              }
+              TOKEN_CLOSE_PAREN(")") 53..54
+            }
+            TOKEN_SEMICOLON(";") 54..55
+          }
+          TOKEN_WHITESPACE(" ") 55..56
+          TOKEN_CLOSE_BRACE("}") 56..57
+        }
+      }
+      TOKEN_WHITESPACE("\n    ") 57..62
+      NODE_FOREACH 62..118 {
+        TOKEN_FOREACH("foreach") 62..69
+        TOKEN_WHITESPACE(" ") 69..70
+        TOKEN_OPEN_PAREN("(") 70..71
+        NODE_BINARY_OP 71..83 {
+          NODE_IDENTIFIER 71..74 {
+            TOKEN_IDENT("Key") 71..74
+          }
+          TOKEN_WHITESPACE(" ") 74..75
+          TOKEN_ARROW("=>") 75..77
+          TOKEN_WHITESPACE(" ") 77..78
+          NODE_IDENTIFIER 78..83 {
+            TOKEN_IDENT("Value") 78..83
+          }
+        }
+        TOKEN_WHITESPACE(" ") 83..84
+        TOKEN_IN("in") 84..86
+        TOKEN_WHITESPACE(" ") 86..87
+        NODE_IDENTIFIER 87..103 {
+          TOKEN_IDENT("AssociativeArray") 87..103
+        }
+        TOKEN_CLOSE_PAREN(")") 103..104
+        TOKEN_WHITESPACE(" ") 104..105
+        NODE_BLOCK 105..118 {
+          TOKEN_OPEN_BRACE("{") 105..106
+          TOKEN_WHITESPACE(" ") 106..107
+          NODE_STATEMENT 107..116 {
+            NODE_FUNCTION_CALL 107..115 {
+              NODE_IDENTIFIER 107..110 {
+                TOKEN_IDENT("log") 107..110
+              }
+              TOKEN_OPEN_PAREN("(") 110..111
+              NODE_IDENTIFIER 111..114 {
+                TOKEN_IDENT("Key") 111..114
+              }
+              TOKEN_CLOSE_PAREN(")") 114..115
+            }
+            TOKEN_SEMICOLON(";") 115..116
+          }
+          TOKEN_WHITESPACE(" ") 116..117
+          TOKEN_CLOSE_BRACE("}") 117..118
+        }
+      }
+      TOKEN_WHITESPACE("\n") 118..119
+      TOKEN_CLOSE_BRACE("}") 119..120
+    }
+  }
+}
