@@ -8,10 +8,6 @@ edition = "2018"
 rowan = "0.9.0"
 cbitset = "0.2.0"
 
-strum = "0.15.0"
-strum_macros = "0.15.0"
-lib_macros = { path = "../lib_macros" }
-
 [dev-dependencies]
 criterion = "0.3"
 

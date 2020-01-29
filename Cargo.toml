@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-    "lib_macros",
     "lib_maniascript",
     "lib_mswasm",
     "manialsp",
