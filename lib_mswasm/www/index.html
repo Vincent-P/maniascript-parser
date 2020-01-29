@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Maniascript Explorer</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/codemirror@5.51.0/lib/codemirror.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/codemirror@5.51.0/theme/dracula.css">
+    <style>
+
+      body {
+          background-color: #282a36 !important;
+          color: #f8f8f2 !important;
+          border: none;
+
+          font-family: 'Cascadia Code', monospace;
+          font-size: 16px;
+      }
+
+      .code-area {
+          flex: 1;
+      }
+
+      .dump-area {
+          border-left-color:#f8f8f2;
+          border-left-width: 2px;
+          border-left-style: dashed;
+          padding-left: 2em;
+      }
+
+      .CodeMirror {
+          height: 100%;
+      }
+
+      #main {
+          display:flex;
+          flex-direction: row;
+          align-items: stretch;
+          height: 92vh;
+      }
+
+      #main > div {
+          flex: 1;
+      }
+
+      #dump-text {
+          white-space: pre;
+      }
+
+    </style>
+  </head>
+  <body>
+    <noscript>This page contains webassembly and javascript content, please enable javascript in your browser.</noscript>
+
+    <div id="main">
+
+      <div class="code-area">
+        <p style="margin-left: 1em;">Code Editor</p>
+        <div id="code-editor"></div>
+      </div>
+
+      <div class="dump-area">
+        <p>AST</p>
+        <p id="dump-text">Dump text</p>
+      </div>
+
+    </div>
+
+    <script src="./bootstrap.js"></script>
+  </body>
+</html>

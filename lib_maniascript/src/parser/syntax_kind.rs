@@ -224,7 +224,6 @@ impl SyntaxKind {
         }
     }
 
-    // TODO: use binding powers from c (https://en.cppreference.com/w/c/language/operator_precedence)
     pub fn lbp(self) -> i32 {
         match self {
             TOKEN_ARROW => 9, // ??

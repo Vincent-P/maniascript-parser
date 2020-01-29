@@ -1,2 +1,4 @@
 target
 .git
+dist
+node_modules

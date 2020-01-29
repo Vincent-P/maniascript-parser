@@ -4,10 +4,12 @@ mod tokenizer;
 mod typed_node;
 mod parser;
 
-// export SyntaxKind to tokenizer
-use syntax_kind::SyntaxKind;
+// export to modules
 use tokenizer::Tokenizer;
-use parser::AST;
+// export to other crates
+pub use syntax_kind::SyntaxKind;
+pub use parser::{AST, ParseError as NewParseError, TextRange};
+pub use typed_node::TypedNode;
 
 /// A convenience function for first tokenizing and then parsing given input
 pub fn parse(input: &str) -> AST {

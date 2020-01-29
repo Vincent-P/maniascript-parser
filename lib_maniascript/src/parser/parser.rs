@@ -1,7 +1,9 @@
 use std::{collections::VecDeque, fmt};
 
 use cbitset::BitSet256;
-use rowan::{Checkpoint, GreenNode, GreenNodeBuilder, Language, SmolStr, TextRange};
+use rowan::{Checkpoint, GreenNode, GreenNodeBuilder, Language, SmolStr};
+
+pub use rowan::TextRange;
 
 use crate::parser::{
     typed_node::{Root, TypedNode},

@@ -1,25 +1,37 @@
-mod app_state;
-mod codecs;
-mod glue;
-mod handlers;
-mod server;
+use std::error::Error;
 
-use app_state::AppState;
-use flexi_logger;
-use handlers::register_handlers;
-use jsonrpc_core::MetaIoHandler;
 use log::info;
-use server::ServerBuilder;
+use lsp_types::*;
+use lsp_server::Connection;
 
-fn main() {
+mod app;
+use crate::app::App;
+
+fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
     flexi_logger::Logger::with_str("info").start().unwrap();
+    info!("Starting ManiaLSP");
 
-    info!("ManiaLSP started.");
+    let (connection, io_threads) = Connection::stdio();
 
-    let mut io = MetaIoHandler::default();
-    let app = AppState::new();
+    let server_capabilities = serde_json::to_value(&ServerCapabilities {
+        text_document_sync: Some(TextDocumentSyncCapability::Options(
+            TextDocumentSyncOptions {
+                open_close: Some(true),
+                change: Some(TextDocumentSyncKind::Full),
+                ..TextDocumentSyncOptions::default()
+            }
+        )),
+        definition_provider: Some(true),
+        ..ServerCapabilities::default()
+    })
+    .unwrap();
 
-    register_handlers(&mut io);
+    let initialization_params = connection.initialize(server_capabilities)?;
 
-    ServerBuilder::new(io).build(app);
+    App::new(connection).main_loop(initialization_params)?;
+
+    io_threads.join()?;
+
+    info!("shutting down server");
+    Ok(())
 }

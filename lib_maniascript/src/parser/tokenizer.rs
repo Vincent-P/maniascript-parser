@@ -806,5 +806,4 @@ string!"#
         single_token_test("0.0", TOKEN_REAL);
         single_token_test(".01", TOKEN_REAL);
     }
-    // TODO: more tests...
 }

@@ -28,7 +28,8 @@ pub fn initialize_handler(
     let mut result = InitializeResult::default();
 
     // for now we take the entire content of a file
-    result.capabilities.text_document_sync = Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::Full));
+    result.capabilities.text_document_sync =
+        Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::Full));
 
     ok(result)
 }

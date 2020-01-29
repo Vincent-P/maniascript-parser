@@ -2,3 +2,9 @@ target
 out
 .idea
 **/*.rs.bk
+Cargo.lock
+bin
+pkg
+wasm-pack.log
+dist
+node_modules
