@@ -3,7 +3,7 @@ mod utils;
 use std::fmt::Write;
 
 use wasm_bindgen::prelude::*;
-use lib_maniascript::parser::{self, TypedNode};
+use lib_maniascript::parser::{self, typed_node::TypedNode};
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
