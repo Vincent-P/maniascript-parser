@@ -9,3 +9,5 @@ members = [
 
 [profile.release]
 debug = true
+# Tell `rustc` to optimize for small code size.
+opt-level = "s"

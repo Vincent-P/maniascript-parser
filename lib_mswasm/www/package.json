@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/rustwasm/create-wasm-app#readme",
   "dependencies": {
+    "codemirror": "^5.51.0",
     "lib_mswasm": "file:../pkg"
   },
   "devDependencies": {

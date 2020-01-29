@@ -406,9 +406,7 @@ where
         let maybe_type_checkpoint = self.checkpoint();
 
         // Is it the type or the name?
-        if let Some(TOKEN_IDENT) = self.peek() {
-            self.expect_ident()
-        }
+        self.expect_ident();
 
         // there is name after the type
         // or a [ indicating an array type
