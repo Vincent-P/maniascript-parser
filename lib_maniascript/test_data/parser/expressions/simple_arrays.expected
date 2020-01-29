@@ -1,12 +1,12 @@
-NODE_ROOT 0..48 {
-  NODE_FUNC_DECL 0..48 {
+NODE_ROOT 0..100 {
+  NODE_FUNC_DECL 0..100 {
     NODE_IDENTIFIER 0..4 {
       TOKEN_IDENT("main") 0..4
     }
     TOKEN_OPEN_PAREN("(") 4..5
     TOKEN_CLOSE_PAREN(")") 5..6
     TOKEN_WHITESPACE("\n") 6..7
-    NODE_BLOCK 7..48 {
+    NODE_BLOCK 7..100 {
       TOKEN_OPEN_BRACE("{") 7..8
       TOKEN_WHITESPACE("\n    ") 8..13
       NODE_VAR_DECL 13..46 {
@@ -32,8 +32,51 @@ NODE_ROOT 0..48 {
         }
         TOKEN_SEMICOLON(";") 45..46
       }
-      TOKEN_WHITESPACE("\n") 46..47
-      TOKEN_CLOSE_BRACE("}") 47..48
+      TOKEN_WHITESPACE("\n    ") 46..51
+      NODE_VAR_DECL 51..65 {
+        TOKEN_DECLARE("declare") 51..58
+        TOKEN_WHITESPACE(" ") 58..59
+        NODE_IDENTIFIER 59..60 {
+          TOKEN_IDENT("i") 59..60
+        }
+        TOKEN_WHITESPACE(" ") 60..61
+        TOKEN_EQUAL("=") 61..62
+        TOKEN_WHITESPACE(" ") 62..63
+        NODE_LITERAL 63..64 {
+          TOKEN_INTEGER("0") 63..64
+        }
+        TOKEN_SEMICOLON(";") 64..65
+      }
+      TOKEN_WHITESPACE("\n    ") 65..70
+      NODE_VAR_DECL 70..98 {
+        TOKEN_DECLARE("declare") 70..77
+        TOKEN_WHITESPACE(" ") 77..78
+        NODE_IDENTIFIER 78..81 {
+          TOKEN_IDENT("Mdr") 78..81
+        }
+        TOKEN_WHITESPACE(" ") 81..82
+        TOKEN_EQUAL("=") 82..83
+        TOKEN_WHITESPACE(" ") 83..84
+        NODE_ARRAY_ACCESS 84..97 {
+          NODE_IDENTIFIER 84..92 {
+            TOKEN_IDENT("Unranked") 84..92
+          }
+          TOKEN_OPEN_SQUARE("[") 92..93
+          NODE_BINARY_OP 93..96 {
+            NODE_IDENTIFIER 93..94 {
+              TOKEN_IDENT("i") 93..94
+            }
+            TOKEN_MINUS("-") 94..95
+            NODE_LITERAL 95..96 {
+              TOKEN_INTEGER("1") 95..96
+            }
+          }
+          TOKEN_CLOSE_SQUARE("]") 96..97
+        }
+        TOKEN_SEMICOLON(";") 97..98
+      }
+      TOKEN_WHITESPACE("\n") 98..99
+      TOKEN_CLOSE_BRACE("}") 99..100
     }
   }
 }
