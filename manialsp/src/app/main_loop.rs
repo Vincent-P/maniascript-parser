@@ -1,9 +1,8 @@
 use std::error::Error;
 
 use log::{info, trace, warn};
-use lsp_types::{request::{Request as RequestTrait, *}, notification::{Notification as NotificationTrait, *}, *};
-use lsp_server::{Message, Request, Notification, RequestId, Response, ErrorCode};
-
+use lsp_server::{ErrorCode, Message, Notification, Request, RequestId, Response};
+use lsp_types::{notification::{Notification as NotificationTrait, *}, request::{Request as RequestTrait, *}, *};
 
 pub use crate::app::App;
 
@@ -15,7 +14,6 @@ where
     req.extract(R::METHOD)
 }
 
-
 impl App {
     pub fn reply(&mut self, response: Response) {
         trace!("Sending response: {:#?}", response);
@@ -24,14 +22,22 @@ impl App {
 
     pub fn notify(&mut self, notification: Notification) {
         trace!("Sending notification: {:#?}", notification);
-        self.conn.sender.send(Message::Notification(notification)).unwrap();
+        self.conn
+            .sender
+            .send(Message::Notification(notification))
+            .unwrap();
     }
 
     pub fn err<E>(&mut self, id: RequestId, err: E)
-        where E: std::fmt::Display
+    where
+        E: std::fmt::Display,
     {
         warn!("{}", err);
-        self.reply(Response::new_err(id, ErrorCode::UnknownErrorCode as i32, err.to_string()));
+        self.reply(Response::new_err(
+            id,
+            ErrorCode::UnknownErrorCode as i32,
+            err.to_string(),
+        ));
     }
 
     pub fn main_loop(
@@ -64,25 +70,24 @@ impl App {
                             self.folding_ranges(id, params);
                         }
 
-                        _ => ()
+                        _ => (),
                     }
                 }
 
-                Message::Notification(not) => {
-                    match not.method.as_str() {
-                        DidOpenTextDocument::METHOD => {
-                            let params: DidOpenTextDocumentParams = serde_json::from_value(not.params)?;
-                            self.did_open_text_document(params);
-                        }
-
-                        DidChangeTextDocument::METHOD => {
-                            let params: DidChangeTextDocumentParams = serde_json::from_value(not.params)?;
-                            self.did_change_text_document(params);
-                        }
-
-                        _ => ()
+                Message::Notification(not) => match not.method.as_str() {
+                    DidOpenTextDocument::METHOD => {
+                        let params: DidOpenTextDocumentParams = serde_json::from_value(not.params)?;
+                        self.did_open_text_document(params);
                     }
-                }
+
+                    DidChangeTextDocument::METHOD => {
+                        let params: DidChangeTextDocumentParams =
+                            serde_json::from_value(not.params)?;
+                        self.did_change_text_document(params);
+                    }
+
+                    _ => (),
+                },
 
                 Message::Response(_) => {}
             }

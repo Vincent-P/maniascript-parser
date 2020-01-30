@@ -1,22 +1,25 @@
 use log::info;
 
+use lsp_server::{Notification, RequestId, Response};
 use lsp_types::{request::*, *};
-use lsp_server::{RequestId, Response, Notification};
 
 use lib_maniascript::parser::{self, typed_node::*, SyntaxKind, TextRange};
 
 pub use crate::app::App;
 
 mod utils {
-    use lsp_types::{Position, Range};
     use lib_maniascript::parser::{TextRange, TextUnit};
+    use lsp_types::{Position, Range};
 
     pub fn offset_to_pos(code: &str, offset: TextUnit) -> Position {
         let offset = offset.to_usize();
-        let start_of_line = code[..offset].rfind('\n').map_or(0, |n| n+1);
+        let start_of_line = code[..offset].rfind('\n').map_or(0, |n| n + 1);
         Position {
             line: code[..start_of_line].chars().filter(|&c| c == '\n').count() as u64,
-            character: code[start_of_line..offset].chars().map(|c| c.len_utf16() as u64).sum()
+            character: code[start_of_line..offset]
+                .chars()
+                .map(|c| c.len_utf16() as u64)
+                .sum(),
         }
     }
 
@@ -57,20 +60,26 @@ impl App {
         if let Some(change) = params.content_changes.into_iter().last() {
             let parsed = parser::parse(&change.text);
             self.send_diagnostics(params.text_document.uri.clone(), &change.text, &parsed);
-            self.files.insert(params.text_document.uri, (parsed, change.text));
+            self.files
+                .insert(params.text_document.uri, (parsed, change.text));
         }
     }
 
     pub fn document_symbol(&mut self, req_id: RequestId, params: DocumentSymbolParams) {
         info!("DocumentSymbol");
 
-        fn add_named_symbol<N>(symbols: &mut Vec<SymbolInformation>, node: N, kind: SymbolKind, text: &str, uri: Url)
-        where
-            N: NamedNode
+        fn add_named_symbol<N>(
+            symbols: &mut Vec<SymbolInformation>,
+            node: N,
+            kind: SymbolKind,
+            text: &str,
+            uri: Url,
+        ) where
+            N: NamedNode,
         {
             let name = match node.name() {
                 Some(n) => n,
-                None => return
+                None => return,
             };
 
             let range = utils::range(text, name.node().text_range());
@@ -81,14 +90,13 @@ impl App {
                 kind,
                 deprecated: None,
                 location,
-                container_name: None
+                container_name: None,
             });
         }
 
-        let mut symbols : Vec<SymbolInformation> = vec![];
+        let mut symbols: Vec<SymbolInformation> = vec![];
 
         if let Some((uri, (ast, text))) = self.files.get_key_value(&params.text_document.uri) {
-
             let root = ast.node();
             let root = Root::cast(root).unwrap();
 
@@ -140,7 +148,7 @@ impl App {
                             ranges_kinds.push((token.text_range(), FoldingRangeKind::Comment));
                         }
                     }
-                    _ => ()
+                    _ => (),
                 }
             }
 
@@ -150,9 +158,11 @@ impl App {
             let mut includes = root.includes();
             if let Some(first) = includes.next() {
                 let range = if let Some(end) = includes.last() {
-                    TextRange::from_to(first.node().text_range().start(), end.node().text_range().end())
-                }
-                else {
+                    TextRange::from_to(
+                        first.node().text_range().start(),
+                        end.node().text_range().end(),
+                    )
+                } else {
                     first.node().text_range()
                 };
 
@@ -164,13 +174,19 @@ impl App {
                 ranges_kinds.push((label.node().text_range(), FoldingRangeKind::Region));
             }
 
-            ranges = Some(ranges_kinds.iter().map(|(range, kind)| FoldingRange {
-                start_line: utils::offset_to_pos(text, range.start()).line,
-                end_line:   utils::offset_to_pos(text, range.end()).line,
-                start_character: None, // default to length of start_line, so it folds anything after the first line
-                end_character: None,
-                kind: Some(kind.clone())
-            }).collect());
+            ranges = Some(
+                ranges_kinds
+                    .iter()
+                    .map(|(range, kind)| FoldingRange {
+                        start_line: utils::offset_to_pos(text, range.start()).line,
+                        end_line: utils::offset_to_pos(text, range.end()).line,
+                        start_character: None, /* default to length of start_line, so it folds
+                                                * anything after the first line */
+                        end_character: None,
+                        kind: Some(kind.clone()),
+                    })
+                    .collect(),
+            );
         }
 
         let result = serde_json::to_value(ranges).unwrap();
@@ -207,7 +223,7 @@ impl App {
                     });
                 }
 
-                _ => ()
+                _ => (),
             }
         }
         self.notify(Notification::new(
@@ -216,7 +232,7 @@ impl App {
                 uri,
                 diagnostics,
                 version: None,
-            }
+            },
         ));
     }
 }

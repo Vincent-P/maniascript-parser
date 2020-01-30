@@ -1,8 +1,8 @@
 use std::error::Error;
 
 use log::info;
-use lsp_types::*;
 use lsp_server::Connection;
+use lsp_types::*;
 
 mod app;
 use crate::app::App;
