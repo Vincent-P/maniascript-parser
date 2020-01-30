@@ -130,6 +130,8 @@ pub enum SyntaxKind {
     NODE_ASSIGNMENT,
 
     // Expressions
+    NODE_EXPRESSION, // not used for now, just inside error node
+
     NODE_BLOCK,
     NODE_PARENTHESISED,
 

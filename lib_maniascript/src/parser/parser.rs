@@ -621,7 +621,6 @@ where
     fn parse_default(&mut self) {
         self.start_node(NODE_DEFAULT);
         self.expect(TOKEN_DEFAULT);
-        self.parse_expr();
         self.expect(TOKEN_COLON);
         self.parse_statement();
         self.finish_node();
@@ -800,7 +799,12 @@ where
                 self.finish_node();
             }
 
-            _ => ()
+            _ => {
+                self.start_node(NODE_ERROR);
+                self.start_node(NODE_EXPRESSION);
+                self.finish_node();
+                self.finish_node();
+            }
         }
     }
 
