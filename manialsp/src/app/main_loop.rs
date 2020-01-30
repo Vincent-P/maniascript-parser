@@ -59,6 +59,11 @@ impl App {
                             self.document_symbol(id, params);
                         }
 
+                        FoldingRangeRequest::METHOD => {
+                            let (id, params) = cast::<FoldingRangeRequest>(req).unwrap();
+                            self.folding_ranges(id, params);
+                        }
+
                         _ => ()
                     }
                 }

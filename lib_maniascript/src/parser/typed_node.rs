@@ -1,6 +1,6 @@
 use std::fmt;
 
-use rowan::{NodeOrToken, WalkEvent};
+pub use rowan::{NodeOrToken, WalkEvent};
 
 use crate::parser::{language::{SyntaxElement, SyntaxNode, SyntaxToken}, SyntaxKind::{self, *}};
 
@@ -347,6 +347,11 @@ typed![
         /// Return all the label implementations of the file
         pub fn labels(&self) -> impl Iterator<Item = LabelDecl> {
             self.node().children().filter_map(LabelDecl::cast)
+        }
+
+        /// Return all the includes of the file
+        pub fn includes(&self) -> impl Iterator<Item = Include> {
+            self.node().children().filter_map(Include::cast)
         }
 
         /// Return all the consts of the file

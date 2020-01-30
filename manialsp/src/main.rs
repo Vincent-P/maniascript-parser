@@ -23,11 +23,14 @@ fn main() -> Result<(), Box<dyn Error + Sync + Send>> {
         )),
         document_symbol_provider: Some(true),
         definition_provider: Some(true),
+        folding_range_provider: Some(FoldingRangeProviderCapability::Simple(true)),
         ..ServerCapabilities::default()
     })
     .unwrap();
 
     let initialization_params = connection.initialize(server_capabilities)?;
+
+    info!("initialization params: {:?}", initialization_params);
 
     App::new(connection).main_loop(initialization_params)?;
 
