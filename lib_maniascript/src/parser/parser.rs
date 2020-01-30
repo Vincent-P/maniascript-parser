@@ -7,26 +7,30 @@ pub use rowan::TextRange;
 
 use crate::parser::{
     typed_node::{Root, TypedNode},
-    language::{MsLanguage, SyntaxNode},
+    language::{MsLanguage, SyntaxNode, SyntaxToken, SyntaxElement},
     SyntaxKind::{self, *},
 };
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ParseError {
-    Unexpected(TextRange),
-    UnexpectedEOF,
+    Missing(TextRange, Box<[SyntaxKind]>),
+    UnknownToken(SyntaxToken),
     UnexpectedEOFWanted(Box<[SyntaxKind]>),
+    UnexpectedEOF,
 }
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ParseError::Unexpected(range) => {
-                write!(f, "error node at {}..{}", range.start(), range.end())
-            }
             ParseError::UnexpectedEOF => write!(f, "unexpected eof"),
             ParseError::UnexpectedEOFWanted(kinds) => {
                 write!(f, "unexpected eof, wanted any of {:?}", kinds)
+            }
+            ParseError::Missing(_, kinds) => {
+                write!(f, "missing token, wanted any of {:?}", kinds)
+            }
+            ParseError::UnknownToken(token) => {
+                write!(f, "unkown token {}", token.text())
             }
         }
     }
@@ -61,12 +65,27 @@ impl AST {
     pub fn errors(&self) -> Vec<ParseError> {
         let mut errors = self.errors.clone();
         errors.extend(
-            self.root().errors().into_iter().map(|node| ParseError::Unexpected(node.text_range())),
+            self.root().errors().into_iter().map(|error| {
+                match error {
+                    SyntaxElement::Node(node) => {
+                        let error_kinds = node.children_with_tokens()
+                            .map(|c| c.kind())
+                            .collect::<Vec<SyntaxKind>>()
+                            .into_boxed_slice();
+
+                        ParseError::Missing(node.text_range(), error_kinds)
+                    }
+                    SyntaxElement::Token(token) => {
+                        ParseError::UnknownToken(token)
+                    }
+                }
+            }),
         );
 
         errors
     }
 
+    /*
     /// Either return the first error in the tree, or if there are none return self
     pub fn as_result(self) -> Result<Self, ParseError> {
         if let Some(err) = self.errors.first() {
@@ -77,6 +96,7 @@ impl AST {
         }
         Ok(self)
     }
+    */
 }
 
 struct Parser<I>
@@ -179,26 +199,25 @@ where
     fn expect_peek_any(&mut self, allowed_slice: &[SyntaxKind]) -> Option<SyntaxKind> {
         let allowed: BitSet256 = allowed_slice.iter().map(|&k| k as u16).collect();
 
-        let next = match self.peek() {
-            None => None,
+        match self.peek() {
             Some(kind) if allowed.contains(kind as usize) => Some(kind),
+
             Some(_) => {
                 self.start_node(NODE_ERROR);
-                loop {
-                    self.bump();
-                    if self.peek().map(|kind| allowed.contains(kind as usize)).unwrap_or(true) {
-                        break;
-                    }
+                for expected in allowed_slice {
+                    self.builder.token(MsLanguage::kind_to_raw(*expected), SmolStr::new(""));
                 }
                 self.finish_node();
-                self.peek()
+                None
             }
-        };
-        if next.is_none() {
-            self.errors
-                .push(ParseError::UnexpectedEOFWanted(allowed_slice.to_vec().into_boxed_slice()));
+
+            None => {
+                self.errors
+                    .push(ParseError::UnexpectedEOFWanted(allowed_slice.to_vec().into_boxed_slice()));
+
+                None
+            },
         }
-        next
     }
 
     fn peek_any(&mut self, allowed_slice: &[SyntaxKind]) -> Option<SyntaxKind> {

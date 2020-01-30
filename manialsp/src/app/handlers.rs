@@ -1,4 +1,3 @@
-use std::convert::TryFrom;
 use lsp_types::{request::*, *};
 use lsp_server::{RequestId, Response, Notification};
 
@@ -112,13 +111,27 @@ impl App {
         let errors = ast.errors();
         let mut diagnostics = Vec::with_capacity(errors.len());
         for err in errors {
-            if let parser::NewParseError::Unexpected(node) = err {
-                diagnostics.push(Diagnostic {
-                    range: utils::range(code, node),
-                    severity: Some(DiagnosticSeverity::Error),
-                    message: err.to_string(),
-                    ..Diagnostic::default()
-                });
+            let message = err.to_string();
+            match err {
+                parser::NewParseError::Missing(node_range, _) => {
+                    diagnostics.push(Diagnostic {
+                        range: utils::range(code, node_range),
+                        severity: Some(DiagnosticSeverity::Error),
+                        message,
+                        ..Diagnostic::default()
+                    });
+                }
+
+                parser::NewParseError::UnknownToken(token) => {
+                    diagnostics.push(Diagnostic {
+                        range: utils::range(code, token.text_range()),
+                        severity: Some(DiagnosticSeverity::Error),
+                        message,
+                        ..Diagnostic::default()
+                    });
+                }
+
+                _ => ()
             }
         }
         self.notify(Notification::new(
