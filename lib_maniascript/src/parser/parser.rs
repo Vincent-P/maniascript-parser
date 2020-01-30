@@ -531,7 +531,10 @@ where
             Some(TOKEN_RETURN) => {
                 self.start_node(NODE_RETURN);
                 self.bump();
-                self.parse_expr();
+                match self.peek() {
+                    Some(TOKEN_SEMICOLON) => (),
+                    _ => self.parse_expr()
+                };
                 self.finish_node();
             }
             Some(TOKEN_CONTINUE) => {

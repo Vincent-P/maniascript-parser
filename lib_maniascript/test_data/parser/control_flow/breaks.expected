@@ -1,0 +1,84 @@
+NODE_ROOT 0..81 {
+  NODE_FUNC_DECL 0..81 {
+    NODE_TYPE 0..7 {
+      NODE_IDENTIFIER 0..7 {
+        TOKEN_IDENT("Integer") 0..7
+      }
+    }
+    TOKEN_WHITESPACE(" ") 7..8
+    NODE_IDENTIFIER 8..12 {
+      TOKEN_IDENT("main") 8..12
+    }
+    TOKEN_OPEN_PAREN("(") 12..13
+    TOKEN_CLOSE_PAREN(")") 13..14
+    TOKEN_WHITESPACE("\n") 14..15
+    NODE_BLOCK 15..81 {
+      TOKEN_OPEN_BRACE("{") 15..16
+      TOKEN_WHITESPACE("\n") 16..17
+      NODE_WHILE 17..65 {
+        TOKEN_WHILE("while") 17..22
+        TOKEN_WHITESPACE(" ") 22..23
+        TOKEN_OPEN_PAREN("(") 23..24
+        NODE_IDENTIFIER 24..28 {
+          TOKEN_IDENT("True") 24..28
+        }
+        TOKEN_CLOSE_PAREN(")") 28..29
+        TOKEN_WHITESPACE("\n") 29..30
+        NODE_BLOCK 30..65 {
+          TOKEN_OPEN_BRACE("{") 30..31
+          TOKEN_WHITESPACE("\n") 31..32
+          NODE_STATEMENT 32..38 {
+            NODE_YIELD 32..37 {
+              TOKEN_YIELD("yield") 32..37
+            }
+            TOKEN_SEMICOLON(";") 37..38
+          }
+          TOKEN_WHITESPACE("\n") 38..39
+          NODE_STATEMENT 39..45 {
+            NODE_BREAK 39..44 {
+              TOKEN_BREAK("break") 39..44
+            }
+            TOKEN_SEMICOLON(";") 44..45
+          }
+          TOKEN_WHITESPACE("\n") 45..46
+          NODE_STATEMENT 46..55 {
+            NODE_CONTINUE 46..54 {
+              TOKEN_CONTINUE("continue") 46..54
+            }
+            TOKEN_SEMICOLON(";") 54..55
+          }
+          TOKEN_WHITESPACE("\n") 55..56
+          NODE_STATEMENT 56..63 {
+            NODE_RETURN 56..62 {
+              TOKEN_RETURN("return") 56..62
+            }
+            TOKEN_SEMICOLON(";") 62..63
+          }
+          TOKEN_WHITESPACE("\n") 63..64
+          TOKEN_CLOSE_BRACE("}") 64..65
+        }
+      }
+      TOKEN_WHITESPACE("\n") 65..66
+      NODE_STATEMENT 66..79 {
+        NODE_RETURN 66..78 {
+          TOKEN_RETURN("return") 66..72
+          TOKEN_WHITESPACE(" ") 72..73
+          NODE_BINARY_OP 73..78 {
+            NODE_LITERAL 73..74 {
+              TOKEN_INTEGER("1") 73..74
+            }
+            TOKEN_WHITESPACE(" ") 74..75
+            TOKEN_PLUS("+") 75..76
+            TOKEN_WHITESPACE(" ") 76..77
+            NODE_LITERAL 77..78 {
+              TOKEN_INTEGER("2") 77..78
+            }
+          }
+        }
+        TOKEN_SEMICOLON(";") 78..79
+      }
+      TOKEN_WHITESPACE("\n") 79..80
+      TOKEN_CLOSE_BRACE("}") 80..81
+    }
+  }
+}
