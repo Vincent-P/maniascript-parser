@@ -2,15 +2,13 @@
 
 A language server for ManiaScript.
 
-/!\ Currently all features are disabled /!\
-
 # Features
 
-- [ ] Lexical errors
-  - [ ] Invalid token
-  - [ ] Missing tokens
-- [ ] Symbols list
-  - [ ] Document symbol list
+- [x] Lexical errors
+  - [x] Invalid token
+  - [x] Missing tokens
+- [x] Symbols list
+  - [x] Document symbol list
   - [ ] Workspace symbol list
 - [ ] Semantic Errors
   - [ ] Use of undefined symbol
@@ -19,7 +17,7 @@ A language server for ManiaScript.
 
 # Installation
 
-The first step is to download the manialsp binary and add it to the PATH.
+The first step is to download the manialsp binary (https://github.com/Vincent-P/maniascript-rust/releases) and add it to your $PATH.
 
 ## VSCode
 
