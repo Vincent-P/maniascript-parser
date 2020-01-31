@@ -359,6 +359,11 @@ typed![
             self.node().children().filter_map(Const::cast)
         }
 
+        /// Return all the consts of the file
+        pub fn settings(&self) -> impl Iterator<Item = Setting> {
+            self.node().children().filter_map(Setting::cast)
+        }
+
         /// Return all the globals of the file
         pub fn globals(&self) -> impl Iterator<Item = VarDecl> {
             self.node().children().filter_map(VarDecl::cast)
@@ -370,9 +375,9 @@ typed![
         }
     },
 
-    NODE_INCLUDE => Include,
+    NODE_INCLUDE => Include: NamedNode,
     NODE_CONST => Const: NamedNode,
-    NODE_SETTING => Setting,
+    NODE_SETTING => Setting: NamedNode,
     NODE_REQUIRE_CONTEXT => RequireContext,
     NODE_EXTENDS => Extends,
     NODE_STRUCT => Struct: NamedNode,

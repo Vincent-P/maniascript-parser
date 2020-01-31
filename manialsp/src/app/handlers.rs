@@ -115,6 +115,12 @@ impl App {
             for n in root.structs() {
                 add_named_symbol(&mut symbols, n, SymbolKind::Struct, &text, uri.clone());
             }
+            for n in root.includes() {
+                add_named_symbol(&mut symbols, n, SymbolKind::Namespace, &text, uri.clone());
+            }
+            for n in root.settings() {
+                add_named_symbol(&mut symbols, n, SymbolKind::Namespace, &text, uri.clone());
+            }
         }
 
         let result = serde_json::to_value(symbols).unwrap();
