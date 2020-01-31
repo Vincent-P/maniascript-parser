@@ -1,14 +1,14 @@
-mod language;
+pub mod language;
+mod parser;
 mod syntax_kind;
 mod tokenizer;
 pub mod typed_node;
-mod parser;
 
 // export to modules
 use tokenizer::Tokenizer;
 // export to other crates
+pub use parser::{ParseError as NewParseError, AST};
 pub use syntax_kind::SyntaxKind;
-pub use parser::{AST, ParseError as NewParseError};
 
 pub use rowan::{TextRange, TextUnit};
 

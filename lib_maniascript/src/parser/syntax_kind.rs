@@ -199,15 +199,26 @@ impl SyntaxKind {
     /// the parser will create a BINARY_OP node from them
     pub fn is_binary_operator(self) -> bool {
         match self {
-            TOKEN_MINUS | TOKEN_PLUS | TOKEN_MULT | TOKEN_DIV | TOKEN_MOD
-            | TOKEN_CONCAT | TOKEN_EQ_EQ | TOKEN_NOT_EQ | TOKEN_LESS | TOKEN_LESS_OR_EQ
-                | TOKEN_MORE | TOKEN_MORE_OR_EQ | TOKEN_AND | TOKEN_OR | TOKEN_AS | TOKEN_IN
-                | TOKEN_ARROW | TOKEN_DOT | TOKEN_COLON_COLON | TOKEN_IS  => true,
+            TOKEN_MINUS | TOKEN_PLUS | TOKEN_MULT | TOKEN_DIV | TOKEN_MOD | TOKEN_CONCAT
+            | TOKEN_EQ_EQ | TOKEN_NOT_EQ | TOKEN_LESS | TOKEN_LESS_OR_EQ | TOKEN_MORE
+            | TOKEN_MORE_OR_EQ | TOKEN_AND | TOKEN_OR | TOKEN_AS | TOKEN_IN | TOKEN_ARROW
+            | TOKEN_DOT | TOKEN_COLON_COLON | TOKEN_IS => true,
             _ => false,
         }
     }
 
-    pub const ASSIGNMENT_OPERATORS: &'static[Self] = &[TOKEN_EQUAL , TOKEN_ALIAS , TOKEN_PLUS_EQ , TOKEN_MINUS_EQ , TOKEN_MULT_EQ, TOKEN_DIV_EQ , TOKEN_CONCAT_EQ , TOKEN_AND_EQ , TOKEN_OR_EQ , TOKEN_MOD_EQ];
+    pub const ASSIGNMENT_OPERATORS: &'static [Self] = &[
+        TOKEN_EQUAL,
+        TOKEN_ALIAS,
+        TOKEN_PLUS_EQ,
+        TOKEN_MINUS_EQ,
+        TOKEN_MULT_EQ,
+        TOKEN_DIV_EQ,
+        TOKEN_CONCAT_EQ,
+        TOKEN_AND_EQ,
+        TOKEN_OR_EQ,
+        TOKEN_MOD_EQ,
+    ];
 
     pub fn is_assignment_operator(self) -> bool {
         match self {
@@ -235,15 +246,13 @@ impl SyntaxKind {
             TOKEN_MULT | TOKEN_DIV | TOKEN_MOD => 6,
             TOKEN_PLUS | TOKEN_MINUS => 5,
 
-            TOKEN_LESS| TOKEN_LESS_OR_EQ| TOKEN_MORE| TOKEN_MORE_OR_EQ => 4,
+            TOKEN_LESS | TOKEN_LESS_OR_EQ | TOKEN_MORE | TOKEN_MORE_OR_EQ => 4,
             TOKEN_EQ_EQ | TOKEN_NOT_EQ => 3,
 
             TOKEN_AND => 2,
             TOKEN_OR => 1,
             TOKEN_IS | TOKEN_AS => 1, // ??
             TOKEN_DOT | TOKEN_COLON_COLON | TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 1, // ???
-
-
 
             _ => -1,
         }

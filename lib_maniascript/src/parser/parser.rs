@@ -6,8 +6,8 @@ use rowan::{Checkpoint, GreenNode, GreenNodeBuilder, Language, SmolStr};
 use rowan::TextRange;
 
 use crate::parser::{
+    language::{MsLanguage, SyntaxElement, SyntaxNode, SyntaxToken},
     typed_node::{Root, TypedNode},
-    language::{MsLanguage, SyntaxNode, SyntaxToken, SyntaxElement},
     SyntaxKind::{self, *},
 };
 
@@ -26,12 +26,8 @@ impl fmt::Display for ParseError {
             ParseError::UnexpectedEOFWanted(kinds) => {
                 write!(f, "unexpected eof, wanted any of {:?}", kinds)
             }
-            ParseError::Missing(_, kinds) => {
-                write!(f, "missing token, wanted any of {:?}", kinds)
-            }
-            ParseError::UnknownToken(token) => {
-                write!(f, "unkown token {}", token.text())
-            }
+            ParseError::Missing(_, kinds) => write!(f, "missing token, wanted any of {:?}", kinds),
+            ParseError::UnknownToken(token) => write!(f, "unkown token {}", token.text()),
         }
     }
 }
@@ -64,23 +60,18 @@ impl AST {
     /// Return all errors in the tree, if any
     pub fn errors(&self) -> Vec<ParseError> {
         let mut errors = self.errors.clone();
-        errors.extend(
-            self.root().errors().into_iter().map(|error| {
-                match error {
-                    SyntaxElement::Node(node) => {
-                        let error_kinds = node.children_with_tokens()
-                            .map(|c| c.kind())
-                            .collect::<Vec<SyntaxKind>>()
-                            .into_boxed_slice();
+        errors.extend(self.root().errors().into_iter().map(|error| match error {
+            SyntaxElement::Node(node) => {
+                let error_kinds = node
+                    .children_with_tokens()
+                    .map(|c| c.kind())
+                    .collect::<Vec<SyntaxKind>>()
+                    .into_boxed_slice();
 
-                        ParseError::Missing(node.text_range(), error_kinds)
-                    }
-                    SyntaxElement::Token(token) => {
-                        ParseError::UnknownToken(token)
-                    }
-                }
-            }),
-        );
+                ParseError::Missing(node.text_range(), error_kinds)
+            }
+            SyntaxElement::Token(token) => ParseError::UnknownToken(token),
+        }));
 
         errors
     }
@@ -137,7 +128,8 @@ where
     }
 
     fn start_node_at(&mut self, checkpoint: Checkpoint, kind: SyntaxKind) {
-        self.builder.start_node_at(checkpoint, MsLanguage::kind_to_raw(kind));
+        self.builder
+            .start_node_at(checkpoint, MsLanguage::kind_to_raw(kind));
     }
 
     fn finish_node(&mut self) {
@@ -175,7 +167,11 @@ where
 
     // return a reference of the first non-trivia token with its str, eat all trivia and buffer them
     fn peek_data(&mut self) -> Option<&(SyntaxKind, SmolStr)> {
-        while self.peek_raw().map(|&(t, _)| t.is_trivia()).unwrap_or(false) {
+        while self
+            .peek_raw()
+            .map(|&(t, _)| t.is_trivia())
+            .unwrap_or(false)
+        {
             self.bump();
         }
         self.peek_raw()
@@ -205,18 +201,20 @@ where
             Some(_) => {
                 self.start_node(NODE_ERROR);
                 for expected in allowed_slice {
-                    self.builder.token(MsLanguage::kind_to_raw(*expected), SmolStr::new(""));
+                    self.builder
+                        .token(MsLanguage::kind_to_raw(*expected), SmolStr::new(""));
                 }
                 self.finish_node();
                 None
             }
 
             None => {
-                self.errors
-                    .push(ParseError::UnexpectedEOFWanted(allowed_slice.to_vec().into_boxed_slice()));
+                self.errors.push(ParseError::UnexpectedEOFWanted(
+                    allowed_slice.to_vec().into_boxed_slice(),
+                ));
 
                 None
-            },
+            }
         }
     }
 
@@ -225,7 +223,7 @@ where
 
         match self.peek() {
             Some(kind) if allowed.contains(kind as usize) => Some(kind),
-            _ => None
+            _ => None,
         }
     }
 
@@ -255,8 +253,8 @@ where
                 Some(kind) if kind.is_directive() => self.parse_directive(),
                 Some(TOKEN_DECLARE) => self.parse_var_decl(),
                 Some(TOKEN_LABEL_STAR) => self.parse_label_decl(),
-                Some(TOKEN_IDENT)  => self.parse_func_decl(),
-                _ =>  break
+                Some(TOKEN_IDENT) => self.parse_func_decl(),
+                _ => break,
             }
         }
     }
@@ -327,7 +325,7 @@ where
                 self.expect(TOKEN_CLOSE_BRACE);
                 self.finish_node();
             }
-            _ => ()
+            _ => (),
         }
     }
 
@@ -343,8 +341,7 @@ where
                 self.bump();
                 self.finish_node();
                 need_name = false;
-            }
-            else {
+            } else {
                 self.parse_type(None);
             }
         }
@@ -358,14 +355,18 @@ where
         loop {
             match self.peek() {
                 Some(TOKEN_CLOSE_PAREN) | None => break,
-                _ => ()
+                _ => (),
             }
 
             self.start_node(NODE_FORMAL_ARG);
             self.parse_type(None);
             self.expect_ident();
 
-            let is_last = if let Some(TOKEN_COMMA) = self.peek() { false } else { true };
+            let is_last = if let Some(TOKEN_COMMA) = self.peek() {
+                false
+            } else {
+                true
+            };
 
             if !is_last {
                 self.bump();
@@ -399,7 +400,7 @@ where
         loop {
             match self.peek() {
                 Some(TOKEN_LABEL_STAR) | None => break,
-                _ => ()
+                _ => (),
             }
             self.parse_statement();
         }
@@ -452,7 +453,7 @@ where
                 self.bump();
                 self.parse_expr();
             }
-            _ => ()
+            _ => (),
         }
 
         self.expect(TOKEN_SEMICOLON);
@@ -470,7 +471,10 @@ where
                 self.parse_expr();
             }
         }
-        if self.expect_peek_any(SyntaxKind::ASSIGNMENT_OPERATORS).is_some() {
+        if self
+            .expect_peek_any(SyntaxKind::ASSIGNMENT_OPERATORS)
+            .is_some()
+        {
             self.bump();
         }
         self.parse_expr();
@@ -484,7 +488,7 @@ where
         loop {
             match self.peek() {
                 Some(TOKEN_CLOSE_BRACE) | None => break,
-                _ => ()
+                _ => (),
             }
             self.parse_statement();
         }
@@ -522,7 +526,7 @@ where
                 self.finish_node();
                 return;
             }
-            _ => ()
+            _ => (),
         }
 
         self.start_node(NODE_STATEMENT);
@@ -533,7 +537,7 @@ where
                 self.bump();
                 match self.peek() {
                     Some(TOKEN_SEMICOLON) => (),
-                    _ => self.parse_expr()
+                    _ => self.parse_expr(),
                 };
                 self.finish_node();
             }
@@ -564,7 +568,7 @@ where
                     }
 
                     // expr1();
-                    _ => ()
+                    _ => (),
                 }
             }
         }
@@ -602,7 +606,7 @@ where
             match peeked {
                 TOKEN_CASE => self.parse_case(),
                 TOKEN_DEFAULT => self.parse_default(),
-                _ => break
+                _ => break,
             }
         }
 
@@ -856,7 +860,7 @@ where
                 self.finish_node();
             }
 
-            _ => ()
+            _ => (),
         }
     }
 
@@ -875,7 +879,6 @@ where
 
         checkpoint
     }
-
 
     fn parse_expr(&mut self) {
         self.parse_expr_until(0);
@@ -915,11 +918,15 @@ where
     I: IntoIterator<Item = (SyntaxKind, SmolStr)>,
 {
     let mut parser = Parser::new(iter.into_iter());
-    parser.builder.start_node(MsLanguage::kind_to_raw(NODE_ROOT));
+    parser
+        .builder
+        .start_node(MsLanguage::kind_to_raw(NODE_ROOT));
     parser.parse_root();
     parser.eat_trivia();
     if parser.peek().is_some() {
-        parser.builder.start_node(MsLanguage::kind_to_raw(NODE_ERROR));
+        parser
+            .builder
+            .start_node(MsLanguage::kind_to_raw(NODE_ERROR));
         while parser.peek().is_some() {
             parser.bump();
         }
@@ -927,9 +934,11 @@ where
         parser.eat_trivia();
     }
     parser.builder.finish_node();
-    AST { node: parser.builder.finish(), errors: parser.errors }
+    AST {
+        node: parser.builder.finish(),
+        errors: parser.errors,
+    }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -977,7 +986,6 @@ mod tests {
                 panic!("Tests did not match");
             }
         }
-
     }
 
     #[rustfmt::skip]

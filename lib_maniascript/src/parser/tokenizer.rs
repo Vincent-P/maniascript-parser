@@ -129,7 +129,6 @@ impl<'a> Tokenizer<'a> {
                         self.ctx.push(Context {
                             interpol: Some(Interpol { multiline }),
                             todo: Some(Todo::InterpolStart),
-                            ..Default::default()
                         });
                         return TOKEN_STRING_CONTENT;
                     }
@@ -227,27 +226,24 @@ impl<'a> Iterator for Tokenizer<'a> {
 
         // directives
         if let Some(peeked_char) = peeked {
-            match (c, peeked_char) {
-                ('#', 'A'..='Z') => {
-                    self.consume(|c| match c {
-                        'a'..='z' | 'A'..='Z' => true,
-                        _ => false,
-                    });
-                    let directive = self.string_since(start);
+            if let ('#', 'A'..='Z') = (c, peeked_char) {
+                self.consume(|c| match c {
+                    'a'..='z' | 'A'..='Z' => true,
+                    _ => false,
+                });
+                let directive = self.string_since(start);
 
-                    let syntax_kind = match &*directive {
-                        "#Include" => TOKEN_INCLUDE,
-                        "#Const" => TOKEN_CONST,
-                        "#Setting" => TOKEN_SETTING,
-                        "#RequireContext" => TOKEN_REQUIRE_CONTEXT,
-                        "#Extends" => TOKEN_EXTENDS,
-                        "#Struct" => TOKEN_STRUCT,
-                        _ => TOKEN_ERROR,
-                    };
+                let syntax_kind = match &*directive {
+                    "#Include" => TOKEN_INCLUDE,
+                    "#Const" => TOKEN_CONST,
+                    "#Setting" => TOKEN_SETTING,
+                    "#RequireContext" => TOKEN_REQUIRE_CONTEXT,
+                    "#Extends" => TOKEN_EXTENDS,
+                    "#Struct" => TOKEN_STRUCT,
+                    _ => TOKEN_ERROR,
+                };
 
-                    return Some((syntax_kind, directive));
-                }
-                _ => (),
+                return Some((syntax_kind, directive));
             }
         }
 
@@ -288,15 +284,13 @@ impl<'a> Iterator for Tokenizer<'a> {
                 }
             }
 
-            '.' => {
-                match peeked {
-                    Some(p) if '0' <= p && p <= '9' => {
-                        self.consume(|c| '0' <= c && c <= '9');
-                        Some((TOKEN_REAL, self.string_since(start)))
-                    }
-                    _ => Some((TOKEN_DOT, self.string_since(start)))
+            '.' => match peeked {
+                Some(p) if '0' <= p && p <= '9' => {
+                    self.consume(|c| '0' <= c && c <= '9');
+                    Some((TOKEN_REAL, self.string_since(start)))
                 }
-            }
+                _ => Some((TOKEN_DOT, self.string_since(start))),
+            },
 
             // strings
             '"' => {
@@ -467,14 +461,15 @@ impl<'a> Iterator for Tokenizer<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::{SyntaxKind::{self, *}, Tokenizer};
+    use super::{
+        SyntaxKind::{self, *},
+        Tokenizer,
+    };
     use rowan::SmolStr;
-
 
     fn tokenize(input: &str) -> Vec<(SyntaxKind, SmolStr)> {
         Tokenizer::new(input).collect()
     }
-
 
     macro_rules! tokens {
         ($(($token:expr, $str:expr)),*) => {
@@ -486,13 +481,12 @@ mod tests {
         assert_eq!(tokenize(token), tokens![(kind, token)]);
     }
 
-
     #[test]
     fn single_line_comment() {
-        assert_eq!(tokenize(" // salut ca va?"), tokens![
-            (TOKEN_WHITESPACE, " "),
-            (TOKEN_COMMENT, "// salut ca va?")
-        ]);
+        assert_eq!(
+            tokenize(" // salut ca va?"),
+            tokens![(TOKEN_WHITESPACE, " "), (TOKEN_COMMENT, "// salut ca va?")]
+        );
     }
 
     #[test]
@@ -521,13 +515,16 @@ mod tests {
 
     #[test]
     fn single_line_string() {
-        assert_eq!(tokenize(r#" " \"hello there!\" " "#), tokens![
-            (TOKEN_WHITESPACE, " "),
-            (TOKEN_STRING_START, "\""),
-            (TOKEN_STRING_CONTENT, r#" \"hello there!\" "#),
-            (TOKEN_STRING_END, "\""),
-            (TOKEN_WHITESPACE, " ")
-        ]);
+        assert_eq!(
+            tokenize(r#" " \"hello there!\" " "#),
+            tokens![
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_STRING_START, "\""),
+                (TOKEN_STRING_CONTENT, r#" \"hello there!\" "#),
+                (TOKEN_STRING_END, "\""),
+                (TOKEN_WHITESPACE, " ")
+            ]
+        );
     }
 
     #[test]
@@ -555,30 +552,36 @@ string!"#
 
     #[test]
     fn multi_line_interpol() {
-        assert_eq!(tokenize(r#"""" {{{MyVariable}}} """"#), tokens![
-            (TOKEN_STRING_START, "\"\"\""),
-            (TOKEN_STRING_CONTENT, " "),
-            (TOKEN_INTERPOL_START, "{{{"),
-            (TOKEN_IDENT, "MyVariable"),
-            (TOKEN_INTERPOL_END, "}}}"),
-            (TOKEN_STRING_CONTENT, " "),
-            (TOKEN_STRING_END, "\"\"\"")
-        ]);
+        assert_eq!(
+            tokenize(r#"""" {{{MyVariable}}} """"#),
+            tokens![
+                (TOKEN_STRING_START, "\"\"\""),
+                (TOKEN_STRING_CONTENT, " "),
+                (TOKEN_INTERPOL_START, "{{{"),
+                (TOKEN_IDENT, "MyVariable"),
+                (TOKEN_INTERPOL_END, "}}}"),
+                (TOKEN_STRING_CONTENT, " "),
+                (TOKEN_STRING_END, "\"\"\"")
+            ]
+        );
     }
 
     #[test]
     fn directive_include() {
-        assert_eq!(tokenize(r#"#Include "TextLib" as TL"#), tokens![
-            (TOKEN_INCLUDE, "#Include"),
-            (TOKEN_WHITESPACE, " "),
-            (TOKEN_STRING_START, "\""),
-            (TOKEN_STRING_CONTENT, "TextLib"),
-            (TOKEN_STRING_END, "\""),
-            (TOKEN_WHITESPACE, " "),
-            (TOKEN_AS, "as"),
-            (TOKEN_WHITESPACE, " "),
-            (TOKEN_IDENT, "TL")
-        ]);
+        assert_eq!(
+            tokenize(r#"#Include "TextLib" as TL"#),
+            tokens![
+                (TOKEN_INCLUDE, "#Include"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_STRING_START, "\""),
+                (TOKEN_STRING_CONTENT, "TextLib"),
+                (TOKEN_STRING_END, "\""),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_AS, "as"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_IDENT, "TL")
+            ]
+        );
     }
 
     #[test]
@@ -621,11 +624,14 @@ string!"#
 
     #[test]
     fn directive_require_context() {
-        assert_eq!(tokenize(r#"#RequireContext CSmMapType"#), tokens![
-            (TOKEN_REQUIRE_CONTEXT, "#RequireContext"),
-            (TOKEN_WHITESPACE, " "),
-            (TOKEN_IDENT, "CSmMapType")
-        ]);
+        assert_eq!(
+            tokenize(r#"#RequireContext CSmMapType"#),
+            tokens![
+                (TOKEN_REQUIRE_CONTEXT, "#RequireContext"),
+                (TOKEN_WHITESPACE, " "),
+                (TOKEN_IDENT, "CSmMapType")
+            ]
+        );
     }
 
     #[test]

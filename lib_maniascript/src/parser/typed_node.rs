@@ -2,7 +2,10 @@ use std::fmt;
 
 pub use rowan::{NodeOrToken, WalkEvent};
 
-use crate::parser::{language::{SyntaxElement, SyntaxNode, SyntaxToken}, SyntaxKind::{self, *}};
+use crate::parser::{
+    language::{SyntaxElement, SyntaxNode, SyntaxToken},
+    SyntaxKind::{self, *},
+};
 
 macro_rules! typed {
     ($($kind:expr => $name:ident$(: $trait:ident)*$(: { $($block:tt)* })*),*) => {
@@ -36,7 +39,6 @@ macro_rules! nth {
         nth!($self; $index).and_then($kind::cast)
     };
 }
-
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum BinOpKind {
@@ -193,10 +195,17 @@ pub trait TypedNode: Clone {
 
 pub trait TokenWrapper: TypedNode {
     fn as_str(&self) -> &str {
-        self.node().green().children().next().unwrap().as_token().unwrap().text().as_str()
+        self.node()
+            .green()
+            .children()
+            .next()
+            .unwrap()
+            .as_token()
+            .unwrap()
+            .text()
+            .as_str()
     }
 }
-
 
 /*
 // TODO: maybe for arrays, vectors?
@@ -225,7 +234,10 @@ pub trait Wrapper: TypedNode {
 pub trait NamedNode: TypedNode {
     /// Return the name of the node
     fn name(&self) -> Option<Identifier> {
-        self.node().children().find(|child| child.kind() == NODE_IDENTIFIER).and_then(Identifier::cast)
+        self.node()
+            .children()
+            .find(|child| child.kind() == NODE_IDENTIFIER)
+            .and_then(Identifier::cast)
     }
 }
 
@@ -251,16 +263,16 @@ pub enum ParsedType {
 
     IfElse(IfElse),
     Switch(Switch),
-    Case(Case), // TODO: not needed?
+    Case(Case),       // TODO: not needed?
     Default(Default), // TODO: not needed?
     For(For),
     Foreach(Foreach),
     While(While),
 
     Continue(Continue), // TODO: not needed?
-    Break(Break), // TODO: not needed?
-    Return(Return), // TODO: not needed?
-    Yield(Yield), // TODO: not needed?
+    Break(Break),       // TODO: not needed?
+    Return(Return),     // TODO: not needed?
+    Yield(Yield),       // TODO: not needed?
     LabelCall(LabelCall),
     Assignment(Assignment),
 
@@ -278,7 +290,7 @@ pub enum ParsedType {
     FunctionCall(FunctionCall),
     StructInit(StructInit),
 
-    Type(Type)
+    Type(Type),
 }
 
 impl core::convert::TryFrom<SyntaxNode> for ParsedType {
@@ -291,7 +303,9 @@ impl core::convert::TryFrom<SyntaxNode> for ParsedType {
             NODE_INCLUDE => Ok(ParsedType::Include(Include::cast(node).unwrap())),
             NODE_CONST => Ok(ParsedType::Const(Const::cast(node).unwrap())),
             NODE_SETTING => Ok(ParsedType::Setting(Setting::cast(node).unwrap())),
-            NODE_REQUIRE_CONTEXT => Ok(ParsedType::RequireContext(RequireContext::cast(node).unwrap())),
+            NODE_REQUIRE_CONTEXT => Ok(ParsedType::RequireContext(
+                RequireContext::cast(node).unwrap(),
+            )),
             NODE_EXTENDS => Ok(ParsedType::Extends(Extends::cast(node).unwrap())),
             NODE_STRUCT => Ok(ParsedType::Struct(Struct::cast(node).unwrap())),
 
@@ -317,7 +331,9 @@ impl core::convert::TryFrom<SyntaxNode> for ParsedType {
             NODE_ASSIGNMENT => Ok(ParsedType::Assignment(Assignment::cast(node).unwrap())),
 
             NODE_BLOCK => Ok(ParsedType::Block(Block::cast(node).unwrap())),
-            NODE_PARENTHESISED => Ok(ParsedType::Parenthesised(Parenthesised::cast(node).unwrap())),
+            NODE_PARENTHESISED => Ok(ParsedType::Parenthesised(
+                Parenthesised::cast(node).unwrap(),
+            )),
 
             NODE_IDENTIFIER => Ok(ParsedType::Identifier(Identifier::cast(node).unwrap())),
             NODE_STRING => Ok(ParsedType::Str(Str::cast(node).unwrap())),
@@ -415,7 +431,22 @@ typed![
     NODE_VECTOR => Vector,
     NODE_ARRAY => Array,
     NODE_UNARY_OP => UnaryOp,
-    NODE_BINARY_OP => BinaryOp,
+    NODE_BINARY_OP => BinaryOp: {
+        /// Returns the left hand side of the binary operation
+        pub fn lhs(&self) -> Option<SyntaxNode> {
+            nth!(self; 0)
+        }
+
+        /// Return the operator kind
+        pub fn operator_kind(&self) -> BinOpKind {
+            self.first_token().and_then(|t| BinOpKind::from_token(t.kind())).expect("invalid ast")
+        }
+
+        /// Returns the right hand side of the binary operation
+        pub fn rhs(&self) -> Option<SyntaxNode> {
+            nth!(self; 1)
+        }
+    },
     NODE_ARRAY_ACCESS => ArrayAccess,
     NODE_FUNCTION_CALL => FunctionCall,
     NODE_STRUCT_INIT => StructInit,
