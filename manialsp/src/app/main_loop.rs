@@ -2,7 +2,11 @@ use std::error::Error;
 
 use log::{info, trace, warn};
 use lsp_server::{ErrorCode, Message, Notification, Request, RequestId, Response};
-use lsp_types::{notification::{Notification as NotificationTrait, *}, request::{Request as RequestTrait, *}, *};
+use lsp_types::{
+    notification::{Notification as NotificationTrait, *},
+    request::{Request as RequestTrait, *},
+    *,
+};
 
 pub use crate::app::App;
 
