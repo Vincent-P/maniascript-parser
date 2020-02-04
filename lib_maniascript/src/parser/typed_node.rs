@@ -448,7 +448,7 @@ typed![
         }
     },
     NODE_ARRAY_ACCESS => ArrayAccess,
-    NODE_FUNCTION_CALL => FunctionCall,
+    NODE_FUNCTION_CALL => FunctionCall: NamedNode,
     NODE_STRUCT_INIT => StructInit,
 
     NODE_TYPE => Type

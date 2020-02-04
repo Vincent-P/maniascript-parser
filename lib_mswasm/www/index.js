@@ -15,6 +15,6 @@ const DumpText = document.querySelector('#dump-text');
 
 CodeEditor.on('change', (instance, change) => {
     const code = CodeEditor.getValue();
-    const dump = wasm.dump_ast(code);
-    DumpText.textContent = dump;
+    const infos = wasm.infos_from_string(code);
+    DumpText.textContent = infos.dump;
 });

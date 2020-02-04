@@ -881,7 +881,9 @@ where
     }
 
     fn parse_expr(&mut self) {
+        self.start_node(NODE_EXPRESSION);
         self.parse_expr_until(0);
+        self.finish_node();
     }
 
     fn parse_string(&mut self) {

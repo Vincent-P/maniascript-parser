@@ -239,7 +239,7 @@ impl SyntaxKind {
 
     pub fn lbp(self) -> i32 {
         match self {
-            TOKEN_ARROW => 9, // ??
+            TOKEN_DOT | TOKEN_COLON_COLON | TOKEN_ARROW => 9, // ??
 
             TOKEN_CONCAT => 7, // ??
 
@@ -252,7 +252,7 @@ impl SyntaxKind {
             TOKEN_AND => 2,
             TOKEN_OR => 1,
             TOKEN_IS | TOKEN_AS => 1, // ??
-            TOKEN_DOT | TOKEN_COLON_COLON | TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 1, // ???
+            TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 1, // ???
 
             _ => -1,
         }

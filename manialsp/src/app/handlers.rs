@@ -3,7 +3,7 @@ use log::info;
 use lsp_server::{Notification, RequestId, Response};
 use lsp_types::{request::*, *};
 
-use lib_maniascript::parser::{self, typed_node::*, SyntaxKind, TextRange};
+use lib_maniascript::{parser::{self, typed_node::*, SyntaxKind, TextRange}, symbols};
 
 pub use crate::app::App;
 
@@ -206,39 +206,83 @@ impl App {
     fn send_diagnostics(&mut self, uri: Url, code: &str, ast: &parser::AST) {
         info!("SendDiagnostics");
 
-        let errors = ast.errors();
-        let mut diagnostics = Vec::with_capacity(errors.len());
-        for err in errors {
-            let message = err.to_string();
-            match err {
-                parser::NewParseError::Missing(node_range, _) => {
-                    diagnostics.push(Diagnostic {
-                        range: utils::range(code, node_range),
-                        severity: Some(DiagnosticSeverity::Error),
-                        message,
-                        ..Diagnostic::default()
-                    });
-                }
+        if !ast.errors().is_empty() {
+            let errors = ast.errors();
+            let mut diagnostics = Vec::with_capacity(errors.len());
+            for err in errors {
+                let message = err.to_string();
+                match err {
+                    parser::NewParseError::Missing(node_range, _) => {
+                        diagnostics.push(Diagnostic {
+                            range: utils::range(code, node_range),
+                            severity: Some(DiagnosticSeverity::Error),
+                            message,
+                            ..Diagnostic::default()
+                        });
+                    }
 
-                parser::NewParseError::UnknownToken(token) => {
-                    diagnostics.push(Diagnostic {
-                        range: utils::range(code, token.text_range()),
-                        severity: Some(DiagnosticSeverity::Error),
-                        message,
-                        ..Diagnostic::default()
-                    });
-                }
+                    parser::NewParseError::UnknownToken(token) => {
+                        diagnostics.push(Diagnostic {
+                            range: utils::range(code, token.text_range()),
+                            severity: Some(DiagnosticSeverity::Error),
+                            message,
+                            ..Diagnostic::default()
+                        });
+                    }
 
-                _ => (),
+                    _ => (),
+                }
             }
+            self.notify(Notification::new(
+                "textDocument/publishDiagnostics".into(),
+                PublishDiagnosticsParams {
+                    uri,
+                    diagnostics,
+                    version: None,
+                },
+            ));
         }
-        self.notify(Notification::new(
-            "textDocument/publishDiagnostics".into(),
-            PublishDiagnosticsParams {
-                uri,
-                diagnostics,
-                version: None,
-            },
-        ));
+        else {
+            let mut env = symbols::Environment::new();
+            env.fill(ast);
+            env.check_errors(ast);
+
+            let errors = env.errors;
+            let mut diagnostics = Vec::with_capacity(errors.len());
+
+            for err in errors {
+                let message = err.to_string();
+                match err {
+                    symbols::TypeError::UnexpectedType(node_range, _, _) => {
+                        diagnostics.push(Diagnostic {
+                            range: utils::range(code, node_range),
+                            severity: Some(DiagnosticSeverity::Error),
+                            message,
+                            ..Diagnostic::default()
+                        });
+                    }
+
+                    symbols::TypeError::Undefined(node_range, _) => {
+                        diagnostics.push(Diagnostic {
+                            range: utils::range(code, node_range),
+                            severity: Some(DiagnosticSeverity::Error),
+                            message,
+                            ..Diagnostic::default()
+                        });
+                    }
+
+                    _ => (),
+                }
+            }
+
+            self.notify(Notification::new(
+                "textDocument/publishDiagnostics".into(),
+                PublishDiagnosticsParams {
+                    uri,
+                    diagnostics,
+                    version: None,
+                },
+            ));
+        }
     }
 }
