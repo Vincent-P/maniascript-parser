@@ -1,0 +1,41 @@
+NODE_ROOT 0..38 {
+  NODE_FUNC_DECL 0..38 {
+    NODE_IDENTIFIER 0..4 {
+      TOKEN_IDENT("main") 0..4
+    }
+    TOKEN_OPEN_PAREN("(") 4..5
+    TOKEN_CLOSE_PAREN(")") 5..6
+    TOKEN_WHITESPACE("\n") 6..7
+    NODE_BLOCK 7..38 {
+      TOKEN_OPEN_BRACE("{") 7..8
+      TOKEN_WHITESPACE("\n    ") 8..13
+      NODE_VAR_DECL 13..36 {
+        TOKEN_DECLARE("declare") 13..20
+        TOKEN_WHITESPACE(" ") 20..21
+        NODE_IDENTIFIER 21..26 {
+          TOKEN_IDENT("MyVec") 21..26
+        }
+        TOKEN_WHITESPACE(" ") 26..27
+        TOKEN_EQUAL("=") 27..28
+        TOKEN_WHITESPACE(" ") 28..29
+        NODE_EXPRESSION 29..35 {
+          NODE_VECTOR 29..35 {
+            TOKEN_LESS("<") 29..30
+            NODE_LITERAL 30..31 {
+              TOKEN_INTEGER("0") 30..31
+            }
+            TOKEN_COMMA(",") 31..32
+            TOKEN_WHITESPACE(" ") 32..33
+            NODE_LITERAL 33..34 {
+              TOKEN_INTEGER("1") 33..34
+            }
+            TOKEN_MORE(">") 34..35
+          }
+        }
+        TOKEN_SEMICOLON(";") 35..36
+      }
+      TOKEN_WHITESPACE("\n") 36..37
+      TOKEN_CLOSE_BRACE("}") 37..38
+    }
+  }
+}

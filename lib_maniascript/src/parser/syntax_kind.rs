@@ -237,6 +237,7 @@ impl SyntaxKind {
         }
     }
 
+    // when token is used in the middle of an expression
     pub fn lbp(self) -> i32 {
         match self {
             TOKEN_DOT | TOKEN_COLON_COLON | TOKEN_ARROW => 9, // ??
@@ -258,10 +259,14 @@ impl SyntaxKind {
         }
     }
 
+    // when token is used to start an expression
     pub fn rbp(self) -> i32 {
         match self {
             TOKEN_MINUS | TOKEN_NOT => 8,
-            TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE | TOKEN_LESS => 1, // ??
+
+            // I think these should be higher than in lbp, maybe nested paren, arrays or vectors wont work tho...
+            TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 2,
+            TOKEN_LESS => 5,
             _ => -1,
         }
     }
