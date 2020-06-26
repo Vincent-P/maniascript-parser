@@ -9,14 +9,16 @@ NODE_ROOT 0..73 {
     TOKEN_LABEL_STAR("***") 24..27
     TOKEN_WHITESPACE("\n") 27..28
     NODE_STATEMENT 28..69 {
-      NODE_BINARY_OP 28..68 {
-        NODE_IDENTIFIER 28..31 {
-          TOKEN_IDENT("Log") 28..31
-        }
-        TOKEN_COLON_COLON("::") 31..33
-        NODE_FUNCTION_CALL 33..68 {
-          NODE_IDENTIFIER 33..47 {
-            TOKEN_IDENT("RegisterScript") 33..47
+      NODE_EXPRESSION 28..68 {
+        NODE_FUNCTION_CALL 28..68 {
+          NODE_BINARY_OP 28..47 {
+            NODE_IDENTIFIER 28..31 {
+              TOKEN_IDENT("Log") 28..31
+            }
+            TOKEN_COLON_COLON("::") 31..33
+            NODE_IDENTIFIER 33..47 {
+              TOKEN_IDENT("RegisterScript") 33..47
+            }
           }
           TOKEN_OPEN_PAREN("(") 47..48
           NODE_IDENTIFIER 48..58 {

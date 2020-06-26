@@ -19,8 +19,10 @@ NODE_ROOT 0..120 {
         TOKEN_WHITESPACE(" ") 28..29
         TOKEN_IN("in") 29..31
         TOKEN_WHITESPACE(" ") 31..32
-        NODE_IDENTIFIER 32..39 {
-          TOKEN_IDENT("Players") 32..39
+        NODE_EXPRESSION 32..39 {
+          NODE_IDENTIFIER 32..39 {
+            TOKEN_IDENT("Players") 32..39
+          }
         }
         TOKEN_CLOSE_PAREN(")") 39..40
         TOKEN_WHITESPACE(" ") 40..41
@@ -28,15 +30,17 @@ NODE_ROOT 0..120 {
           TOKEN_OPEN_BRACE("{") 41..42
           TOKEN_WHITESPACE(" ") 42..43
           NODE_STATEMENT 43..55 {
-            NODE_FUNCTION_CALL 43..54 {
-              NODE_IDENTIFIER 43..46 {
-                TOKEN_IDENT("log") 43..46
+            NODE_EXPRESSION 43..54 {
+              NODE_FUNCTION_CALL 43..54 {
+                NODE_IDENTIFIER 43..46 {
+                  TOKEN_IDENT("log") 43..46
+                }
+                TOKEN_OPEN_PAREN("(") 46..47
+                NODE_IDENTIFIER 47..53 {
+                  TOKEN_IDENT("Player") 47..53
+                }
+                TOKEN_CLOSE_PAREN(")") 53..54
               }
-              TOKEN_OPEN_PAREN("(") 46..47
-              NODE_IDENTIFIER 47..53 {
-                TOKEN_IDENT("Player") 47..53
-              }
-              TOKEN_CLOSE_PAREN(")") 53..54
             }
             TOKEN_SEMICOLON(";") 54..55
           }
@@ -63,8 +67,10 @@ NODE_ROOT 0..120 {
         TOKEN_WHITESPACE(" ") 83..84
         TOKEN_IN("in") 84..86
         TOKEN_WHITESPACE(" ") 86..87
-        NODE_IDENTIFIER 87..103 {
-          TOKEN_IDENT("AssociativeArray") 87..103
+        NODE_EXPRESSION 87..103 {
+          NODE_IDENTIFIER 87..103 {
+            TOKEN_IDENT("AssociativeArray") 87..103
+          }
         }
         TOKEN_CLOSE_PAREN(")") 103..104
         TOKEN_WHITESPACE(" ") 104..105
@@ -72,15 +78,17 @@ NODE_ROOT 0..120 {
           TOKEN_OPEN_BRACE("{") 105..106
           TOKEN_WHITESPACE(" ") 106..107
           NODE_STATEMENT 107..116 {
-            NODE_FUNCTION_CALL 107..115 {
-              NODE_IDENTIFIER 107..110 {
-                TOKEN_IDENT("log") 107..110
+            NODE_EXPRESSION 107..115 {
+              NODE_FUNCTION_CALL 107..115 {
+                NODE_IDENTIFIER 107..110 {
+                  TOKEN_IDENT("log") 107..110
+                }
+                TOKEN_OPEN_PAREN("(") 110..111
+                NODE_IDENTIFIER 111..114 {
+                  TOKEN_IDENT("Key") 111..114
+                }
+                TOKEN_CLOSE_PAREN(")") 114..115
               }
-              TOKEN_OPEN_PAREN("(") 110..111
-              NODE_IDENTIFIER 111..114 {
-                TOKEN_IDENT("Key") 111..114
-              }
-              TOKEN_CLOSE_PAREN(")") 114..115
             }
             TOKEN_SEMICOLON(";") 115..116
           }

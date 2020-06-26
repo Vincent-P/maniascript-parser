@@ -19,8 +19,10 @@ NODE_ROOT 0..81 {
         TOKEN_WHILE("while") 17..22
         TOKEN_WHITESPACE(" ") 22..23
         TOKEN_OPEN_PAREN("(") 23..24
-        NODE_IDENTIFIER 24..28 {
-          TOKEN_IDENT("True") 24..28
+        NODE_EXPRESSION 24..28 {
+          NODE_IDENTIFIER 24..28 {
+            TOKEN_IDENT("True") 24..28
+          }
         }
         TOKEN_CLOSE_PAREN(")") 28..29
         TOKEN_WHITESPACE("\n") 29..30
@@ -63,15 +65,17 @@ NODE_ROOT 0..81 {
         NODE_RETURN 66..78 {
           TOKEN_RETURN("return") 66..72
           TOKEN_WHITESPACE(" ") 72..73
-          NODE_BINARY_OP 73..78 {
-            NODE_LITERAL 73..74 {
-              TOKEN_INTEGER("1") 73..74
-            }
-            TOKEN_WHITESPACE(" ") 74..75
-            TOKEN_PLUS("+") 75..76
-            TOKEN_WHITESPACE(" ") 76..77
-            NODE_LITERAL 77..78 {
-              TOKEN_INTEGER("2") 77..78
+          NODE_EXPRESSION 73..78 {
+            NODE_BINARY_OP 73..78 {
+              NODE_LITERAL 73..74 {
+                TOKEN_INTEGER("1") 73..74
+              }
+              TOKEN_WHITESPACE(" ") 74..75
+              TOKEN_PLUS("+") 75..76
+              TOKEN_WHITESPACE(" ") 76..77
+              NODE_LITERAL 77..78 {
+                TOKEN_INTEGER("2") 77..78
+              }
             }
           }
         }

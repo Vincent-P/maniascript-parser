@@ -26,9 +26,11 @@ NODE_ROOT 0..100 {
         TOKEN_WHITESPACE(" ") 40..41
         TOKEN_EQUAL("=") 41..42
         TOKEN_WHITESPACE(" ") 42..43
-        NODE_ARRAY 43..45 {
-          TOKEN_OPEN_SQUARE("[") 43..44
-          TOKEN_CLOSE_SQUARE("]") 44..45
+        NODE_EXPRESSION 43..45 {
+          NODE_ARRAY 43..45 {
+            TOKEN_OPEN_SQUARE("[") 43..44
+            TOKEN_CLOSE_SQUARE("]") 44..45
+          }
         }
         TOKEN_SEMICOLON(";") 45..46
       }
@@ -42,8 +44,10 @@ NODE_ROOT 0..100 {
         TOKEN_WHITESPACE(" ") 60..61
         TOKEN_EQUAL("=") 61..62
         TOKEN_WHITESPACE(" ") 62..63
-        NODE_LITERAL 63..64 {
-          TOKEN_INTEGER("0") 63..64
+        NODE_EXPRESSION 63..64 {
+          NODE_LITERAL 63..64 {
+            TOKEN_INTEGER("0") 63..64
+          }
         }
         TOKEN_SEMICOLON(";") 64..65
       }
@@ -57,21 +61,23 @@ NODE_ROOT 0..100 {
         TOKEN_WHITESPACE(" ") 81..82
         TOKEN_EQUAL("=") 82..83
         TOKEN_WHITESPACE(" ") 83..84
-        NODE_ARRAY_ACCESS 84..97 {
-          NODE_IDENTIFIER 84..92 {
-            TOKEN_IDENT("Unranked") 84..92
-          }
-          TOKEN_OPEN_SQUARE("[") 92..93
-          NODE_BINARY_OP 93..96 {
-            NODE_IDENTIFIER 93..94 {
-              TOKEN_IDENT("i") 93..94
+        NODE_EXPRESSION 84..97 {
+          NODE_ARRAY_ACCESS 84..97 {
+            NODE_IDENTIFIER 84..92 {
+              TOKEN_IDENT("Unranked") 84..92
             }
-            TOKEN_MINUS("-") 94..95
-            NODE_LITERAL 95..96 {
-              TOKEN_INTEGER("1") 95..96
+            TOKEN_OPEN_SQUARE("[") 92..93
+            NODE_BINARY_OP 93..96 {
+              NODE_IDENTIFIER 93..94 {
+                TOKEN_IDENT("i") 93..94
+              }
+              TOKEN_MINUS("-") 94..95
+              NODE_LITERAL 95..96 {
+                TOKEN_INTEGER("1") 95..96
+              }
             }
+            TOKEN_CLOSE_SQUARE("]") 96..97
           }
-          TOKEN_CLOSE_SQUARE("]") 96..97
         }
         TOKEN_SEMICOLON(";") 97..98
       }

@@ -13,8 +13,10 @@ NODE_ROOT 0..113 {
         TOKEN_SWITCH("switch") 13..19
         TOKEN_WHITESPACE(" ") 19..20
         TOKEN_OPEN_PAREN("(") 20..21
-        NODE_IDENTIFIER 21..26 {
-          TOKEN_IDENT("Thing") 21..26
+        NODE_EXPRESSION 21..26 {
+          NODE_IDENTIFIER 21..26 {
+            TOKEN_IDENT("Thing") 21..26
+          }
         }
         TOKEN_CLOSE_PAREN(")") 26..27
         TOKEN_WHITESPACE("\n    ") 27..32
@@ -23,8 +25,10 @@ NODE_ROOT 0..113 {
         NODE_CASE 42..56 {
           TOKEN_CASE("case") 42..46
           TOKEN_WHITESPACE(" ") 46..47
-          NODE_LITERAL 47..48 {
-            TOKEN_INTEGER("0") 47..48
+          NODE_EXPRESSION 47..48 {
+            NODE_LITERAL 47..48 {
+              TOKEN_INTEGER("0") 47..48
+            }
           }
           TOKEN_COLON(":") 48..49
           TOKEN_WHITESPACE(" ") 49..50
@@ -39,8 +43,10 @@ NODE_ROOT 0..113 {
         NODE_CASE 65..79 {
           TOKEN_CASE("case") 65..69
           TOKEN_WHITESPACE(" ") 69..70
-          NODE_LITERAL 70..71 {
-            TOKEN_INTEGER("1") 70..71
+          NODE_EXPRESSION 70..71 {
+            NODE_LITERAL 70..71 {
+              TOKEN_INTEGER("1") 70..71
+            }
           }
           TOKEN_COLON(":") 71..72
           TOKEN_WHITESPACE(" ") 72..73

@@ -35,14 +35,18 @@ NODE_ROOT 0..104 {
         TOKEN_WHITESPACE(" ") 79..80
         TOKEN_FOR("for") 80..83
         TOKEN_WHITESPACE(" ") 83..84
-        NODE_IDENTIFIER 84..93 {
-          TOKEN_IDENT("_Landmark") 84..93
+        NODE_EXPRESSION 84..93 {
+          NODE_IDENTIFIER 84..93 {
+            TOKEN_IDENT("_Landmark") 84..93
+          }
         }
         TOKEN_WHITESPACE(" ") 93..94
         TOKEN_EQUAL("=") 94..95
         TOKEN_WHITESPACE(" ") 95..96
-        NODE_IDENTIFIER 96..101 {
-          TOKEN_IDENT("False") 96..101
+        NODE_EXPRESSION 96..101 {
+          NODE_IDENTIFIER 96..101 {
+            TOKEN_IDENT("False") 96..101
+          }
         }
         TOKEN_SEMICOLON(";") 101..102
       }

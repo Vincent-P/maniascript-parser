@@ -6,10 +6,12 @@ NODE_ROOT 0..47 {
       TOKEN_IDENT("C_HudModulePath") 7..22
     }
     TOKEN_WHITESPACE(" ") 22..23
-    NODE_STRING 23..47 {
-      TOKEN_STRING_START("\"") 23..24
-      TOKEN_STRING_CONTENT("Obstacle/UI.Module.Gbx") 24..46
-      TOKEN_STRING_END("\"") 46..47
+    NODE_EXPRESSION 23..47 {
+      NODE_STRING 23..47 {
+        TOKEN_STRING_START("\"") 23..24
+        TOKEN_STRING_CONTENT("Obstacle/UI.Module.Gbx") 24..46
+        TOKEN_STRING_END("\"") 46..47
+      }
     }
   }
 }
