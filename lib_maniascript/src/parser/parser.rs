@@ -309,20 +309,40 @@ where
                 self.finish_node();
             }
 
-            // #Struct MyStruct { Type1 Field1; Type2 Field2; }
             TOKEN_STRUCT => {
                 self.start_node(NODE_STRUCT);
                 self.bump();
                 self.expect_ident();
-                self.expect(TOKEN_OPEN_BRACE);
-                while let Some(TOKEN_IDENT) = self.peek() {
-                    self.start_node(NODE_STRUCT_FIELD);
-                    self.parse_type(None);
-                    self.expect_ident();
-                    self.expect(TOKEN_SEMICOLON);
-                    self.finish_node();
+
+                let next_token = self.peek_any(&[TOKEN_OPEN_BRACE, TOKEN_COLON_COLON]);
+
+                // TODO: I dont think the node is usable with this structure
+                match next_token {
+                    // #Struct MyStruct { Type1 Field1; Type2 Field2; }
+                    Some(TOKEN_OPEN_BRACE) => {
+                        self.expect(TOKEN_OPEN_BRACE);
+                        while let Some(TOKEN_IDENT) = self.peek() {
+                            self.start_node(NODE_STRUCT_FIELD);
+                            self.parse_type(None);
+                            self.expect_ident();
+                            self.expect(TOKEN_SEMICOLON);
+                            self.finish_node();
+                        }
+                        self.expect(TOKEN_CLOSE_BRACE);
+                    }
+
+                    // #Struct Library::SExportedStruct as SImportedStruct
+                    Some(TOKEN_COLON_COLON) => {
+                        self.expect(TOKEN_COLON_COLON);
+                        self.expect(TOKEN_IDENT);
+                        self.expect(TOKEN_AS);
+                        self.expect(TOKEN_IDENT);
+                    }
+                    _ => {
+
+                    }
                 }
-                self.expect(TOKEN_CLOSE_BRACE);
+
                 self.finish_node();
             }
             _ => (),

@@ -1,4 +1,4 @@
-NODE_ROOT 0..53 {
+NODE_ROOT 0..106 {
   NODE_STRUCT 0..53 {
     TOKEN_STRUCT("#Struct") 0..7
     TOKEN_WHITESPACE(" ") 7..8
@@ -35,5 +35,19 @@ NODE_ROOT 0..53 {
     }
     TOKEN_WHITESPACE("\n") 51..52
     TOKEN_CLOSE_BRACE("}") 52..53
+  }
+  TOKEN_WHITESPACE("\n\n") 53..55
+  NODE_STRUCT 55..106 {
+    TOKEN_STRUCT("#Struct") 55..62
+    TOKEN_WHITESPACE(" ") 62..63
+    NODE_IDENTIFIER 63..70 {
+      TOKEN_IDENT("Library") 63..70
+    }
+    TOKEN_COLON_COLON("::") 70..72
+    TOKEN_IDENT("SExportedStruct") 72..87
+    TOKEN_WHITESPACE(" ") 87..88
+    TOKEN_AS("as") 88..90
+    TOKEN_WHITESPACE(" ") 90..91
+    TOKEN_IDENT("SImportedStruct") 91..106
   }
 }
