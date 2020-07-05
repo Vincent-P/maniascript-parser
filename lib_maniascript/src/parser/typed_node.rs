@@ -254,6 +254,7 @@ pub enum ParsedType {
     RequireContext(RequireContext),
     Extends(Extends),
     Struct(Struct),
+    Command(Command),
 
     StructField(StructField), // TODO: not needed?
     VarDecl(VarDecl),
@@ -308,6 +309,7 @@ impl core::convert::TryFrom<SyntaxNode> for ParsedType {
             )),
             NODE_EXTENDS => Ok(ParsedType::Extends(Extends::cast(node).unwrap())),
             NODE_STRUCT => Ok(ParsedType::Struct(Struct::cast(node).unwrap())),
+            NODE_COMMAND => Ok(ParsedType::Command(Command::cast(node).unwrap())),
 
             NODE_STRUCT_FIELD => Ok(ParsedType::StructField(StructField::cast(node).unwrap())),
             NODE_VAR_DECL => Ok(ParsedType::VarDecl(VarDecl::cast(node).unwrap())),
@@ -385,9 +387,14 @@ typed![
             self.node().children().filter_map(VarDecl::cast)
         }
 
-        /// Return all the globals of the file
+        /// Return all the structs of the file
         pub fn structs(&self) -> impl Iterator<Item = Struct> {
             self.node().children().filter_map(Struct::cast)
+        }
+
+        /// Return all the commands of the file
+        pub fn commands(&self) -> impl Iterator<Item = Command> {
+            self.node().children().filter_map(Command::cast)
         }
     },
 
@@ -397,6 +404,7 @@ typed![
     NODE_REQUIRE_CONTEXT => RequireContext,
     NODE_EXTENDS => Extends,
     NODE_STRUCT => Struct: NamedNode,
+    NODE_COMMAND => Command: NamedNode,
 
     NODE_STRUCT_FIELD => StructField,
     NODE_VAR_DECL => VarDecl: NamedNode,
