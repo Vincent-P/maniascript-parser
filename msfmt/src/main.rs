@@ -3,6 +3,7 @@
 use clap::{App, Arg};
 
 use std::{fs::File, io::{self, Read}, path::Path, time::Instant};
+use lib_maniascript::{parser::{self, typed_node::TypedNode}, symbols};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("MSfmt - ManiaScript formatter")
@@ -43,29 +44,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let file_start = Instant::now();
 
-        // parse the file
-        /*
-        let lexer = Lexer::new(&input);
+        let tree = parser::parse(&input);
 
-        let mut tree = Parser::new(lexer).parse()?;
+        println!("Tree:");
+        println!("{}", tree.root().dump());
 
-        tree.format();
-
-        if matches.is_present("dot") {
-            let out_dot = format!("{}.dot", file_stem.to_str().unwrap());
-            let mut dotfile = File::create(out_dot)?;
-            print_dot(&mut dotfile, &tree, 0, &input)?;
-        }
-
-        if matches.is_present("overwrite") {
-            let mut formated_file = File::create(path)?;
-            print_ast(&mut formated_file, &tree, 0, &input)?;
-        } else {
-            print_ast(&mut io::stdout(), &tree, 0, &input)?;
-        }
-        */
-
-        // print(file_stem.to_str().unwrap(), &tree, 0, &input)?;
         println!(
             "{} processed in {}ms.",
             file_stem.to_str().unwrap(),
