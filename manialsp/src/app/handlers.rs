@@ -250,6 +250,7 @@ impl App {
             let errors = env.errors;
             let mut diagnostics = Vec::with_capacity(errors.len());
 
+            /*
             for err in errors {
                 let message = err.to_string();
                 match err {
@@ -274,6 +275,7 @@ impl App {
                     _ => (),
                 }
             }
+            */
 
             self.notify(Notification::new(
                 "textDocument/publishDiagnostics".into(),
