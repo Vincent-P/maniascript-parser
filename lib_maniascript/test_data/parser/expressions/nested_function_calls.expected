@@ -1,0 +1,54 @@
+NODE_ROOT 0..68 {
+  NODE_FUNC_DECL 0..68 {
+    NODE_IDENTIFIER 0..4 {
+      TOKEN_IDENT("main") 0..4
+    }
+    TOKEN_OPEN_PAREN("(") 4..5
+    TOKEN_CLOSE_PAREN(")") 5..6
+    TOKEN_WHITESPACE("\n") 6..7
+    NODE_BLOCK 7..68 {
+      TOKEN_OPEN_BRACE("{") 7..8
+      TOKEN_WHITESPACE("\n    ") 8..13
+      NODE_STATEMENT 13..66 {
+        NODE_EXPRESSION 13..65 {
+          NODE_FUNCTION_CALL 13..65 {
+            NODE_IDENTIFIER 13..21 {
+              TOKEN_IDENT("Function") 13..21
+            }
+            TOKEN_OPEN_PAREN("(") 21..22
+            NODE_IDENTIFIER 22..25 {
+              TOKEN_IDENT("one") 22..25
+            }
+            TOKEN_COMMA(",") 25..26
+            TOKEN_WHITESPACE(" ") 26..27
+            NODE_IDENTIFIER 27..30 {
+              TOKEN_IDENT("two") 27..30
+            }
+            TOKEN_COMMA(",") 30..31
+            TOKEN_WHITESPACE(" ") 31..32
+            NODE_FUNCTION_CALL 32..64 {
+              NODE_BINARY_OP 32..55 {
+                NODE_IDENTIFIER 32..38 {
+                  TOKEN_IDENT("Player") 32..38
+                }
+                TOKEN_COLON_COLON("::") 38..40
+                NODE_IDENTIFIER 40..55 {
+                  TOKEN_IDENT("getRespawnCount") 40..55
+                }
+              }
+              TOKEN_OPEN_PAREN("(") 55..56
+              NODE_IDENTIFIER 56..63 {
+                TOKEN_IDENT("_Player") 56..63
+              }
+              TOKEN_CLOSE_PAREN(")") 63..64
+            }
+            TOKEN_CLOSE_PAREN(")") 64..65
+          }
+        }
+        TOKEN_SEMICOLON(";") 65..66
+      }
+      TOKEN_WHITESPACE("\n") 66..67
+      TOKEN_CLOSE_BRACE("}") 67..68
+    }
+  }
+}

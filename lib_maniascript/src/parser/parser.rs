@@ -829,6 +829,7 @@ where
             _ => {
                 self.start_node(NODE_ERROR);
                 self.start_node(NODE_EXPRESSION);
+                self.bump(); // infinite loop otherwise?
                 self.finish_node();
                 self.finish_node();
             }
@@ -870,10 +871,10 @@ where
                 }
 
                 // args
-                self.parse_expr_until(expect.unwrap().rbp());
+                self.parse_expr_until(expect.unwrap().lbp());
                 while let Some(TOKEN_COMMA) = self.peek() {
                     self.bump();
-                    self.parse_expr_until(expect.unwrap().rbp());
+                    self.parse_expr_until(expect.unwrap().lbp());
                 }
 
                 self.expect(TOKEN_CLOSE_PAREN);

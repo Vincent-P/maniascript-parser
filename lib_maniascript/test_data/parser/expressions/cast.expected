@@ -1,0 +1,52 @@
+NODE_ROOT 0..58 {
+  NODE_FUNC_DECL 0..58 {
+    NODE_IDENTIFIER 0..4 {
+      TOKEN_IDENT("main") 0..4
+    }
+    TOKEN_OPEN_PAREN("(") 4..5
+    TOKEN_CLOSE_PAREN(")") 5..6
+    TOKEN_WHITESPACE("\n") 6..7
+    NODE_BLOCK 7..58 {
+      TOKEN_OPEN_BRACE("{") 7..8
+      TOKEN_WHITESPACE("\n    ") 8..13
+      NODE_STATEMENT 13..56 {
+        NODE_ASSIGNMENT 13..55 {
+          NODE_EXPRESSION 13..19 {
+            NODE_IDENTIFIER 13..19 {
+              TOKEN_IDENT("Victim") 13..19
+            }
+          }
+          TOKEN_WHITESPACE(" ") 19..20
+          TOKEN_EQUAL("=") 20..21
+          TOKEN_WHITESPACE(" ") 21..22
+          NODE_EXPRESSION 22..55 {
+            NODE_PARENTHESISED 22..55 {
+              TOKEN_OPEN_PAREN("(") 22..23
+              NODE_BINARY_OP 23..54 {
+                NODE_BINARY_OP 23..41 {
+                  NODE_IDENTIFIER 23..28 {
+                    TOKEN_IDENT("Event") 23..28
+                  }
+                  TOKEN_DOT(".") 28..29
+                  NODE_IDENTIFIER 29..41 {
+                    TOKEN_IDENT("VictimEntity") 29..41
+                  }
+                }
+                TOKEN_WHITESPACE(" ") 41..42
+                TOKEN_AS("as") 42..44
+                TOKEN_WHITESPACE(" ") 44..45
+                NODE_IDENTIFIER 45..54 {
+                  TOKEN_IDENT("CSmPlayer") 45..54
+                }
+              }
+              TOKEN_CLOSE_PAREN(")") 54..55
+            }
+          }
+        }
+        TOKEN_SEMICOLON(";") 55..56
+      }
+      TOKEN_WHITESPACE("\n") 56..57
+      TOKEN_CLOSE_BRACE("}") 57..58
+    }
+  }
+}

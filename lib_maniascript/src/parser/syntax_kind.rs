@@ -264,8 +264,7 @@ impl SyntaxKind {
         match self {
             TOKEN_MINUS | TOKEN_NOT => 8,
 
-            // I think these should be higher than in lbp, maybe nested paren, arrays or vectors wont work tho...
-            TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 2,
+            TOKEN_OPEN_PAREN | TOKEN_OPEN_SQUARE => 1,
             TOKEN_LESS => 5,
             _ => -1,
         }
