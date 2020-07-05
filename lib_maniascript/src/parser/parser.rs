@@ -14,7 +14,7 @@ use crate::parser::{
 #[derive(Clone, Debug, PartialEq)]
 pub enum ParseError {
     Missing(TextRange, Box<[SyntaxKind]>),
-    UnknownToken(SyntaxToken),
+    UnknownToken(TextRange, SmolStr),
     UnexpectedEOFWanted(Box<[SyntaxKind]>),
     UnexpectedEOF,
 }
@@ -27,7 +27,7 @@ impl fmt::Display for ParseError {
                 write!(f, "unexpected eof, wanted any of {:?}", kinds)
             }
             ParseError::Missing(_, kinds) => write!(f, "missing token, wanted any of {:?}", kinds),
-            ParseError::UnknownToken(token) => write!(f, "unkown token {}", token.text()),
+            ParseError::UnknownToken(_, text) => write!(f, "unkown token {}", text),
         }
     }
 }
@@ -70,7 +70,7 @@ impl AST {
 
                 ParseError::Missing(node.text_range(), error_kinds)
             }
-            SyntaxElement::Token(token) => ParseError::UnknownToken(token),
+            SyntaxElement::Token(token) => ParseError::UnknownToken(token.text_range(), token.text().clone()),
         }));
 
         errors
