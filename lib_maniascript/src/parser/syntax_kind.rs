@@ -41,6 +41,7 @@ pub enum SyntaxKind {
     // Symbols
     TOKEN_LABEL_STAR,
     TOKEN_LABEL_PLUS,
+    TOKEN_LABEL_MINUS,
     TOKEN_DOT,
     TOKEN_COMMA,
     TOKEN_SEMICOLON,

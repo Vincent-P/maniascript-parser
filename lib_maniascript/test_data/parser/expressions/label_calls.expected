@@ -1,0 +1,31 @@
+NODE_ROOT 0..51 {
+  NODE_FUNC_DECL 0..51 {
+    NODE_IDENTIFIER 0..4 {
+      TOKEN_IDENT("main") 0..4
+    }
+    TOKEN_OPEN_PAREN("(") 4..5
+    TOKEN_CLOSE_PAREN(")") 5..6
+    TOKEN_WHITESPACE("\n") 6..7
+    NODE_BLOCK 7..51 {
+      TOKEN_OPEN_BRACE("{") 7..8
+      TOKEN_WHITESPACE("\n    ") 8..13
+      NODE_LABEL_CALL 13..29 {
+        TOKEN_LABEL_MINUS("---") 13..16
+        NODE_IDENTIFIER 16..26 {
+          TOKEN_IDENT("MinusLabel") 16..26
+        }
+        TOKEN_LABEL_MINUS("---") 26..29
+      }
+      TOKEN_WHITESPACE("\n    ") 29..34
+      NODE_LABEL_CALL 34..49 {
+        TOKEN_LABEL_PLUS("+++") 34..37
+        NODE_IDENTIFIER 37..46 {
+          TOKEN_IDENT("PlusLabel") 37..46
+        }
+        TOKEN_LABEL_PLUS("+++") 46..49
+      }
+      TOKEN_WHITESPACE("\n") 49..50
+      TOKEN_CLOSE_BRACE("}") 50..51
+    }
+  }
+}

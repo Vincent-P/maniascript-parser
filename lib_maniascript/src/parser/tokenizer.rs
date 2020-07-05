@@ -214,6 +214,12 @@ impl<'a> Iterator for Tokenizer<'a> {
                 return Some((TOKEN_LABEL_PLUS, self.string_since(start)));
             }
 
+            ('-', Some('-'), Some('-')) => {
+                self.next().unwrap();
+                self.next().unwrap();
+                return Some((TOKEN_LABEL_MINUS, self.string_since(start)));
+            }
+
             ('"', Some('"'), Some('"')) => {
                 self.next().unwrap();
                 self.next().unwrap();

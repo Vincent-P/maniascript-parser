@@ -537,12 +537,12 @@ where
                 return;
             }
 
-            // ***LabelCall***
-            Some(TOKEN_LABEL_STAR) => {
+            // ---LabelCall---
+            Some(TOKEN_LABEL_MINUS) => {
                 self.start_node(NODE_LABEL_CALL);
                 self.bump();
                 self.expect_ident();
-                self.expect(TOKEN_LABEL_STAR);
+                self.expect(TOKEN_LABEL_MINUS);
                 self.finish_node();
                 return;
             }
