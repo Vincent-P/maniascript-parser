@@ -1,0 +1,34 @@
+NODE_ROOT 0..79 {
+  NODE_COMMAND 0..79 {
+    TOKEN_COMMAND("#Command") 0..8
+    TOKEN_WHITESPACE(" ") 8..9
+    NODE_IDENTIFIER 9..30 {
+      TOKEN_IDENT("Command_BeginSurvival") 9..30
+    }
+    TOKEN_WHITESPACE(" ") 30..31
+    TOKEN_OPEN_PAREN("(") 31..32
+    NODE_TYPE 32..39 {
+      NODE_IDENTIFIER 32..39 {
+        TOKEN_IDENT("Integer") 32..39
+      }
+    }
+    TOKEN_CLOSE_PAREN(")") 39..40
+    TOKEN_WHITESPACE(" ") 40..41
+    TOKEN_AS("as") 41..43
+    TOKEN_WHITESPACE(" ") 43..44
+    NODE_EXPRESSION 44..79 {
+      NODE_FUNCTION_CALL 44..79 {
+        NODE_IDENTIFIER 44..45 {
+          TOKEN_IDENT("_") 44..45
+        }
+        TOKEN_OPEN_PAREN("(") 45..46
+        NODE_STRING 46..78 {
+          TOKEN_STRING_START("\"") 46..47
+          TOKEN_STRING_CONTENT("Begin survival cup (max lives)") 47..77
+          TOKEN_STRING_END("\"") 77..78
+        }
+        TOKEN_CLOSE_PAREN(")") 78..79
+      }
+    }
+  }
+}

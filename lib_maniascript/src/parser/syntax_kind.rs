@@ -37,6 +37,7 @@ pub enum SyntaxKind {
     TOKEN_REQUIRE_CONTEXT,
     TOKEN_EXTENDS,
     TOKEN_STRUCT,
+    TOKEN_COMMAND,
 
     // Symbols
     TOKEN_LABEL_STAR,
@@ -105,6 +106,7 @@ pub enum SyntaxKind {
     NODE_REQUIRE_CONTEXT,
     NODE_EXTENDS,
     NODE_STRUCT,
+    NODE_COMMAND,
 
     NODE_STRUCT_FIELD,
     NODE_VAR_DECL,
@@ -178,11 +180,12 @@ impl SyntaxKind {
     pub fn is_directive(self) -> bool {
         match self {
             TOKEN_INCLUDE
-            | TOKEN_CONST
-            | TOKEN_SETTING
-            | TOKEN_REQUIRE_CONTEXT
-            | TOKEN_EXTENDS
-            | TOKEN_STRUCT => true,
+                | TOKEN_CONST
+                | TOKEN_SETTING
+                | TOKEN_REQUIRE_CONTEXT
+                | TOKEN_EXTENDS
+                | TOKEN_STRUCT
+                | TOKEN_COMMAND => true,
             _ => false,
         }
     }

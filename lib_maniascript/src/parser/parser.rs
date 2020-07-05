@@ -345,6 +345,20 @@ where
 
                 self.finish_node();
             }
+
+            // #Command Command_Name (Type) as Description
+            TOKEN_COMMAND => {
+                self.start_node(NODE_COMMAND);
+                self.bump();
+                self.expect_ident();
+                self.expect(TOKEN_OPEN_PAREN);
+                self.parse_type(None);
+                self.expect(TOKEN_CLOSE_PAREN);
+                self.expect(TOKEN_AS);
+                self.parse_expr();
+                self.finish_node();
+            }
+
             _ => (),
         }
     }

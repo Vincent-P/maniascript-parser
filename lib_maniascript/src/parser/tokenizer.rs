@@ -246,6 +246,7 @@ impl<'a> Iterator for Tokenizer<'a> {
                     "#RequireContext" => TOKEN_REQUIRE_CONTEXT,
                     "#Extends" => TOKEN_EXTENDS,
                     "#Struct" => TOKEN_STRUCT,
+                    "#Command" => TOKEN_COMMAND,
                     _ => TOKEN_ERROR,
                 };
 
@@ -692,6 +693,22 @@ string!"#
                 (TOKEN_SEMICOLON, ";"),
                 (TOKEN_WHITESPACE, "\n"),
                 (TOKEN_CLOSE_BRACE, "}")
+            ]
+        );
+    }
+
+    #[test]
+    fn directive_command() {
+        assert_eq!(
+            tokenize(
+                r#"
+#Command
+"#
+            ),
+            tokens![
+                (TOKEN_WHITESPACE, "\n"),
+                (TOKEN_COMMAND, "#Command"),
+                (TOKEN_WHITESPACE, "\n")
             ]
         );
     }
